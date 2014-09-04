@@ -34,6 +34,7 @@ import org.apache.hadoop.util.DataChecksum;
 import org.htrace.Span;
 import org.htrace.Trace;
 import org.htrace.TraceInfo;
+import org.htrace.TraceScope;
 
 /**
  * Static utilities for dealing with the protocol buffers used by the
@@ -97,5 +98,15 @@ public abstract class DataTransferProtoUtil {
     if (proto == null) return null;
     if (!proto.hasTraceId()) return null;
     return new TraceInfo(proto.getTraceId(), proto.getParentId());
+  }
+
+  public static TraceScope continueTraceSpan(BaseHeaderProto header,
+      String description) {
+    TraceScope scope = null;
+    TraceInfo info = fromProto(header.getTraceInfo());
+    if (info != null) {
+      scope = Trace.startSpan(description, info);
+    }
+    return scope;
   }
 }

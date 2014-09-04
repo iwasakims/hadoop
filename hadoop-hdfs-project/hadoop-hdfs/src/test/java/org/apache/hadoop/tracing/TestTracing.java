@@ -74,6 +74,7 @@ public class TestTracing {
     stream.close();
     long endTime = System.currentTimeMillis();
     ts.close();
+    Thread.sleep(100);
 
     String[] expectedSpanNames = {
       "testWriteTraceHooks",
@@ -148,6 +149,7 @@ public class TestTracing {
     ts.getSpan().addTimelineAnnotation("count: " + count);
     long endTime = System.currentTimeMillis();
     ts.close();
+    Thread.sleep(100);
 
     String[] expectedSpanNames = {
       "testReadTraceHooks",
