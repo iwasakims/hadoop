@@ -39,6 +39,9 @@ import org.apache.hadoop.hdfs.protocol.proto.DataTransferProtos.ShortCircuitShmR
 import org.apache.hadoop.hdfs.protocolPB.PBHelper;
 import org.apache.hadoop.hdfs.server.datanode.CachingStrategy;
 import org.apache.hadoop.hdfs.shortcircuit.ShortCircuitShm.SlotId;
+import org.htrace.Trace;
+import org.htrace.TraceInfo;
+import org.htrace.TraceScope;
 
 /** Receiver */
 @InterfaceAudience.Private
@@ -108,7 +111,13 @@ public abstract class Receiver implements DataTransferProtocol {
   /** Receive OP_READ_BLOCK */
   private void opReadBlock() throws IOException {
     OpReadBlockProto proto = OpReadBlockProto.parseFrom(vintPrefixed(in));
-    readBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
+    TraceScope ts = null;
+    TraceInfo ti = fromProto(proto.getHeader().getBaseHeader().getTraceInfo());
+    if (ti != null) {
+       ts = Trace.startSpan("Receiver.opReadBlock", ti);
+    }
+    try {
+      readBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
         PBHelper.convert(proto.getHeader().getBaseHeader().getToken()),
         proto.getHeader().getClientName(),
         proto.getOffset(),
@@ -117,27 +126,39 @@ public abstract class Receiver implements DataTransferProtocol {
         (proto.hasCachingStrategy() ?
             getCachingStrategy(proto.getCachingStrategy()) :
           CachingStrategy.newDefaultStrategy()));
+    } finally {
+      if (ts != null) ts.close();
+    }
   }
   
   /** Receive OP_WRITE_BLOCK */
   private void opWriteBlock(DataInputStream in) throws IOException {
     final OpWriteBlockProto proto = OpWriteBlockProto.parseFrom(vintPrefixed(in));
     final DatanodeInfo[] targets = PBHelper.convert(proto.getTargetsList());
-    writeBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
-        PBHelper.convertStorageType(proto.getStorageType()),
-        PBHelper.convert(proto.getHeader().getBaseHeader().getToken()),
-        proto.getHeader().getClientName(),
-        targets,
-        PBHelper.convertStorageTypes(proto.getTargetStorageTypesList(), targets.length),
-        PBHelper.convert(proto.getSource()),
-        fromProto(proto.getStage()),
-        proto.getPipelineSize(),
-        proto.getMinBytesRcvd(), proto.getMaxBytesRcvd(),
-        proto.getLatestGenerationStamp(),
-        fromProto(proto.getRequestedChecksum()),
-        (proto.hasCachingStrategy() ?
-            getCachingStrategy(proto.getCachingStrategy()) :
-          CachingStrategy.newDefaultStrategy()));
+    TraceScope ts = null;
+    TraceInfo ti = fromProto(proto.getHeader().getBaseHeader().getTraceInfo());
+    if (ti != null) {
+      ts = Trace.startSpan("Receiver.opWriteBlock", ti);
+    }
+    try {
+      writeBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
+          PBHelper.convertStorageType(proto.getStorageType()),
+          PBHelper.convert(proto.getHeader().getBaseHeader().getToken()),
+          proto.getHeader().getClientName(),
+          targets,
+          PBHelper.convertStorageTypes(proto.getTargetStorageTypesList(), targets.length),
+          PBHelper.convert(proto.getSource()),
+          fromProto(proto.getStage()),
+          proto.getPipelineSize(),
+          proto.getMinBytesRcvd(), proto.getMaxBytesRcvd(),
+          proto.getLatestGenerationStamp(),
+          fromProto(proto.getRequestedChecksum()),
+          (proto.hasCachingStrategy() ?
+              getCachingStrategy(proto.getCachingStrategy()) :
+            CachingStrategy.newDefaultStrategy()));
+     } finally {
+       if (ts != null) ts.close();
+     }
   }
 
   /** Receive {@link Op#TRANSFER_BLOCK} */
@@ -145,11 +166,20 @@ public abstract class Receiver implements DataTransferProtocol {
     final OpTransferBlockProto proto =
       OpTransferBlockProto.parseFrom(vintPrefixed(in));
     final DatanodeInfo[] targets = PBHelper.convert(proto.getTargetsList());
-    transferBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
-        PBHelper.convert(proto.getHeader().getBaseHeader().getToken()),
-        proto.getHeader().getClientName(),
-        targets,
-        PBHelper.convertStorageTypes(proto.getTargetStorageTypesList(), targets.length));
+    TraceScope ts = null;
+    if (Trace.isTracing()) {
+      Trace.startSpan("Receiver.opTransferBlock",
+          fromProto(proto.getHeader().getBaseHeader().getTraceInfo()));
+    }
+    try {
+      transferBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
+          PBHelper.convert(proto.getHeader().getBaseHeader().getToken()),
+          proto.getHeader().getClientName(),
+          targets,
+          PBHelper.convertStorageTypes(proto.getTargetStorageTypesList(), targets.length));
+    } finally {
+      if (ts != null) ts.close();
+    }
   }
 
   /** Receive {@link Op#REQUEST_SHORT_CIRCUIT_FDS} */
