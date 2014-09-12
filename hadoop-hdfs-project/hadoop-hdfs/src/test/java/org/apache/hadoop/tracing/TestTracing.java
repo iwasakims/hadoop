@@ -40,11 +40,9 @@ import org.junit.Test;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeoutException;
 
@@ -239,7 +237,7 @@ public class TestTracing {
     cluster.shutdown();
   }
 
-  private void assertSpanNamesFound(final String[] expectedSpanNames) {
+  static void assertSpanNamesFound(final String[] expectedSpanNames) {
     try {
       GenericTestUtils.waitFor(new Supplier<Boolean>() {
         @Override
