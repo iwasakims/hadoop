@@ -359,21 +359,21 @@ public class DFSOutputStream extends FSOutputSummer
     /** Append on an existing block? */
     private final boolean isAppend;
 
-    private Span traceSpan = null;
+    private final Span traceSpan;
 
     /**
      * Default construction for file create
      */
     private DataStreamer() {
-      isAppend = false;
-      stage = BlockConstructionStage.PIPELINE_SETUP_CREATE;
+      this(null);
     }
 
     /**
      * construction with tracing info
      */
     private DataStreamer(Span span) {
-      this();
+      isAppend = false;
+      stage = BlockConstructionStage.PIPELINE_SETUP_CREATE;
       traceSpan = span;
     }
     
