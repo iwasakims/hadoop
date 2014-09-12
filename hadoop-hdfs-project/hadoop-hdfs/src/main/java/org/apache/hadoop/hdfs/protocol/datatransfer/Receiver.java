@@ -110,7 +110,7 @@ public abstract class Receiver implements DataTransferProtocol {
   /** Receive OP_READ_BLOCK */
   private void opReadBlock() throws IOException {
     OpReadBlockProto proto = OpReadBlockProto.parseFrom(vintPrefixed(in));
-    TraceScope traceScope = continueTraceSpan(proto.getHeader().getBaseHeader(),
+    TraceScope traceScope = continueTraceSpan(proto.getHeader(),
         proto.getClass().getSimpleName());
     try {
       readBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
@@ -131,7 +131,7 @@ public abstract class Receiver implements DataTransferProtocol {
   private void opWriteBlock(DataInputStream in) throws IOException {
     final OpWriteBlockProto proto = OpWriteBlockProto.parseFrom(vintPrefixed(in));
     final DatanodeInfo[] targets = PBHelper.convert(proto.getTargetsList());
-    TraceScope traceScope = continueTraceSpan(proto.getHeader().getBaseHeader(),
+    TraceScope traceScope = continueTraceSpan(proto.getHeader(),
         proto.getClass().getSimpleName());
     try {
       writeBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
@@ -159,7 +159,7 @@ public abstract class Receiver implements DataTransferProtocol {
     final OpTransferBlockProto proto =
       OpTransferBlockProto.parseFrom(vintPrefixed(in));
     final DatanodeInfo[] targets = PBHelper.convert(proto.getTargetsList());
-    TraceScope traceScope = continueTraceSpan(proto.getHeader().getBaseHeader(),
+    TraceScope traceScope = continueTraceSpan(proto.getHeader(),
         proto.getClass().getSimpleName());
     try {
       transferBlock(PBHelper.convert(proto.getHeader().getBaseHeader().getBlock()),
@@ -194,14 +194,26 @@ public abstract class Receiver implements DataTransferProtocol {
       throws IOException {
     final ReleaseShortCircuitAccessRequestProto proto =
       ReleaseShortCircuitAccessRequestProto.parseFrom(vintPrefixed(in));
-    releaseShortCircuitFds(PBHelper.convert(proto.getSlotId()));
+    TraceScope traceScope = continueTraceSpan(proto.getTraceInfo(),
+        proto.getClass().getSimpleName());
+    try {
+      releaseShortCircuitFds(PBHelper.convert(proto.getSlotId()));
+    } finally {
+      if (traceScope != null) traceScope.close();
+    }
   }
 
   /** Receive {@link Op#REQUEST_SHORT_CIRCUIT_SHM} */
   private void opRequestShortCircuitShm(DataInputStream in) throws IOException {
     final ShortCircuitShmRequestProto proto =
         ShortCircuitShmRequestProto.parseFrom(vintPrefixed(in));
-    requestShortCircuitShm(proto.getClientName());
+    TraceScope traceScope = continueTraceSpan(proto.getTraceInfo(),
+        proto.getClass().getSimpleName());
+    try {
+      requestShortCircuitShm(proto.getClientName());
+    } finally {
+      if (traceScope != null) traceScope.close();
+    }
   }
 
   /** Receive OP_REPLACE_BLOCK */

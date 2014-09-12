@@ -100,10 +100,20 @@ public abstract class DataTransferProtoUtil {
     return new TraceInfo(proto.getTraceId(), proto.getParentId());
   }
 
+  public static TraceScope continueTraceSpan(ClientOperationHeaderProto header,
+      String description) {
+    return continueTraceSpan(header.getBaseHeader(), description);
+  }
+
   public static TraceScope continueTraceSpan(BaseHeaderProto header,
       String description) {
+    return continueTraceSpan(header.getTraceInfo(), description);
+  }
+
+  public static TraceScope continueTraceSpan(DataTransferTraceInfoProto proto,
+      String description) {
     TraceScope scope = null;
-    TraceInfo info = fromProto(header.getTraceInfo());
+    TraceInfo info = fromProto(proto);
     if (info != null) {
       scope = Trace.startSpan(description, info);
     }
