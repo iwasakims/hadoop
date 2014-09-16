@@ -28,7 +28,7 @@ import org.htrace.Sampler;
 import org.htrace.TraceScope;
 
 /**
- * Get a listing of all files in that match the file patterns.
+ * Invoke fs shell command with tracing turned on
  */
 @InterfaceAudience.Private
 @InterfaceStability.Unstable
@@ -39,7 +39,7 @@ class Trace extends FsCommand {
   }
   
   public static final String NAME = "trace";
-  public static final String USAGE = "<command> [<args> ...]";
+  public static final String USAGE = "<-cmd> ...";
   public static final String DESCRIPTION =
       "invoke fs shell command with tracing turned on.";
   SpanReceiverHost spanReceiverHost;
