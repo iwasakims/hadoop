@@ -57,7 +57,7 @@ class Trace extends FsCommand {
     } catch (Exception e) {
       displayError(e);
     } finally {
-      ts.close();
+      if (ts != null) ts.close();
       spanReceiverHost.closeReceivers();
     }
     try {

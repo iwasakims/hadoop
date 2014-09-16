@@ -21,6 +21,7 @@ import org.apache.commons.lang.RandomStringUtils;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
+import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
@@ -211,6 +212,23 @@ public class TestTracing {
       istream.close();
     }
     Assert.assertTrue(SetSpanReceiver.SetHolder.size() == 0);
+  }
+
+  @Test
+  public void testTracingFsShell() throws Exception {
+    FsShell shell = new FsShell(dfs.getConf());
+    String[] args = {"-trace", "-mkdir", "/testTracingFsShell"};
+    try {
+      shell.run(args);
+    } finally {
+      shell.close();
+    }
+    String[] expectedSpanNames = {
+      "FsShell",
+      "org.apache.hadoop.hdfs.protocol.proto.ClientNamenodeProtocolProtos.ClientNamenodeProtocol.BlockingInterface.mkdirs",
+      "org.apache.hadoop.hdfs.protocol.ClientProtocol.mkdirs"
+    };
+    assertSpanNamesFound(expectedSpanNames);
   }
 
   @Before
