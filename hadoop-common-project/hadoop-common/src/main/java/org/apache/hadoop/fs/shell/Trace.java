@@ -23,7 +23,6 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.classification.InterfaceStability;
 import org.apache.hadoop.fs.FsShell;
 import org.apache.hadoop.tracing.SpanReceiverHost;
-import org.apache.hadoop.util.ToolRunner;
 import org.htrace.Sampler;
 import org.htrace.TraceScope;
 
@@ -53,7 +52,7 @@ class Trace extends FsCommand {
         Sampler.ALWAYS);
     int res = -1;
     try {
-      res = ToolRunner.run(shell, argv);
+      res = shell.run(argv);
     } catch (Exception e) {
       displayError(e);
     } finally {
