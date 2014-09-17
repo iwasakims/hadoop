@@ -284,7 +284,7 @@ function hadoop_validate_classname
   local class=$1
   shift 1
 
-  if [[ ! ${class} =~ \. ]]; then
+  if [[ ${class} =~ [[:blank:]] ]]; then
     return 1
   fi
   return 0
