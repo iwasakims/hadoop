@@ -55,6 +55,17 @@ public void receiveSpan(Span span);
   </property>
 +----
 
+  You can omit package name prefix if you use span receiver bundled with HTrace.
+
++----
+  <property>
+    <name>hadoop.htrace.spanreceiver.classes</name>
+    <value>LocalFileSpanReceiver</value>
+  </property>
++----
+
+
+
 ** Setting up ZipkinSpanReceiver
 
   Instead of implementing SpanReceiver by yourself,
@@ -83,7 +94,7 @@ public void receiveSpan(Span span);
 +----
   <property>
     <name>hadoop.htrace.spanreceiver.classes</name>
-    <value>org.htrace.impl.ZipkinSpanReceiver</value>
+    <value>ZipkinSpanReceiver</value>
   </property>
   <property>
     <name>hadoop.htrace.zipkin.collector-hostname</name>
@@ -127,7 +138,7 @@ public void receiveSpan(Span span);
   You can specify the configuration associated with span receiver by <<<-Ckey=value>>> options.
 
 +----
-  $ hadoop trace -add -class org.htrace.impl.LocalFileSpanReceiver -Chadoop.htrace.local-file-span-receiver.path=/tmp/htrace.out -host 192.168.56.2:9000
+  $ hadoop trace -add -class LocalFileSpanReceiver -Chadoop.htrace.local-file-span-receiver.path=/tmp/htrace.out -host 192.168.56.2:9000
   Added trace span receiver 2 with configuration hadoop.htrace.local-file-span-receiver.path = /tmp/htrace.out
 
   $ hadoop trace -list -host 192.168.56.2:9000
