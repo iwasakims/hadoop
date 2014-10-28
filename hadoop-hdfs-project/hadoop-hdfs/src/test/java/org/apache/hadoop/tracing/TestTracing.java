@@ -104,6 +104,11 @@ public class TestTracing {
     Assert.assertTrue(spanStart - startTime < 100);
     Assert.assertTrue(spanEnd - endTime < 100);
 
+    Assert.assertEquals("called",
+        map.get("org.apache.hadoop.hdfs.protocol.ClientProtocol.create")
+           .get(0).getTimelineAnnotations()
+           .get(0).getMessage());
+
     // There should only be one trace id as it should all be homed in the
     // top trace.
     for (Span span : SetSpanReceiver.SetHolder.spans.values()) {
