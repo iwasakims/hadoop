@@ -177,9 +177,9 @@ call :updatepath %HADOOP_BIN_PATH%
   goto :eof
 
 :jar
-  if not defined YARN_OPTS if not defined YARN_CLIENT_OPTS (
-    @rem
-  ) else (
+  if defined YARN_OPTS (
+    @echo WARNING: Use "yarn jar" for YARN application.
+  ) else if defined YARN_CLIENT_OPTS (
     @echo WARNING: Use "yarn jar" for YARN application.
   )
   set CLASS=org.apache.hadoop.util.RunJar
