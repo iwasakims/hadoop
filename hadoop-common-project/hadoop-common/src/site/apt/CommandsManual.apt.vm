@@ -173,7 +173,7 @@ User Commands
    Wordcount example
 
    Use {{{../../hadoop-yarn/hadoop-yarn-site/YarnCommands.html#jar}<<<yarn jar>>>}}
-   for YARN application instead.
+   to launch YARN applications instead.
 
 * <<<job>>>
 
