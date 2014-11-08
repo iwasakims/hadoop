@@ -837,13 +837,13 @@ function hadoop_start_daemon_wrapper
   # shellcheck disable=SC2086
   renice "${HADOOP_NICENESS}" $! >/dev/null 2>&1
   if [[ $? -gt 0 ]]; then
-    hadoop_error "ERROR: Cannot set priority of ${daemoname} process $!"
+    hadoop_error "ERROR: Cannot set priority of ${daemonname} process $!"
   fi
   
   # shellcheck disable=SC2086
   disown %+ >/dev/null 2>&1
   if [[ $? -gt 0 ]]; then
-    hadoop_error "ERROR: Cannot disconnect ${daemoname} process $!"
+    hadoop_error "ERROR: Cannot disconnect ${daemonname} process $!"
   fi
   sleep 1
   
@@ -898,7 +898,7 @@ function hadoop_start_secure_daemon
   #shellcheck disable=SC2086
   echo $$ > "${privpidfile}" 2>/dev/null
   if [[ $? -gt 0 ]]; then
-    hadoop_error "ERROR:  Cannot write ${daemoname} pid ${privpidfile}."
+    hadoop_error "ERROR:  Cannot write ${daemonname} pid ${privpidfile}."
   fi
   
   exec "${jsvc}" \
