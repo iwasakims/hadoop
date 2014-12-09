@@ -2438,10 +2438,10 @@ public class Configuration implements Iterable<Map.Entry<String,String>>,
 
       if (root == null) {
         if (doc == null) {
-          if (quiet) {
-            return null;
+          if (!quiet) {
+            LOG.warn(resource + " not found");
           }
-          throw new RuntimeException(resource + " not found");
+          return null;
         }
         root = doc.getDocumentElement();
       }

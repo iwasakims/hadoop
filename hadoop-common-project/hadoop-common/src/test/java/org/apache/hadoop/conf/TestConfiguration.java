@@ -1308,6 +1308,20 @@ public class TestConfiguration extends TestCase {
     assertTrue("my.var is not final", finalParameters.contains("my.var"));
   }
 
+  public void testLoadResourceInNonQuietMode() throws Exception {
+    class TmpConfiguration extends Configuration {
+    }
+    TmpConfiguration.addDefaultResource("non-existent-default-resource.xml");
+    Configuration conf = new TmpConfiguration();
+    conf.setQuietMode(false);
+    try {
+      // loading default resources on the first access to properties.
+      conf.setBoolean("test.load.resource.in.non.quiet.mode", true);
+    } catch (Throwable e) {
+      fail("failed to load default resources.");
+    }
+  }
+
   public static void main(String[] argv) throws Exception {
     junit.textui.TestRunner.main(new String[]{
       TestConfiguration.class.getName()
