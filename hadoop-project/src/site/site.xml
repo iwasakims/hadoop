@@ -126,6 +126,8 @@
       <item name="NodeManager Restart" href="hadoop-yarn/hadoop-yarn-site/NodeManagerRestart.html"/>
       <item name="DockerContainerExecutor" href="hadoop-yarn/hadoop-yarn-site/DockerContainerExecutor.html"/>
       <item name="Using CGroups" href="hadoop-yarn/hadoop-yarn-site/NodeManagerCGroups.html"/>
+      <item name="Secure Containers" href="hadoop-yarn/hadoop-yarn-site/SecureContainer.html"/>
+      <item name="Registry" href="hadoop-yarn/hadoop-yarn-site/registry/index.html"/>
     </menu>
 
     <menu name="YARN REST APIs" inherit="top">
