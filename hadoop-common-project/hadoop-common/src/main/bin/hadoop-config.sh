@@ -168,8 +168,8 @@ hadoop_exec_userfuncs
 # IMPORTANT! User provided code is now available!
 #
 
-hadoop_verify_confdir
 hadoop_exec_hadooprc
+hadoop_verify_confdir
 
 # do all the OS-specific startup bits here
 # this allows us to get a decent JAVA_HOME,
