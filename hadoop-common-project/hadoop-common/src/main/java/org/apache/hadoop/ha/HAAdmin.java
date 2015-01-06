@@ -69,13 +69,11 @@ public abstract class HAAdmin extends Configured implements Tool {
   protected final static Map<String, UsageInfo> USAGE =
     ImmutableMap.<String, UsageInfo>builder()
     .put("-transitionToActive",
-        new UsageInfo("[--"+FORCEACTIVE+"] [--"+FORCEMANUAL+"] <serviceId>",
-            "Transitions the service into Active state"))
+        new UsageInfo("[--"+FORCEACTIVE+"] <serviceId>", "Transitions the service into Active state"))
     .put("-transitionToStandby",
-        new UsageInfo("[--"+FORCEMANUAL+"] <serviceId>",
-            "Transitions the service into Standby state"))
+        new UsageInfo("<serviceId>", "Transitions the service into Standby state"))
     .put("-failover",
-        new UsageInfo("[--"+FORCEFENCE+"] [--"+FORCEACTIVE+"] [--"+FORCEMANUAL+"] <serviceId> <serviceId>",
+        new UsageInfo("[--"+FORCEFENCE+"] [--"+FORCEACTIVE+"] <serviceId> <serviceId>",
             "Failover from the first service to the second.\n" +
             "Unconditionally fence services if the --"+FORCEFENCE+" option is used.\n" +
             "Try to failover to the target service even if it is not ready if the " + 
