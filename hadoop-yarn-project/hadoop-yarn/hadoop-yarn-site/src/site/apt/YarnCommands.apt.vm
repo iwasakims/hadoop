@@ -293,9 +293,9 @@ YARN Commands
 |               | you need caution.
 *---------------+--------------+
 | -transitionToStandby [--forcemanual] \<serviceId\> |
-|               | Transitions the service into Standby state. 
+|               | Transitions the service into Standby state.
 |               | This command can not be used if automatic failover is enabled.
-|               | Though you can override this by --forcemanual option, 
+|               | Though you can override this by --forcemanual option,
 |               | you need caution.
 *---------------+--------------+
 | -failover [--forceactive] \<serviceId1\> \<serviceId2\> |
