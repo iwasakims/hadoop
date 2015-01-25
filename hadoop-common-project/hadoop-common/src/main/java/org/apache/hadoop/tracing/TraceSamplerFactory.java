@@ -20,8 +20,10 @@ package org.apache.hadoop.tracing;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeys;
-import org.htrace.Sampler;
-import org.htrace.impl.ProbabilitySampler;
+import org.apache.htrace.HTraceConfiguration;
+import org.apache.htrace.Sampler;
+import org.apache.htrace.SamplerBuilder;
+import org.apache.htrace.impl.ProbabilitySampler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,25 +31,36 @@ import org.slf4j.LoggerFactory;
 public class TraceSamplerFactory {
   private static final Logger LOG =
       LoggerFactory.getLogger(TraceSamplerFactory.class);
+  private static final String HTRACE_CONF_PREFIX ="hadoop.htrace.";
 
   public static Sampler<?> createSampler(Configuration conf) {
     String samplerStr = conf.get(CommonConfigurationKeys.HADOOP_TRACE_SAMPLER,
         CommonConfigurationKeys.HADOOP_TRACE_SAMPLER_DEFAULT);
-    if (samplerStr.equals("NeverSampler")) {
-      LOG.debug("HTrace is OFF for all spans.");
-      return Sampler.NEVER;
-    } else if (samplerStr.equals("AlwaysSampler")) {
-      LOG.info("HTrace is ON for all spans.");
-      return Sampler.ALWAYS;
-    } else if (samplerStr.equals("ProbabilitySampler")) {
+    conf.set(HTRACE_CONF_PREFIX + SamplerBuilder.SAMPLER_CONF_KEY, samplerStr);
+    if (samplerStr.equals("ProbabilitySampler")) {
       double percentage =
           conf.getDouble("htrace.probability.sampler.percentage", 0.01d);
+      conf.setDouble(
+          HTRACE_CONF_PREFIX + ProbabilitySampler.SAMPLER_FRACTION_CONF_KEY,
+          percentage / 100.0d);
       LOG.info("HTrace is ON for " + percentage + "% of top-level spans.");
-      return new ProbabilitySampler(percentage / 100.0d);
-    } else {
-      throw new RuntimeException("Can't create sampler " + samplerStr +
-          ".  Available samplers are NeverSampler, AlwaysSampler, " +
-          "and ProbabilitySampler.");
     }
+    return new SamplerBuilder(wrapHadoopConf(conf)).build();
+  }
+
+  private static HTraceConfiguration wrapHadoopConf(final Configuration conf) {
+    return new HTraceConfiguration() {
+      @Override
+      public String get(String key) {
+        return conf.get(HTRACE_CONF_PREFIX + key);
+      }
+
+      @Override
+      public String get(String key, String defaultValue) {
+        return conf.get(HTRACE_CONF_PREFIX + key, defaultValue);
+      }
+    };
   }
 }
+
+

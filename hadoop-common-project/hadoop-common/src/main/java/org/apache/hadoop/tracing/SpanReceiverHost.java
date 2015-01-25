@@ -40,9 +40,10 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.tracing.SpanReceiverInfo.ConfigurationPair;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.ShutdownHookManager;
-import org.htrace.HTraceConfiguration;
-import org.htrace.SpanReceiver;
-import org.htrace.Trace;
+import org.apache.htrace.HTraceConfiguration;
+import org.apache.htrace.SpanReceiver;
+import org.apache.htrace.SpanReceiverBuilder;
+import org.apache.htrace.Trace;
 
 /**
  * This class provides functions for reading the names of SpanReceivers from
@@ -156,33 +157,13 @@ public class SpanReceiverHost implements TraceAdminProtocol {
 
   private synchronized SpanReceiver loadInstance(String className,
       List<ConfigurationPair> extraConfig) throws IOException {
-    className = className.trim();
-    if (!className.contains(".")) {
-      className = "org.htrace.impl." + className;
+    SpanReceiverBuilder builder =
+        new SpanReceiverBuilder(wrapHadoopConf(config, extraConfig));
+    SpanReceiver rcvr = builder.spanReceiverClass(className.trim()).build();
+    if (rcvr == null) {
+      throw new IOException("Failed to load SpanReceiver " + className);
     }
-    Class<?> implClass = null;
-    SpanReceiver impl;
-    try {
-      implClass = Class.forName(className);
-      Object o = ReflectionUtils.newInstance(implClass, config);
-      impl = (SpanReceiver)o;
-      impl.configure(wrapHadoopConf(config, extraConfig));
-    } catch (ClassCastException e) {
-      throw new IOException("Class " + className +
-          " does not implement SpanReceiver.");
-    } catch (ClassNotFoundException e) {
-      throw new IOException("Class " + className + " cannot be found.");
-    } catch (SecurityException e) {
-      throw new IOException("Got SecurityException while loading " +
-          "SpanReceiver " + className);
-    } catch (IllegalArgumentException e) {
-      throw new IOException("Got IllegalArgumentException while loading " +
-          "SpanReceiver " + className, e);
-    } catch (RuntimeException e) {
-      throw new IOException("Got RuntimeException while loading " +
-          "SpanReceiver " + className, e);
-    }
-    return impl;
+    return rcvr;
   }
 
   private static HTraceConfiguration wrapHadoopConf(final Configuration conf,
