@@ -17,50 +17,49 @@
  */
 package org.apache.hadoop.tracing;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.fs.CommonConfigurationKeys;
+import org.apache.hadoop.tracing.SpanReceiverInfo.ConfigurationPair;
 import org.apache.htrace.HTraceConfiguration;
-import org.apache.htrace.Sampler;
-import org.apache.htrace.SamplerBuilder;
-import org.apache.htrace.impl.ProbabilitySampler;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
+/**
+ * This class provides utility functions for tracing.
+ */
 @InterfaceAudience.Private
-public class TraceSamplerFactory {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(TraceSamplerFactory.class);
-  private static final String HTRACE_CONF_PREFIX ="hadoop.htrace.";
+public class TraceUtils { 
+  public static final String HTRACE_CONF_PREFIX = "hadoop.htrace.";
+  private static List<ConfigurationPair> EMPTY = Collections.emptyList();
 
-  public static Sampler<?> createSampler(Configuration conf) {
-    String samplerStr = conf.get(CommonConfigurationKeys.HADOOP_TRACE_SAMPLER,
-        CommonConfigurationKeys.HADOOP_TRACE_SAMPLER_DEFAULT);
-    conf.set(HTRACE_CONF_PREFIX + SamplerBuilder.SAMPLER_CONF_KEY, samplerStr);
-    if (samplerStr.equals("ProbabilitySampler")) {
-      double percentage =
-          conf.getDouble("htrace.probability.sampler.percentage", 0.01d);
-      conf.setDouble(
-          HTRACE_CONF_PREFIX + ProbabilitySampler.SAMPLER_FRACTION_CONF_KEY,
-          percentage / 100.0d);
-      LOG.info("HTrace is ON for " + percentage + "% of top-level spans.");
-    }
-    return new SamplerBuilder(wrapHadoopConf(conf)).build();
+  public static HTraceConfiguration wrapHadoopConf(final Configuration conf) {
+    return wrapHadoopConf(conf, EMPTY);
   }
 
-  private static HTraceConfiguration wrapHadoopConf(final Configuration conf) {
+  public static HTraceConfiguration wrapHadoopConf(final Configuration conf,
+          List<ConfigurationPair> extraConfig) {
+    final HashMap<String, String> extraMap = new HashMap<String, String>();
+    for (ConfigurationPair pair : extraConfig) {
+      extraMap.put(pair.getKey(), pair.getValue());
+    }
     return new HTraceConfiguration() {
       @Override
       public String get(String key) {
+        if (extraMap.containsKey(key)) {
+          return extraMap.get(key);
+        }
         return conf.get(HTRACE_CONF_PREFIX + key);
       }
 
       @Override
       public String get(String key, String defaultValue) {
+        if (extraMap.containsKey(key)) {
+          return extraMap.get(key);
+        }
         return conf.get(HTRACE_CONF_PREFIX + key, defaultValue);
       }
     };
   }
 }
-
-

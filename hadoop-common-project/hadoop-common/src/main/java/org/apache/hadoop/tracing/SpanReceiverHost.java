@@ -25,7 +25,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
@@ -38,9 +37,9 @@ import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.tracing.SpanReceiverInfo.ConfigurationPair;
+import org.apache.hadoop.tracing.TraceUtils;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.ShutdownHookManager;
-import org.apache.htrace.HTraceConfiguration;
 import org.apache.htrace.SpanReceiver;
 import org.apache.htrace.SpanReceiverBuilder;
 import org.apache.htrace.Trace;
@@ -158,39 +157,12 @@ public class SpanReceiverHost implements TraceAdminProtocol {
   private synchronized SpanReceiver loadInstance(String className,
       List<ConfigurationPair> extraConfig) throws IOException {
     SpanReceiverBuilder builder =
-        new SpanReceiverBuilder(wrapHadoopConf(config, extraConfig));
+        new SpanReceiverBuilder(TraceUtils.wrapHadoopConf(config, extraConfig));
     SpanReceiver rcvr = builder.spanReceiverClass(className.trim()).build();
     if (rcvr == null) {
       throw new IOException("Failed to load SpanReceiver " + className);
     }
     return rcvr;
-  }
-
-  private static HTraceConfiguration wrapHadoopConf(final Configuration conf,
-          List<ConfigurationPair> extraConfig) {
-    final HashMap<String, String> extraMap = new HashMap<String, String>();
-    for (ConfigurationPair pair : extraConfig) {
-      extraMap.put(pair.getKey(), pair.getValue());
-    }
-    return new HTraceConfiguration() {
-      public static final String HTRACE_CONF_PREFIX = "hadoop.htrace.";
-
-      @Override
-      public String get(String key) {
-        if (extraMap.containsKey(key)) {
-          return extraMap.get(key);
-        }
-        return conf.get(HTRACE_CONF_PREFIX + key);
-      }
-
-      @Override
-      public String get(String key, String defaultValue) {
-        if (extraMap.containsKey(key)) {
-          return extraMap.get(key);
-        }
-        return conf.get(HTRACE_CONF_PREFIX + key, defaultValue);
-      }
-    };
   }
 
   /**

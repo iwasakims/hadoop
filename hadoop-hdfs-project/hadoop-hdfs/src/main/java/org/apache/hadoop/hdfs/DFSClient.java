@@ -211,13 +211,14 @@ import org.apache.hadoop.security.token.SecretManager.InvalidToken;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.security.token.TokenRenewer;
 import org.apache.hadoop.tracing.SpanReceiverHost;
-import org.apache.hadoop.tracing.TraceSamplerFactory;
+import org.apache.hadoop.tracing.TraceUtils;
 import org.apache.hadoop.util.Daemon;
 import org.apache.hadoop.util.DataChecksum;
 import org.apache.hadoop.util.DataChecksum.Type;
 import org.apache.hadoop.util.Progressable;
 import org.apache.hadoop.util.Time;
 import org.apache.htrace.Sampler;
+import org.apache.htrace.SamplerBuilder;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
@@ -621,7 +622,7 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
       Configuration conf, FileSystem.Statistics stats)
     throws IOException {
     spanReceiverHost = SpanReceiverHost.getInstance(conf);
-    traceSampler = TraceSamplerFactory.createSampler(conf);
+    traceSampler = new SamplerBuilder(TraceUtils.wrapHadoopConf(conf)).build();
     // Copy only the required DFSClient configuration
     this.dfsClientConf = new Conf(conf);
     if (this.dfsClientConf.useLegacyBlockReaderLocal) {
