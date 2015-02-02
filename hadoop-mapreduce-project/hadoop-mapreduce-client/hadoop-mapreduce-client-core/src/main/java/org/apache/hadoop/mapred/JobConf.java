@@ -2136,10 +2136,10 @@ public class JobConf extends Configuration {
         MRJobConfig.DEFAULT_HEAP_MEMORY_MB_RATIO);
     if (taskType == TaskType.MAP) {
       return getMemoryRequiredHelper(MRJobConfig.MAP_MEMORY_MB,
-          MRJobConfig.DEFAULT_MAP_MEMORY_MB, heapSize, heapRatio);
+          memory, heapSize, heapRatio);
     } else if (taskType == TaskType.REDUCE) {
       return getMemoryRequiredHelper(MRJobConfig.REDUCE_MEMORY_MB,
-          MRJobConfig.DEFAULT_REDUCE_MEMORY_MB, heapSize, heapRatio);
+          memory, heapSize, heapRatio);
     } else {
       return memory;
     }
