@@ -238,7 +238,6 @@ public class HadoopArchives implements Tool {
       ArrayList<FileSplit> splits = new ArrayList<FileSplit>(numSplits);
       LongWritable key = new LongWritable();
       final HarEntry value = new HarEntry();
-      SequenceFile.Reader reader = null;
       // the remaining bytes in the file split
       long remaining = fstatus.getLen();
       // the count of sizes calculated till now
@@ -250,8 +249,7 @@ public class HadoopArchives implements Tool {
       long targetSize = totalSize/numSplits;
       // create splits of size target size so that all the maps 
       // have equals sized data to read and write to.
-      try {
-        reader = new SequenceFile.Reader(fs, src, jconf);
+      try (SequenceFile.Reader reader = new SequenceFile.Reader(fs, src, jconf)) {
         while(reader.next(key, value)) {
           if (currentCount + key.get() > targetSize && currentCount != 0){
             long size = lastPos - startPos;
@@ -266,11 +264,6 @@ public class HadoopArchives implements Tool {
         // the remaining not equal to the target size.
         if (remaining != 0) {
           splits.add(new FileSplit(src, startPos, remaining, (String[])null));
-        }
-      }
-      finally { 
-        if (reader != null) {
-          reader.close();
         }
       }
       return splits.toArray(new FileSplit[splits.size()]);
