@@ -68,6 +68,7 @@ import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.util.Tool;
 import org.apache.hadoop.util.ToolRunner;
 
+import com.google.common.base.Charsets;
 
 /**
  * a archive creation utility.
@@ -268,7 +269,9 @@ public class HadoopArchives implements Tool {
         }
       }
       finally { 
-        reader.close();
+        if (reader != null) {
+          reader.close();
+        }
       }
       return splits.toArray(new FileSplit[splits.size()]);
     }
@@ -741,7 +744,7 @@ public class HadoopArchives implements Tool {
         indexStream = fs.create(index);
         outStream = fs.create(masterIndex);
         String version = VERSION + " \n";
-        outStream.write(version.getBytes());
+        outStream.write(version.getBytes(Charsets.UTF_8));
         
       } catch(IOException e) {
         throw new RuntimeException(e);
@@ -760,7 +763,7 @@ public class HadoopArchives implements Tool {
       while(values.hasNext()) {
         Text value = values.next();
         String towrite = value.toString() + "\n";
-        indexStream.write(towrite.getBytes());
+        indexStream.write(towrite.getBytes(Charsets.UTF_8));
         written++;
         if (written > numIndexes -1) {
           // every 1000 indexes we report status
@@ -769,7 +772,7 @@ public class HadoopArchives implements Tool {
           endIndex = keyVal;
           String masterWrite = startIndex + " " + endIndex + " " + startPos 
                               +  " " + indexStream.getPos() + " \n" ;
-          outStream.write(masterWrite.getBytes());
+          outStream.write(masterWrite.getBytes(Charsets.UTF_8));
           startPos = indexStream.getPos();
           startIndex = endIndex;
           written = 0;
@@ -782,7 +785,7 @@ public class HadoopArchives implements Tool {
       if (written > 0) {
         String masterWrite = startIndex + " " + keyVal + " " + startPos  +
                              " " + indexStream.getPos() + " \n";
-        outStream.write(masterWrite.getBytes());
+        outStream.write(masterWrite.getBytes(Charsets.UTF_8));
       }
       // close the streams
       outStream.close();
