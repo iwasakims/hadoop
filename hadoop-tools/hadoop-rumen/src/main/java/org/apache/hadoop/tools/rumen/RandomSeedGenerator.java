@@ -17,13 +17,12 @@
  */
 package org.apache.hadoop.tools.rumen;
 
+import java.nio.charset.Charset;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-
-import com.google.common.base.Charsets;
 
 /**
  * The purpose of this class is to generate new random seeds from a master
@@ -44,6 +43,7 @@ import com.google.common.base.Charsets;
  */
 public class RandomSeedGenerator {
   private static Log LOG = LogFactory.getLog(RandomSeedGenerator.class);
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
   
   /** MD5 algorithm instance, one for each thread. */
   private static final ThreadLocal<MessageDigest> md5Holder =
@@ -74,7 +74,7 @@ public class RandomSeedGenerator {
     // We could have fed the bytes of masterSeed one by one to md5.update()
     // instead
     String str = streamId + '/' + masterSeed;
-    byte[] digest = md5.digest(str.getBytes(Charsets.UTF_8));
+    byte[] digest = md5.digest(str.getBytes(UTF_8));
     // Create a long from the first 8 bytes of the digest
     // This is fine as MD5 has the avalanche property.
     // Paranoids could have XOR folded the other 8 bytes in too. 

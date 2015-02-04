@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 
+import java.nio.charset.Charset;
+
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.ParserConfigurationException;
@@ -39,13 +41,12 @@ import org.w3c.dom.Text;
 
 import org.xml.sax.SAXException;
 
-import com.google.common.base.Charsets;
-
 class ParsedConfigFile {
   private static final Pattern jobIDPattern =
       Pattern.compile("_(job_[0-9]+_[0-9]+)_");
   private static final Pattern heapPattern =
       Pattern.compile("-Xmx([0-9]+)([mMgG])");
+  private static final Charset UTF_8 = Charset.forName("UTF-8");
 
   final int heapMegabytes;
 
@@ -102,7 +103,7 @@ class ParsedConfigFile {
     }
 
     try {
-      InputStream is = new ByteArrayInputStream(xmlString.getBytes(Charsets.UTF_8));
+      InputStream is = new ByteArrayInputStream(xmlString.getBytes(UTF_8));
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
