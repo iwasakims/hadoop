@@ -23,6 +23,8 @@ import java.security.NoSuchAlgorithmException;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 
+import com.google.common.base.Charsets;
+
 /**
  * The purpose of this class is to generate new random seeds from a master
  * seed. This is needed to make the Random().next*() calls in rumen and mumak
@@ -72,7 +74,7 @@ public class RandomSeedGenerator {
     // We could have fed the bytes of masterSeed one by one to md5.update()
     // instead
     String str = streamId + '/' + masterSeed;
-    byte[] digest = md5.digest(str.getBytes());
+    byte[] digest = md5.digest(str.getBytes(Charsets.UTF_8));
     // Create a long from the first 8 bytes of the digest
     // This is fine as MD5 has the avalanche property.
     // Paranoids could have XOR folded the other 8 bytes in too. 

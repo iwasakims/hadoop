@@ -39,6 +39,8 @@ import org.w3c.dom.Text;
 
 import org.xml.sax.SAXException;
 
+import com.google.common.base.Charsets;
+
 class ParsedConfigFile {
   private static final Pattern jobIDPattern =
       Pattern.compile("_(job_[0-9]+_[0-9]+)_");
@@ -100,7 +102,7 @@ class ParsedConfigFile {
     }
 
     try {
-      InputStream is = new ByteArrayInputStream(xmlString.getBytes());
+      InputStream is = new ByteArrayInputStream(xmlString.getBytes(Charsets.UTF_8));
 
       DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
 
@@ -151,7 +153,7 @@ class ParsedConfigFile {
         
         properties.setProperty(attr, value);
 
-        if ("mapred.child.java.opts".equals(attr) && value != null) {
+        if ("mapred.child.java.opts".equals(attr)) {
           Matcher matcher = heapPattern.matcher(value);
           if (matcher.find()) {
             String heapSize = matcher.group(1);
@@ -164,11 +166,11 @@ class ParsedConfigFile {
           }
         }
 
-        if (MRJobConfig.QUEUE_NAME.equals(attr) && value != null) {
+        if (MRJobConfig.QUEUE_NAME.equals(attr)) {
           queue = value;
         }
 
-        if (MRJobConfig.JOB_NAME.equals(attr) && value != null) {
+        if (MRJobConfig.JOB_NAME.equals(attr)) {
           jobName = value;
         }
 
