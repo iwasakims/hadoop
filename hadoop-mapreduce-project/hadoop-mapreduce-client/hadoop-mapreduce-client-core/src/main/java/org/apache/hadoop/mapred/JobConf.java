@@ -178,6 +178,9 @@ public class JobConf extends Configuration {
   static final String MAPREDUCE_JOB_REDUCE_MEMORY_MB_PROPERTY =
     JobContext.REDUCE_MEMORY_MB;
 
+  public static final int DEFAULT_MAP_MEMORY_REQUIRED = 1024;
+  public static final int DEFAULT_REDUCE_MEMORY_REQUIRED = 1024;
+
   /**
    * The variable is kept for M/R 1.x applications, while M/R 2.x applications
    * should use {@link #MAPREDUCE_JOB_MAP_MEMORY_MB_PROPERTY}
@@ -2136,10 +2139,10 @@ public class JobConf extends Configuration {
         MRJobConfig.DEFAULT_HEAP_MEMORY_MB_RATIO);
     if (taskType == TaskType.MAP) {
       return getMemoryRequiredHelper(MRJobConfig.MAP_MEMORY_MB,
-          memory, heapSize, heapRatio);
+          DEFAULT_MAP_MEMORY_REQUIRED, heapSize, heapRatio);
     } else if (taskType == TaskType.REDUCE) {
       return getMemoryRequiredHelper(MRJobConfig.REDUCE_MEMORY_MB,
-          memory, heapSize, heapRatio);
+          DEFAULT_REDUCE_MEMORY_REQUIRED, heapSize, heapRatio);
     } else {
       return memory;
     }
