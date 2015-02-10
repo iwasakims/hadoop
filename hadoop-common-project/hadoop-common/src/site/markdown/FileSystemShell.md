@@ -13,90 +13,48 @@
 -->
 
 * [Overview](#Overview)
-
-  * [appendToFile](#appendToFile)
-
-  * [cat](#cat)
-
-  * [checksum](#checksum)
-
-  * [chgrp](#chgrp)
-
-  * [chmod](#chmod)
-
-  * [chown](#chown)
-
-  * [copyFromLocal](#copyFromLocal)
-
-  * [copyToLocal](#copyToLocal)
-
-  * [count](#count)
-
-  * [cp](#cp)
-
-  * [createSnapshot](#createSnapshot)
-
-  * [deleteSnapshot](#deleteSnapshot)
-
-  * [df](#df)
-
-  * [du](#du)
-
-  * [dus](#dus)
-
-  * [expunge](#expunge)
-
-  * [find](#find)
-
-  * [get](#get)
-
-  * [getfacl](#getfacl)
-
-  * [getfattr](#getfattr)
-
-  * [getmerge](#getmerge)
-
-  * [help](#help)
-
-  * [ls](#ls)
-
-  * [lsr](#lsr)
-
-  * [mkdir](#mkdir)
-
-  * [moveFromLocal](#moveFromLocal)
-
-  * [moveToLocal](#moveToLocal)
-
-  * [mv](#mv)
-
-  * [put](#put)
-
-  * [renameSnapshot](#renameSnapshot)
-
-  * [rm](#rm)
-
-  * [rmdir](#rmdir)
-
-  * [rmr](#rmr)
-
-  * [setfacl](#setfacl)
-
-  * [setfattr](#setfattr)
-
-  * [setrep](#setrep)
-
-  * [stat](#stat)
-
-  * [tail](#tail)
-
-  * [test](#test)
-
-  * [text](#text)
-
-  * [touchz](#touchz)
-
-  * [usage](#usage)
+    * [appendToFile](#appendToFile)
+    * [cat](#cat)
+    * [checksum](#checksum)
+    * [chgrp](#chgrp)
+    * [chmod](#chmod)
+    * [chown](#chown)
+    * [copyFromLocal](#copyFromLocal)
+    * [copyToLocal](#copyToLocal)
+    * [count](#count)
+    * [cp](#cp)
+    * [createSnapshot](#createSnapshot)
+    * [deleteSnapshot](#deleteSnapshot)
+    * [df](#df)
+    * [du](#du)
+    * [dus](#dus)
+    * [expunge](#expunge)
+    * [find](#find)
+    * [get](#get)
+    * [getfacl](#getfacl)
+    * [getfattr](#getfattr)
+    * [getmerge](#getmerge)
+    * [help](#help)
+    * [ls](#ls)
+    * [lsr](#lsr)
+    * [mkdir](#mkdir)
+    * [moveFromLocal](#moveFromLocal)
+    * [moveToLocal](#moveToLocal)
+    * [mv](#mv)
+    * [put](#put)
+    * [renameSnapshot](#renameSnapshot)
+    * [rm](#rm)
+    * [rmdir](#rmdir)
+    * [rmr](#rmr)
+    * [setfacl](#setfacl)
+    * [setfattr](#setfattr)
+    * [setrep](#setrep)
+    * [stat](#stat)
+    * [tail](#tail)
+    * [test](#test)
+    * [text](#text)
+    * [touchz](#touchz)
+    * [usage](#usage)
 
 Overview
 ========
@@ -121,11 +79,8 @@ Usage: `hadoop fs -appendToFile <localsrc> ... <dst> `
 Append single src, or multiple srcs from local file system to the destination file system. Also reads input from stdin and appends to destination file system.
 
 * `hadoop fs -appendToFile localfile /user/hadoop/hadoopfile`
-
 * `hadoop fs -appendToFile localfile1 localfile2 /user/hadoop/hadoopfile`
-
 * `hadoop fs -appendToFile localfile hdfs://nn.example.com/hadoop/hadoopfile`
-
 * `hadoop fs -appendToFile - hdfs://nn.example.com/hadoop/hadoopfile` Reads the input from stdin.
 
 Exit Code:
@@ -142,7 +97,6 @@ Copies source paths to stdout.
 Example:
 
 * `hadoop fs -cat hdfs://nn1.example.com/file1 hdfs://nn2.example.com/file2`
-
 * `hadoop fs -cat file:///file3 /user/hadoop/file4`
 
 Exit Code:
@@ -159,7 +113,6 @@ Returns the checksum information of a file.
 Example:
 
 * `hadoop fs -checksum hdfs://nn1.example.com/file1`
-
 * `hadoop fs -checksum file:///etc/hosts`
 
 chgrp
@@ -216,28 +169,29 @@ Similar to get command, except that the destination is restricted to a local fil
 count
 -----
 
-Usage: `hadoop fs -count [-q] [-h] <paths> `
+Usage: `hadoop fs -count [-q] [-h] [-v] <paths> `
 
-Count the number of directories, files and bytes under the paths that match the specified file pattern. The output columns with -count are: DIR\_COUNT, FILE\_COUNT, CONTENT\_SIZE FILE\_NAME
+Count the number of directories, files and bytes under the paths that match the specified file pattern. The output columns with -count are: DIR\_COUNT, FILE\_COUNT, CONTENT\_SIZE, PATHNAME
 
-The output columns with -count -q are: QUOTA, REMAINING\_QUATA, SPACE\_QUOTA, REMAINING\_SPACE\_QUOTA, DIR\_COUNT, FILE\_COUNT, CONTENT\_SIZE, FILE\_NAME
+The output columns with -count -q are: QUOTA, REMAINING\_QUATA, SPACE\_QUOTA, REMAINING\_SPACE\_QUOTA, DIR\_COUNT, FILE\_COUNT, CONTENT\_SIZE, PATHNAME
 
 The -h option shows sizes in human readable format.
+
+The -v option displays a header line.
 
 Example:
 
 * `hadoop fs -count hdfs://nn1.example.com/file1 hdfs://nn2.example.com/file2`
-
 * `hadoop fs -count -q hdfs://nn1.example.com/file1`
-
 * `hadoop fs -count -q -h hdfs://nn1.example.com/file1`
+* `hdfs dfs -count -q -h -v hdfs://nn1.example.com/file1`
 
 Exit Code:
 
 Returns 0 on success and -1 on error.
 
 cp
---
+----
 
 Usage: `hadoop fs -cp [-f] [-p | -p[topax]] URI [URI ...] <dest> `
 
@@ -248,13 +202,11 @@ Copy files from source to destination. This command allows multiple sources as w
 Options:
 
 * The -f option will overwrite the destination if it already exists.
-
 * The -p option will preserve file attributes [topx] (timestamps, ownership, permission, ACL, XAttr). If -p is specified with no *arg*, then preserves timestamps, ownership, permission. If -pa is specified, then preserves permission also because ACL is a super-set of permission. Determination of whether raw namespace extended attributes are preserved is independent of the -p flag.
 
 Example:
 
 * `hadoop fs -cp /user/hadoop/file1 /user/hadoop/file2`
-
 * `hadoop fs -cp /user/hadoop/file1 /user/hadoop/file2 /user/hadoop/dir`
 
 Exit Code:
@@ -272,7 +224,7 @@ deleteSnapshot
 See [HDFS Snapshots Guide](../hadoop-hdfs/HdfsSnapshots.html).
 
 df
---
+----
 
 Usage: `hadoop fs -df [-h] URI [URI ...]`
 
@@ -287,7 +239,7 @@ Example:
 * `hadoop dfs -df /user/hadoop/dir1`
 
 du
---
+----
 
 Usage: `hadoop fs -du [-s] [-h] URI [URI ...]`
 
@@ -296,7 +248,6 @@ Displays sizes of files and directories contained in the given directory or the 
 Options:
 
 * The -s option will result in an aggregate summary of file lengths being displayed, rather than the individual files.
-
 * The -h option will format file sizes in a "human-readable" fashion (e.g 64.0m instead of 67108864)
 
 Example:
@@ -330,13 +281,19 @@ Finds all files that match the specified expression and applies selected actions
 
 The following primary expressions are recognised:
 
-* -name pattern -iname patternEvaluates as true if the basename of the file matches the pattern using standard file system globbing. If -iname is used then the match is case insensitive.
+*   -name pattern<br />-iname pattern
 
-* -print -print0Always evaluates to true. Causes the current pathname to be written to standard output. If the -print0 expression is used then an ASCII NULL character is appended.
+    Evaluates as true if the basename of the file matches the pattern using standard file system globbing. If -iname is used then the match is case insensitive.
+
+*   -print<br />-print0Always
+
+    evaluates to true. Causes the current pathname to be written to standard output. If the -print0 expression is used then an ASCII NULL character is appended.
 
 The following operators are recognised:
 
-* expression -a expression expression -and expression expression expressionLogical AND operator for joining two expressions. Returns true if both child expressions return true. Implied by the juxtaposition of two expressions and so does not need to be explicitly specified. The second expression will not be applied if the first fails.
+* expression -a expression<br />expression -and expression<br />expression expression
+
+    Logical AND operator for joining two expressions. Returns true if both child expressions return true. Implied by the juxtaposition of two expressions and so does not need to be explicitly specified. The second expression will not be applied if the first fails.
 
 Example:
 
@@ -356,7 +313,6 @@ Copy files to the local file system. Files that fail the CRC check may be copied
 Example:
 
 * `hadoop fs -get /user/hadoop/file localfile`
-
 * `hadoop fs -get hdfs://nn.example.com/user/hadoop/file localfile`
 
 Exit Code:
@@ -373,13 +329,11 @@ Displays the Access Control Lists (ACLs) of files and directories. If a director
 Options:
 
 * -R: List the ACLs of all files and directories recursively.
-
 * *path*: File or directory to list.
 
 Examples:
 
 * `hadoop fs -getfacl /file`
-
 * `hadoop fs -getfacl -R /dir`
 
 Exit Code:
@@ -396,19 +350,14 @@ Displays the extended attribute names and values (if any) for a file or director
 Options:
 
 * -R: Recursively list the attributes for all files and directories.
-
 * -n name: Dump the named extended attribute value.
-
 * -d: Dump all extended attribute values associated with pathname.
-
 * -e *encoding*: Encode values after retrieving them. Valid encodings are "text", "hex", and "base64". Values encoded as text strings are enclosed in double quotes ("), and values encoded as hexadecimal and base64 are prefixed with 0x and 0s, respectively.
-
 * *path*: The file or directory.
 
 Examples:
 
 * `hadoop fs -getfattr -d /file`
-
 * `hadoop fs -getfattr -R -n user.myAttr /dir`
 
 Exit Code:
@@ -430,21 +379,29 @@ Usage: `hadoop fs -help`
 Return usage output.
 
 ls
---
+----
 
-Usage: `hadoop fs -ls [-R] <args> `
+Usage: `hadoop fs -ls [-d] [-h] [-R] [-t] [-S] [-r] [-u] <args> `
 
 Options:
 
-* The -R option will return stat recursively through the directory structure.
+* -d: Directories are listed as plain files.
+* -h: Format file sizes in a human-readable fashion (eg 64.0m instead of 67108864).
+* -R: Recursively list subdirectories encountered.
+* -t: Sort output by modification time (most recent first).
+* -S: Sort output by file size.
+* -r: Reverse the sort order.
+* -u: Use access time rather than modification time for display and sorting.  
 
-For a file returns stat on the file with the following format:
+For a file ls returns stat on the file with the following format:
 
     permissions number_of_replicas userid groupid filesize modification_date modification_time filename
 
 For a directory it returns list of its direct children as in Unix. A directory is listed as:
 
     permissions userid groupid modification_date modification_time dirname
+
+Files within a directory are order by filename by default.
 
 Example:
 
@@ -477,7 +434,6 @@ Options:
 Example:
 
 * `hadoop fs -mkdir /user/hadoop/dir1 /user/hadoop/dir2`
-
 * `hadoop fs -mkdir hdfs://nn1.example.com/user/hadoop/dir hdfs://nn2.example.com/user/hadoop/dir`
 
 Exit Code:
@@ -499,7 +455,7 @@ Usage: `hadoop fs -moveToLocal [-crc] <src> <dst> `
 Displays a "Not implemented yet" message.
 
 mv
---
+----
 
 Usage: `hadoop fs -mv URI [URI ...] <dest> `
 
@@ -508,7 +464,6 @@ Moves files from source to destination. This command allows multiple sources as 
 Example:
 
 * `hadoop fs -mv /user/hadoop/file1 /user/hadoop/file2`
-
 * `hadoop fs -mv hdfs://nn.example.com/file1 hdfs://nn.example.com/file2 hdfs://nn.example.com/file3 hdfs://nn.example.com/dir1`
 
 Exit Code:
@@ -523,11 +478,8 @@ Usage: `hadoop fs -put <localsrc> ... <dst> `
 Copy single src, or multiple srcs from local file system to the destination file system. Also reads input from stdin and writes to destination file system.
 
 * `hadoop fs -put localfile /user/hadoop/hadoopfile`
-
 * `hadoop fs -put localfile1 localfile2 /user/hadoop/hadoopdir`
-
 * `hadoop fs -put localfile hdfs://nn.example.com/hadoop/hadoopfile`
-
 * `hadoop fs -put - hdfs://nn.example.com/hadoop/hadoopfile` Reads the input from stdin.
 
 Exit Code:
@@ -540,7 +492,7 @@ renameSnapshot
 See [HDFS Snapshots Guide](../hadoop-hdfs/HdfsSnapshots.html).
 
 rm
---
+----
 
 Usage: `hadoop fs -rm [-f] [-r |-R] [-skipTrash] URI [URI ...]`
 
@@ -549,11 +501,8 @@ Delete files specified as args.
 Options:
 
 * The -f option will not display a diagnostic message or modify the exit status to reflect an error if the file does not exist.
-
 * The -R option deletes the directory and any content under it recursively.
-
 * The -r option is equivalent to -R.
-
 * The -skipTrash option will bypass trash, if enabled, and delete the specified file(s) immediately. This can be useful when it is necessary to delete files from an over-quota directory.
 
 Example:
@@ -573,7 +522,7 @@ Delete a directory.
 
 Options:
 
-* --ignore-fail-on-non-empty: When using wildcards, do not fail if a directory still contains files.
+* `--ignore-fail-on-non-empty`: When using wildcards, do not fail if a directory still contains files.
 
 Example:
 
@@ -598,35 +547,22 @@ Sets Access Control Lists (ACLs) of files and directories.
 Options:
 
 * -b: Remove all but the base ACL entries. The entries for user, group and others are retained for compatibility with permission bits.
-
 * -k: Remove the default ACL.
-
 * -R: Apply operations to all files and directories recursively.
-
 * -m: Modify ACL. New entries are added to the ACL, and existing entries are retained.
-
 * -x: Remove specified ACL entries. Other ACL entries are retained.
-
-* --set: Fully replace the ACL, discarding all existing entries. The *acl\_spec* must include entries for user, group, and others for compatibility with permission bits.
-
+* ``--set``: Fully replace the ACL, discarding all existing entries. The *acl\_spec* must include entries for user, group, and others for compatibility with permission bits.
 * *acl\_spec*: Comma separated list of ACL entries.
-
 * *path*: File or directory to modify.
 
 Examples:
 
 * `hadoop fs -setfacl -m user:hadoop:rw- /file`
-
 * `hadoop fs -setfacl -x user:hadoop /file`
-
 * `hadoop fs -setfacl -b /file`
-
 * `hadoop fs -setfacl -k /dir`
-
 * `hadoop fs -setfacl --set user::rw-,user:hadoop:rw-,group::r--,other::r-- /file`
-
 * `hadoop fs -setfacl -R -m user:hadoop:r-x /dir`
-
 * `hadoop fs -setfacl -m default:user:hadoop:r-x /dir`
 
 Exit Code:
@@ -643,21 +579,15 @@ Sets an extended attribute name and value for a file or directory.
 Options:
 
 * -b: Remove all but the base ACL entries. The entries for user, group and others are retained for compatibility with permission bits.
-
 * -n name: The extended attribute name.
-
 * -v value: The extended attribute value. There are three different encoding methods for the value. If the argument is enclosed in double quotes, then the value is the string inside the quotes. If the argument is prefixed with 0x or 0X, then it is taken as a hexadecimal number. If the argument begins with 0s or 0S, then it is taken as a base64 encoding.
-
 * -x name: Remove the extended attribute.
-
 * *path*: The file or directory.
 
 Examples:
 
 * `hadoop fs -setfattr -n user.myAttr -v myValue /file`
-
 * `hadoop fs -setfattr -n user.noValue /file`
-
 * `hadoop fs -setfattr -x user.myAttr /file`
 
 Exit Code:
@@ -674,7 +604,6 @@ Changes the replication factor of a file. If *path* is a directory then the comm
 Options:
 
 * The -w flag requests that the command wait for the replication to complete. This can potentially take a very long time.
-
 * The -R flag is accepted for backwards compatibility. It has no effect.
 
 Example:
@@ -723,13 +652,9 @@ Usage: `hadoop fs -test -[defsz] URI`
 Options:
 
 * -d: f the path is a directory, return 0.
-
 * -e: if the path exists, return 0.
-
 * -f: if the path is a file, return 0.
-
 * -s: if the path is not empty, return 0.
-
 * -z: if the file is zero length, return 0.
 
 Example:
