@@ -13,50 +13,28 @@
 -->
 
 * [Overview](#Overview)
-
 * [jvm context](#jvm_context)
-
-  * [JvmMetrics](#JvmMetrics)
-
+    * [JvmMetrics](#JvmMetrics)
 * [rpc context](#rpc_context)
-
-  * [rpc](#rpc)
-
-  * [RetryCache/NameNodeRetryCache](#RetryCacheNameNodeRetryCache)
-
+    * [rpc](#rpc)
+    * [RetryCache/NameNodeRetryCache](#RetryCacheNameNodeRetryCache)
 * [rpcdetailed context](#rpcdetailed_context)
-
-  * [rpcdetailed](#rpcdetailed)
-
+    * [rpcdetailed](#rpcdetailed)
 * [dfs context](#dfs_context)
-
-  * [namenode](#namenode)
-
-  * [FSNamesystem](#FSNamesystem)
-
-  * [JournalNode](#JournalNode)
-
-  * [datanode](#datanode)
-
+    * [namenode](#namenode)
+    * [FSNamesystem](#FSNamesystem)
+    * [JournalNode](#JournalNode)
+    * [datanode](#datanode)
 * [yarn context](#yarn_context)
-
-  * [ClusterMetrics](#ClusterMetrics)
-
-  * [QueueMetrics](#QueueMetrics)
-
-  * [NodeManagerMetrics](#NodeManagerMetrics)
-
+    * [ClusterMetrics](#ClusterMetrics)
+    * [QueueMetrics](#QueueMetrics)
+    * [NodeManagerMetrics](#NodeManagerMetrics)
 * [ugi context](#ugi_context)
-
-  * [UgiMetrics](#UgiMetrics)
-
+    * [UgiMetrics](#UgiMetrics)
 * [metricssystem context](#metricssystem_context)
-
-  * [MetricsSystem](#MetricsSystem)
-
+    * [MetricsSystem](#MetricsSystem)
 * [default context](#default_context)
-
-  * [StartupProgress](#StartupProgress)
+    * [StartupProgress](#StartupProgress)
 
 Overview
 ========

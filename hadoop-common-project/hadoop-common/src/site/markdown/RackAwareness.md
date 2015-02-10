@@ -13,10 +13,8 @@
 -->
 
 * [Rack Awareness](#Rack_Awareness)
-
-  * [python Example](#python_Example)
-
-  * [bash Example](#bash_Example)
+    * [python Example](#python_Example)
+    * [bash Example](#bash_Example)
 
 Rack Awareness
 ==============

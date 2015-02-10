@@ -16,16 +16,11 @@ Proxy user - Superusers Acting On Behalf Of Other Users
 =======================================================
 
 * [Proxy user - Superusers Acting On Behalf Of Other Users](#Proxy_user_-_Superusers_Acting_On_Behalf_Of_Other_Users)
-
-  * [Introduction](#Introduction)
-
-  * [Use Case](#Use_Case)
-
-  * [Code example](#Code_example)
-
-  * [Configurations](#Configurations)
-
-  * [Caveats](#Caveats)
+    * [Introduction](#Introduction)
+    * [Use Case](#Use_Case)
+    * [Code example](#Code_example)
+    * [Configurations](#Configurations)
+    * [Caveats](#Caveats)
 
 Introduction
 ------------

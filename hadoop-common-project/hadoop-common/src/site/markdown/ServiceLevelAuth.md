@@ -16,24 +16,15 @@ Service Level Authorization Guide
 =================================
 
 * [Service Level Authorization Guide](#Service_Level_Authorization_Guide)
-
-  * [Purpose](#Purpose)
-
-  * [Prerequisites](#Prerequisites)
-
-  * [Overview](#Overview)
-
-  * [Configuration](#Configuration)
-
-      * [Enable Service Level Authorization](#Enable_Service_Level_Authorization)
-
-      * [Hadoop Services and Configuration Properties](#Hadoop_Services_and_Configuration_Properties)
-
-      * [Access Control Lists](#Access_Control_Lists)
-
-      * [Refreshing Service Level Authorization Configuration](#Refreshing_Service_Level_Authorization_Configuration)
-
-      * [Examples](#Examples)
+    * [Purpose](#Purpose)
+    * [Prerequisites](#Prerequisites)
+    * [Overview](#Overview)
+    * [Configuration](#Configuration)
+        * [Enable Service Level Authorization](#Enable_Service_Level_Authorization)
+        * [Hadoop Services and Configuration Properties](#Hadoop_Services_and_Configuration_Properties)
+        * [Access Control Lists](#Access_Control_Lists)
+        * [Refreshing Service Level Authorization Configuration](#Refreshing_Service_Level_Authorization_Configuration)
+        * [Examples](#Examples)
 
 Purpose
 -------
@@ -46,7 +37,6 @@ Prerequisites
 Make sure Hadoop is installed, configured and setup correctly. For more information see:
 
 * [Single Node Setup](./SingleCluster.html) for first-time users.
-
 * [Cluster Setup](./ClusterSetup.html) for large, distributed clusters.
 
 Overview

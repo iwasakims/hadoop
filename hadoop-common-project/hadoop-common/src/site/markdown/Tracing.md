@@ -16,23 +16,15 @@ Enabling Dapper-like Tracing in Hadoop
 ======================================
 
 * [Enabling Dapper-like Tracing in Hadoop](#Enabling_Dapper-like_Tracing_in_Hadoop)
-
-  * [Dapper-like Tracing in Hadoop](#Dapper-like_Tracing_in_Hadoop)
-
-      * [HTrace](#HTrace)
-
-      * [Samplers Configure the samplers in core-site.xml property: hadoop.htrace.sampler. The value can be NeverSampler, AlwaysSampler or ProbabilitySampler. NeverSampler: HTrace is OFF for all spans; AlwaysSampler: HTrace is ON for all spans; ProbabilitySampler: HTrace is ON for some percentage% of top-level spans.](#Samplers_Configure_the_samplers_in_core-site.xml_property:_hadoop.htrace.sampler._The_value_can_be_NeverSampler_AlwaysSampler_or_ProbabilitySampler._NeverSampler:_HTrace_is_OFF_for_all_spans_AlwaysSampler:_HTrace_is_ON_for_all_spans_ProbabilitySampler:_HTrace_is_ON_for_some_percentage_of_top-level_spans.)
-
-      * [SpanReceivers](#SpanReceivers)
-
-      * [Setting up ZipkinSpanReceiver](#Setting_up_ZipkinSpanReceiver)
-
-      * [Dynamic update of tracing configuration](#Dynamic_update_of_tracing_configuration)
-
-      * [Starting tracing spans by HTrace API](#Starting_tracing_spans_by_HTrace_API)
-
-      * [Sample code for tracing](#Sample_code_for_tracing)
-
+    * [Dapper-like Tracing in Hadoop](#Dapper-like_Tracing_in_Hadoop)
+        * [HTrace](#HTrace)
+        * [Samplers Configure the samplers in core-site.xml property: hadoop.htrace.sampler. The value can be NeverSampler, AlwaysSampler or ProbabilitySampler. NeverSampler: HTrace is OFF for all spans; AlwaysSampler: HTrace is ON for all spans; ProbabilitySampler: HTrace is ON for some percentage% of top-level spans.](#Samplers_Configure_the_samplers_in_core-site.xml_property:_hadoop.htrace.sampler._The_value_can_be_NeverSampler_AlwaysSampler_or_ProbabilitySampler._NeverSampler:_HTrace_is_OFF_for_all_spans_AlwaysSampler:_HTrace_is_ON_for_all_spans_ProbabilitySampler:_HTrace_is_ON_for_some_percentage_of_top-level_spans.)
+        * [SpanReceivers](#SpanReceivers)
+        * [Setting up ZipkinSpanReceiver](#Setting_up_ZipkinSpanReceiver)
+        * [Dynamic update of tracing configuration](#Dynamic_update_of_tracing_configuration)
+        * [Starting tracing spans by HTrace API](#Starting_tracing_spans_by_HTrace_API)
+        * [Sample code for tracing](#Sample_code_for_tracing)
+  
 Dapper-like Tracing in Hadoop
 -----------------------------
 

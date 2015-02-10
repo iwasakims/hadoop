@@ -16,26 +16,16 @@ Native Libraries Guide
 ======================
 
 * [Native Libraries Guide](#Native_Libraries_Guide)
-
-  * [Overview](#Overview)
-
-  * [Native Hadoop Library](#Native_Hadoop_Library)
-
-  * [Usage](#Usage)
-
-  * [Components](#Components)
-
-  * [Supported Platforms](#Supported_Platforms)
-
-  * [Download](#Download)
-
-  * [Build](#Build)
-
-  * [Runtime](#Runtime)
-
-  * [Check](#Check)
-
-  * [Native Shared Libraries](#Native_Shared_Libraries)
+    * [Overview](#Overview)
+    * [Native Hadoop Library](#Native_Hadoop_Library)
+    * [Usage](#Usage)
+    * [Components](#Components)
+    * [Supported Platforms](#Supported_Platforms)
+    * [Download](#Download)
+    * [Build](#Build)
+    * [Runtime](#Runtime)
+    * [Check](#Check)
+    * [Native Shared Libraries](#Native_Shared_Libraries)
 
 Overview
 --------
@@ -55,17 +45,11 @@ Usage
 It is fairly easy to use the native hadoop library:
 
 1.  Review the components.
-
 2.  Review the supported platforms.
-
 3.  Either download a hadoop release, which will include a pre-built version of the native hadoop library, or build your own version of the native hadoop library. Whether you download or build, the name for the library is the same: libhadoop.so
-
 4.  Install the compression codec development packages (\>zlib-1.2, \>gzip-1.2):
-
-  * If you download the library, install one or more development packages - whichever compression codecs you want to use with your deployment.
-
-  * If you build the library, it is mandatory to install both development packages.
-
+    * If you download the library, install one or more development packages - whichever compression codecs you want to use with your deployment.
+    * If you build the library, it is mandatory to install both development packages.
 5.  Check the runtime log files.
 
 Components
@@ -74,9 +58,7 @@ Components
 The native hadoop library includes various components:
 
 * Compression Codecs (bzip2, lz4, snappy, zlib)
-
 * Native IO utilities for [HDFS Short-Circuit Local Reads](../hadoop-hdfs/ShortCircuitLocalReads.html) and [Centralized Cache Management in HDFS](../hadoop-hdfs/CentralizedCacheManagement.html)
-
 * CRC32 checksum implementation
 
 Supported Platforms
@@ -87,9 +69,7 @@ The native hadoop library is supported on \*nix platforms only. The library does
 The native hadoop library is mainly used on the GNU/Linus platform and has been tested on these distributions:
 
 * RHEL4/Fedora
-
 * Ubuntu
-
 * Gentoo
 
 On all the above distributions a 32/64 bit native hadoop library will work with a respective 32/64 bit jvm.
@@ -109,11 +89,8 @@ The native hadoop library is written in ANSI C and is built using the GNU autoto
 The packages you need to install on the target platform are:
 
 * C compiler (e.g. GNU C Compiler)
-
 * GNU Autools Chain: autoconf, automake, libtool
-
 * zlib-development package (stable version \>= 1.2.0)
-
 * openssl-development package(e.g. libssl-dev)
 
 Once you installed the prerequisite packages use the standard hadoop pom.xml file and pass along the native flag to build the native hadoop library:
@@ -127,7 +104,6 @@ You should see the newly-built library in:
 Please note the following:
 
 * It is mandatory to install both the zlib and gzip development packages on the target platform in order to build the native hadoop library; however, for deployment it is sufficient to install just one package if you wish to use only one codec.
-
 * It is necessary to have the correct 32/64 libraries for zlib, depending on the 32/64 bit jvm for the target platform, in order to build and deploy the native hadoop library.
 
 Runtime
@@ -138,7 +114,6 @@ The bin/hadoop script ensures that the native hadoop library is on the library p
 During runtime, check the hadoop log files for your MapReduce tasks.
 
 * If everything is all right, then: `DEBUG util.NativeCodeLoader - Trying to load the custom-built native-hadoop library...` `INFO util.NativeCodeLoader - Loaded the native-hadoop library`
-
 * If something goes wrong, then: `INFO util.NativeCodeLoader - Unable to load native-hadoop library for your platform... using builtin-java classes where applicable`
 
 Check
@@ -164,9 +139,7 @@ You can load any native shared library using DistributedCache for distributing a
 This example shows you how to distribute a shared library, mylib.so, and load it from a MapReduce task.
 
 1.  First copy the library to the HDFS: `bin/hadoop fs -copyFromLocal mylib.so.1 /libraries/mylib.so.1`
-
 2.  The job launching program should contain the following: `DistributedCache.createSymlink(conf);` `DistributedCache.addCacheFile("hdfs://host:port/libraries/mylib.so. 1#mylib.so", conf);`
-
 3.  The MapReduce task can contain: `System.loadLibrary("mylib.so");`
 
 Note: If you downloaded or built the native hadoop library, you don’t need to use DistibutedCache to make the library available to your MapReduce tasks.
