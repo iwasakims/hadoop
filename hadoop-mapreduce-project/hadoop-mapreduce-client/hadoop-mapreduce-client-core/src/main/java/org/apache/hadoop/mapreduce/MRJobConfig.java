@@ -243,7 +243,7 @@ public interface MRJobConfig {
   public static final String MAP_INPUT_START = "mapreduce.map.input.start";
 
   public static final String MAP_MEMORY_MB = "mapreduce.map.memory.mb";
-  public static final int DEFAULT_MAP_MEMORY_MB = -1;
+  public static final int DEFAULT_MAP_MEMORY_MB = 1024;
 
   public static final String MAP_CPU_VCORES = "mapreduce.map.cpu.vcores";
   public static final int DEFAULT_MAP_CPU_VCORES = 1;
@@ -291,7 +291,7 @@ public interface MRJobConfig {
   public static final String REDUCE_MARKRESET_BUFFER_SIZE = "mapreduce.reduce.markreset.buffer.size";
 
   public static final String REDUCE_MEMORY_MB = "mapreduce.reduce.memory.mb";
-  public static final int DEFAULT_REDUCE_MEMORY_MB = -1;
+  public static final int DEFAULT_REDUCE_MEMORY_MB = 1024;
 
   public static final String REDUCE_CPU_VCORES = "mapreduce.reduce.cpu.vcores";
   public static final int DEFAULT_REDUCE_CPU_VCORES = 1;
