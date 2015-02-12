@@ -51,9 +51,10 @@ Components layout
 
 This piece of the FI framework allows you to set expectations for faults to happen. The settings can be applied either statically (in advance) or in runtime. The desired level of faults in the framework can be configured two ways:
 
-* editing src/aop/fi-site.xml configuration file. This file is similar to other Hadoop's config files
-
-* setting system properties of JVM through VM startup parameters or in build.properties file
+* editing src/aop/fi-site.xml configuration file. This file is
+  similar to other Hadoop's config files
+* setting system properties of JVM through VM startup parameters or
+  in build.properties file
 
 ### Probability Model
 
@@ -67,38 +68,28 @@ Note: The default probability level is set to 0 (zero) unless the level is chang
 
 The foundation of Hadoop's FI framework includes a cross-cutting concept implemented by AspectJ. The following basic terms are important to remember:
 
-* A cross-cutting concept (aspect) is behavior, and often data, that is used across the scope of a piece of software
-
-* In AOP, the aspects provide a mechanism by which a cross-cutting concern can be specified in a modular way
-
+* A cross-cutting concept (aspect) is behavior, and often data, that
+  is used across the scope of a piece of software
+* In AOP, the aspects provide a mechanism by which a cross-cutting concern
+  can be specified in a modular way
 * Advice is the code that is executed when an aspect is invoked
-
-* Join point (or pointcut) is a specific point within the application that may or not invoke some advice
+* Join point (or pointcut) is a specific point within the application
+  that may or not invoke some advice
 
 ### Existing Join Points
 
 The following readily available join points are provided by AspectJ:
 
 * Join when a method is called
-
 * Join during a method's execution
-
 * Join when a constructor is invoked
-
 * Join during a constructor's execution
-
 * Join during aspect advice execution
-
 * Join before an object is initialized
-
 * Join during object initialization
-
 * Join during static initializer execution
-
 * Join when a class's field is referenced
-
 * Join when a class's field is assigned
-
 * Join when a handler is executed
 
 Aspect Example
@@ -144,9 +135,12 @@ public aspect BlockReceiverAspects {
 
 The aspect has two main parts:
 
-* The join point pointcut callReceivepacket() which servers as an identification mark of a specific point (in control and/or data flow) in the life of an application.
-
-* A call to the advice - before () throws IOException : callReceivepacket() - will be injected (see Putting It All Together) before that specific spot of the application's code.
+* The join point pointcut callReceivepacket() which servers as an
+  identification mark of a specific point (in control and/or data
+  flow) in the life of an application.
+* A call to the advice - before () throws IOException :
+  callReceivepacket() - will be injected (see Putting It All
+  Together) before that specific spot of the application's code.
 
 The pointcut identifies an invocation of class' java.io.OutputStream write() method with any number of parameters and any return type. This invoke should take place within the body of method receivepacket() from classBlockReceiver. The method can have any parameters and any return type. Possible invocations of write() method happening anywhere within the aspect BlockReceiverAspects or its heirs will be ignored.
 
@@ -159,15 +153,16 @@ Fault Naming Convention and Namespaces
 
 For the sake of a unified naming convention the following two types of names are recommended for a new aspects development:
 
-* Activity specific notation (when we don't care about a particular location of a fault's happening). In this case the name of the fault is rather abstract: fi.hdfs.DiskError
-
-* Location specific notation. Here, the fault's name is mnemonic as in: fi.hdfs.datanode.BlockReceiver[optional location details]
+* Activity specific notation (when we don't care about a particular
+  location of a fault's happening). In this case the name of the
+  fault is rather abstract: fi.hdfs.DiskError
+* Location specific notation. Here, the fault's name is mnemonic as
+  in: fi.hdfs.datanode.BlockReceiver[optional location details]
 
 Development Tools
 -----------------
 
 * The Eclipse AspectJ Development Toolkit may help you when developing aspects
-
 * IntelliJ IDEA provides AspectJ weaver and Spring-AOP plugins
 
 Putting It All Together
@@ -254,7 +249,6 @@ Additional Information and Contacts
 These two sources of information are particularly interesting and worth reading:
 
 * <http://www.eclipse.org/aspectj/doc/next/devguide/>
-
 * AspectJ Cookbook (ISBN-13: 978-0-596-00654-9)
 
 If you have additional comments or questions for the author check [HDFS-435](https://issues.apache.org/jira/browse/HDFS-435).
