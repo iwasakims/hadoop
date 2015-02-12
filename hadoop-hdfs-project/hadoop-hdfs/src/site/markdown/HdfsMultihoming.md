@@ -29,11 +29,21 @@ Multihoming Background
 
 In multihomed networks the cluster nodes are connected to more than one network interface. There could be multiple reasons for doing so.
 
-1.  **Security**: Security requirements may dictate that intra-cluster traffic be confined to a different network than the network used to transfer data in and out of the cluster.
+1.  **Security**: Security requirements may dictate that intra-cluster
+    traffic be confined to a different network than the network used to
+    transfer data in and out of the cluster.
 
-2.  **Performance**: Intra-cluster traffic may use one or more high bandwidth interconnects like Fiber Channel, Infiniband or 10GbE.
+2.  **Performance**: Intra-cluster traffic may use one or more high bandwidth
+    interconnects like Fiber Channel, Infiniband or 10GbE.
 
-3.  **Failover/Redundancy**: The nodes may have multiple network adapters connected to a single network to handle network adapter failure.Note that NIC Bonding (also known as NIC Teaming or Link Aggregation) is a related but separate topic. The following settings are usually not applicable to a NIC bonding configuration which handles multiplexing and failover transparently while presenting a single 'logical network' to applications.
+3.  **Failover/Redundancy**: The nodes may have multiple network adapters
+    connected to a single network to handle network adapter failure.
+
+Note that NIC Bonding (also known as NIC Teaming or Link
+Aggregation) is a related but separate topic. The following settings
+are usually not applicable to a NIC bonding configuration which handles
+multiplexing and failover transparently while presenting a single 'logical
+network' to applications.
 
 Fixing Hadoop Issues In Multihomed Environments
 -----------------------------------------------
