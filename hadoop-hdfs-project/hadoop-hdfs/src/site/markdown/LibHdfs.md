@@ -16,18 +16,12 @@ C API libhdfs
 =============
 
 * [C API libhdfs](#C_API_libhdfs)
-
-  * [Overview](#Overview)
-
-  * [The APIs](#The_APIs)
-
-  * [A Sample Program](#A_Sample_Program)
-
-  * [How To Link With The Library](#How_To_Link_With_The_Library)
-
-  * [Common Problems](#Common_Problems)
-
-  * [Thread Safe](#Thread_Safe)
+    * [Overview](#Overview)
+    * [The APIs](#The_APIs)
+    * [A Sample Program](#A_Sample_Program)
+    * [How To Link With The Library](#How_To_Link_With_The_Library)
+    * [Common Problems](#Common_Problems)
+    * [Thread Safe](#Thread_Safe)
 
 Overview
 --------

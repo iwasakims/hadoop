@@ -16,16 +16,11 @@ HDFS Quotas Guide
 =================
 
 * [HDFS Quotas Guide](#HDFS_Quotas_Guide)
-
-  * [Overview](#Overview)
-
-  * [Name Quotas](#Name_Quotas)
-
-  * [Space Quotas](#Space_Quotas)
-
-  * [Administrative Commands](#Administrative_Commands)
-
-  * [Reporting Command](#Reporting_Command)
+    * [Overview](#Overview)
+    * [Name Quotas](#Name_Quotas)
+    * [Space Quotas](#Space_Quotas)
+    * [Administrative Commands](#Administrative_Commands)
+    * [Reporting Command](#Reporting_Command)
 
 Overview
 --------

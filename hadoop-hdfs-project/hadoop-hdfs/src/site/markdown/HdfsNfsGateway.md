@@ -16,20 +16,13 @@ HDFS NFS Gateway
 ================
 
 * [HDFS NFS Gateway](#HDFS_NFS_Gateway)
-
-  * [Overview](#Overview)
-
-  * [Configuration](#Configuration)
-
-  * [Start and stop NFS gateway service](#Start_and_stop_NFS_gateway_service)
-
-  * [Verify validity of NFS related services](#Verify_validity_of_NFS_related_services)
-
-  * [Mount the export "/"](#Mount_the_export_)
-
-  * [Allow mounts from unprivileged clients](#Allow_mounts_from_unprivileged_clients)
-
-  * [User authentication and mapping](#User_authentication_and_mapping)
+    * [Overview](#Overview)
+    * [Configuration](#Configuration)
+    * [Start and stop NFS gateway service](#Start_and_stop_NFS_gateway_service)
+    * [Verify validity of NFS related services](#Verify_validity_of_NFS_related_services)
+    * [Mount the export "/"](#Mount_the_export_)
+    * [Allow mounts from unprivileged clients](#Allow_mounts_from_unprivileged_clients)
+    * [User authentication and mapping](#User_authentication_and_mapping)
 
 Overview
 --------

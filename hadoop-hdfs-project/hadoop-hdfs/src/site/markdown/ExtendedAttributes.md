@@ -16,17 +16,11 @@ Extended Attributes in HDFS
 ===========================
 
 * [Overview](#Overview)
-
-  * [HDFS extended attributes](#HDFS_extended_attributes)
-
-  * [Namespaces and Permissions](#Namespaces_and_Permissions)
-
+    * [HDFS extended attributes](#HDFS_extended_attributes)
+    * [Namespaces and Permissions](#Namespaces_and_Permissions)
 * [Interacting with extended attributes](#Interacting_with_extended_attributes)
-
-  * [getfattr](#getfattr)
-
-  * [setfattr](#setfattr)
-
+    * [getfattr](#getfattr)
+    * [setfattr](#setfattr)
 * [Configuration options](#Configuration_options)
 
 Overview

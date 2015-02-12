@@ -16,70 +16,38 @@ HDFS Commands Guide
 ===================
 
 * [Overview](#Overview)
-
 * [User Commands](#User_Commands)
-
-  * [classpath](#classpath)
-
-  * [dfs](#dfs)
-
-  * [fetchdt](#fetchdt)
-
-  * [fsck](#fsck)
-
-  * [getconf](#getconf)
-
-  * [groups](#groups)
-
-  * [lsSnapshottableDir](#lsSnapshottableDir)
-
-  * [jmxget](#jmxget)
-
-  * [oev](#oev)
-
-  * [oiv](#oiv)
-
-  * [oiv\_legacy](#oiv_legacy)
-
-  * [snapshotDiff](#snapshotDiff)
-
-  * [version](#version)
-
+    * [classpath](#classpath)
+    * [dfs](#dfs)
+    * [fetchdt](#fetchdt)
+    * [fsck](#fsck)
+    * [getconf](#getconf)
+    * [groups](#groups)
+    * [lsSnapshottableDir](#lsSnapshottableDir)
+    * [jmxget](#jmxget)
+    * [oev](#oev)
+    * [oiv](#oiv)
+    * [oiv\_legacy](#oiv_legacy)
+    * [snapshotDiff](#snapshotDiff)
+    * [version](#version)
 * [Administration Commands](#Administration_Commands)
-
-  * [balancer](#balancer)
-
-  * [cacheadmin](#cacheadmin)
-
-  * [crypto](#crypto)
-
-  * [datanode](#datanode)
-
-  * [dfsadmin](#dfsadmin)
-
-  * [haadmin](#haadmin)
-
-  * [journalnode](#journalnode)
-
-  * [mover](#mover)
-
-  * [namenode](#namenode)
-
-  * [nfs3](#nfs3)
-
-  * [portmap](#portmap)
-
-  * [secondarynamenode](#secondarynamenode)
-
-  * [storagepolicies](#storagepolicies)
-
-  * [zkfc](#zkfc)
-
+    * [balancer](#balancer)
+    * [cacheadmin](#cacheadmin)
+    * [crypto](#crypto)
+    * [datanode](#datanode)
+    * [dfsadmin](#dfsadmin)
+    * [haadmin](#haadmin)
+    * [journalnode](#journalnode)
+    * [mover](#mover)
+    * [namenode](#namenode)
+    * [nfs3](#nfs3)
+    * [portmap](#portmap)
+    * [secondarynamenode](#secondarynamenode)
+    * [storagepolicies](#storagepolicies)
+    * [zkfc](#zkfc)
 * [Debug Commands](#Debug_Commands)
-
-  * [verify](#verify)
-
-  * [recoverLease](#recoverLease)
+    * [verify](#verify)
+    * [recoverLease](#recoverLease)
 
 Overview
 --------

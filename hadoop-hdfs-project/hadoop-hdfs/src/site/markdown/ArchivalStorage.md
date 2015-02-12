@@ -16,28 +16,17 @@ Archival Storage, SSD & Memory
 ==============================
 
 * [Archival Storage, SSD & Memory](#Archival_Storage_SSD__Memory)
-
-  * [Introduction](#Introduction)
-
-  * [Storage Types and Storage Policies](#Storage_Types_and_Storage_Policies)
-
-      * [Storage Types: ARCHIVE, DISK, SSD and RAM\_DISK](#Storage_Types:_ARCHIVE_DISK_SSD_and_RAM_DISK)
-
-      * [Storage Policies: Hot, Warm, Cold, All\_SSD, One\_SSD and Lazy\_Persist](#Storage_Policies:_Hot_Warm_Cold_All_SSD_One_SSD_and_Lazy_Persist)
-
-      * [Storage Policy Resolution](#Storage_Policy_Resolution)
-
-      * [Configuration](#Configuration)
-
-  * [Mover - A New Data Migration Tool](#Mover_-_A_New_Data_Migration_Tool)
-
-  * [Storage Policy Commands](#Storage_Policy_Commands)
-
-      * [List Storage Policies](#List_Storage_Policies)
-
-      * [Set Storage Policy](#Set_Storage_Policy)
-
-      * [Get Storage Policy](#Get_Storage_Policy)
+    * [Introduction](#Introduction)
+    * [Storage Types and Storage Policies](#Storage_Types_and_Storage_Policies)
+        * [Storage Types: ARCHIVE, DISK, SSD and RAM\_DISK](#Storage_Types:_ARCHIVE_DISK_SSD_and_RAM_DISK)
+        * [Storage Policies: Hot, Warm, Cold, All\_SSD, One\_SSD and Lazy\_Persist](#Storage_Policies:_Hot_Warm_Cold_All_SSD_One_SSD_and_Lazy_Persist)
+        * [Storage Policy Resolution](#Storage_Policy_Resolution)
+        * [Configuration](#Configuration)
+    * [Mover - A New Data Migration Tool](#Mover_-_A_New_Data_Migration_Tool)
+    * [Storage Policy Commands](#Storage_Policy_Commands)
+        * [List Storage Policies](#List_Storage_Policies)
+        * [Set Storage Policy](#Set_Storage_Policy)
+        * [Get Storage Policy](#Get_Storage_Policy)
 
 Introduction
 ------------
@@ -64,27 +53,18 @@ A new concept of storage policies is introduced in order to allow files to be st
 We have the following storage policies:
 
 * **Hot** - for both storage and compute. The data that is popular and still being used for processing will stay in this policy. When a block is hot, all replicas are stored in DISK.
-
 * **Cold** - only for storage with limited compute. The data that is no longer being used, or data that needs to be archived is moved from hot storage to cold storage. When a block is cold, all replicas are stored in ARCHIVE.
-
 * **Warm** - partially hot and partially cold. When a block is warm, some of its replicas are stored in DISK and the remaining replicas are stored in ARCHIVE.
-
 * **All\_SSD** - for storing all replicas in SSD.
-
 * **One\_SSD** - for storing one of the replicas in SSD. The remaining replicas are stored in DISK.
-
 * **Lazy\_Persist** - for writing blocks with single replica in memory. The replica is first written in RAM\_DISK and then it is lazily persisted in DISK.
 
 More formally, a storage policy consists of the following fields:
 
 1.  Policy ID
-
 2.  Policy name
-
 3.  A list of storage types for block placement
-
 4.  A list of fallback storage types for file creation
-
 5.  A list of fallback storage types for replication
 
 When there is enough space, block replicas are stored according to the storage type list specified in \#3. When some of the storage types in list \#3 are running out of space, the fallback storage type lists specified in \#4 and \#5 are used to replace the out-of-space storage types for file creation and replication, respectively.
@@ -104,13 +84,13 @@ Note that the Lasy\_Persist policy is useful only for single replica blocks. For
 
 ### Storage Policy Resolution
 
-When a file or directory is created, its storage policy is *unspecified*. The storage policy can be specified using the "`dfsadmin -setStoragePolicy`" command. The effective storage policy of a file or directory is resolved by the following rules.
+When a file or directory is created, its storage policy is *unspecified*. The storage policy can be specified using the "[`dfsadmin -setStoragePolicy`](#Set_Storage_Policy)" command. The effective storage policy of a file or directory is resolved by the following rules.
 
 1.  If the file or directory is specificed with a storage policy, return it.
 
 2.  For an unspecified file or directory, if it is the root directory, return the *default storage policy*. Otherwise, return its parent's effective storage policy.
 
-The effective storage policy can be retrieved by the "`dfsadmin -getStoragePolicy`" command.
+The effective storage policy can be retrieved by the "[`dfsadmin -getStoragePolicy`](#Get_Storage_Policy)" command.
 
 ### Configuration
 
@@ -127,11 +107,12 @@ A new data migration tool is added for archiving data. The tool is similar to Ba
 
 * Arguments:
 
-| `-p <files/dirs>` | Specify a space separated list of HDFS files/dirs to migrate. |
+| | |
 |:---- |:---- |
+| `-p <files/dirs>` | Specify a space separated list of HDFS files/dirs to migrate. |
 | `-f <local file>` | Specify a local file containing a list of HDFS files/dirs to migrate. |
 
-    Note that, when both -p and -f options are omitted, the default path is the root directory.
+Note that, when both -p and -f options are omitted, the default path is the root directory.
 
 Storage Policy Commands
 -----------------------
@@ -156,8 +137,9 @@ Set a storage policy to a file or a directory.
 
 * Arguments:
 
-| `-path <path>` | The path referring to either a directory or a file. |
+| | |
 |:---- |:---- |
+| `-path <path>` | The path referring to either a directory or a file. |
 | `-policy <policy>` | The name of the storage policy. |
 
 ### Get Storage Policy
@@ -170,7 +152,9 @@ Get the storage policy of a file or a directory.
 
 * Arguments:
 
-| `-path <path>` | The path referring to either a directory or a file. |
+| | |
 |:---- |:---- |
+| `-path <path>` | The path referring to either a directory or a file. |
+
 
 

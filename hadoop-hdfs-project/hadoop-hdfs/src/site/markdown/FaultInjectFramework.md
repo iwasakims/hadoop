@@ -16,32 +16,19 @@ Fault Injection Framework and Development Guide
 ===============================================
 
 * [Fault Injection Framework and Development Guide](#Fault_Injection_Framework_and_Development_Guide)
-
-  * [Introduction](#Introduction)
-
-  * [Assumptions](#Assumptions)
-
-  * [Architecture of the Fault Injection Framework](#Architecture_of_the_Fault_Injection_Framework)
-
-      * [Configuration Management](#Configuration_Management)
-
-      * [Probability Model](#Probability_Model)
-
-      * [Fault Injection Mechanism: AOP and AspectJ](#Fault_Injection_Mechanism:_AOP_and_AspectJ)
-
-      * [Existing Join Points](#Existing_Join_Points)
-
-  * [Aspect Example](#Aspect_Example)
-
-  * [Fault Naming Convention and Namespaces](#Fault_Naming_Convention_and_Namespaces)
-
-  * [Development Tools](#Development_Tools)
-
-  * [Putting It All Together](#Putting_It_All_Together)
-
-      * [How to Use the Fault Injection Framework](#How_to_Use_the_Fault_Injection_Framework)
-
-  * [Additional Information and Contacts](#Additional_Information_and_Contacts)
+    * [Introduction](#Introduction)
+    * [Assumptions](#Assumptions)
+    * [Architecture of the Fault Injection Framework](#Architecture_of_the_Fault_Injection_Framework)
+        * [Configuration Management](#Configuration_Management)
+        * [Probability Model](#Probability_Model)
+        * [Fault Injection Mechanism: AOP and AspectJ](#Fault_Injection_Mechanism:_AOP_and_AspectJ)
+        * [Existing Join Points](#Existing_Join_Points)
+    * [Aspect Example](#Aspect_Example)
+    * [Fault Naming Convention and Namespaces](#Fault_Naming_Convention_and_Namespaces)
+    * [Development Tools](#Development_Tools)
+    * [Putting It All Together](#Putting_It_All_Together)
+        * [How to Use the Fault Injection Framework](#How_to_Use_the_Fault_Injection_Framework)
+    * [Additional Information and Contacts](#Additional_Information_and_Contacts)
 
 Introduction
 ------------
