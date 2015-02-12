@@ -33,11 +33,27 @@ The Offline Image Viewer is a tool to dump the contents of hdfs fsimage files to
 
 The Offline Image Viewer provides several output processors:
 
-1.  Web is the default output processor. It launches a HTTP server that exposes read-only WebHDFS API. Users can investigate the namespace interactively by using HTTP REST API.
+1.  Web is the default output processor. It launches a HTTP server
+    that exposes read-only WebHDFS API. Users can investigate the namespace
+    interactively by using HTTP REST API.
 
-2.  XML creates an XML document of the fsimage and includes all of the information within the fsimage, similar to the lsr processor. The output of this processor is amenable to automated processing and analysis with XML tools. Due to the verbosity of the XML syntax, this processor will also generate the largest amount of output.
+2.  XML creates an XML document of the fsimage and includes all of the
+    information within the fsimage, similar to the lsr processor. The
+    output of this processor is amenable to automated processing and
+    analysis with XML tools. Due to the verbosity of the XML syntax,
+    this processor will also generate the largest amount of output.
 
-3.  FileDistribution is the tool for analyzing file sizes in the namespace image. In order to run the tool one should define a range of integers [0, maxSize] by specifying maxSize and a step. The range of integers is divided into segments of size step: [0, s[1], ..., s[n-1], maxSize], and the processor calculates how many files in the system fall into each segment [s[i-1], s[i]). Note that files larger than maxSize always fall into the very last segment. The output file is formatted as a tab separated two column table: Size and NumFiles. Where Size represents the start of the segment, and numFiles is the number of files form the image which size falls in this segment.
+3.  FileDistribution is the tool for analyzing file sizes in the
+    namespace image. In order to run the tool one should define a range
+    of integers [0, maxSize] by specifying maxSize and a step. The
+    range of integers is divided into segments of size step: [0, s[1],
+    ..., s[n-1], maxSize], and the processor calculates how many files
+    in the system fall into each segment [s[i-1], s[i]). Note that
+    files larger than maxSize always fall into the very last segment.
+    The output file is formatted as a tab separated two column table:
+    Size and NumFiles. Where Size represents the start of the segment,
+    and numFiles is the number of files form the image which size falls
+    in this segment.
 
 Usage
 -----
@@ -75,9 +91,7 @@ Users can also get JSON formatted FileStatuses via HTTP REST API.
 The Web processor now supports the following operations:
 
 * [LISTSTATUS](./WebHDFS.html#List_a_Directory)
-
 * [GETFILESTATUS](./WebHDFS.html#Status_of_a_FileDirectory)
-
 * [GETACLSTATUS](./WebHDFS.html#Get_ACL_Status)
 
 ### XML Processor
@@ -115,15 +129,15 @@ Applying the Offline Image Viewer with XML processor would result in the followi
 Options
 -------
 
-|                           **Flag** | **Description** |
+| **Flag** | **Description** |
 |:---- |:---- |
-|    `-i` |`--inputFile` *input file* | Specify the input fsimage file to process. Required. |
-|  `-o` |`--outputFile` *output file* | Specify the output filename, if the specified output processor generates one. If the specified file already exists, it is silently overwritten. (output to stdout by default) |
-|     `-p` |`--processor` *processor* | Specify the image processor to apply against the image file. Currently valid options are Web (default), XML and FileDistribution. |
-|                  `-addr` *address* | Specify the address(host:port) to listen. (localhost:5978 by default). This option is used with Web processor. |
-|                  `-maxSize` *size* | Specify the range [0, maxSize] of file sizes to be analyzed in bytes (128GB by default). This option is used with FileDistribution processor. |
-|                     `-step` *size* | Specify the granularity of the distribution in bytes (2MB by default). This option is used with FileDistribution processor. |
-|                      `-h` |`--help` | Display the tool usage and help information and exit. |
+| `-i`\|`--inputFile` *input file* | Specify the input fsimage file to process. Required. |
+| `-o`\|`--outputFile` *output file* | Specify the output filename, if the specified output processor generates one. If the specified file already exists, it is silently overwritten. (output to stdout by default)\|
+| `-p`\|`--processor` *processor* | Specify the image processor to apply against the image file. Currently valid options are Web (default), XML and FileDistribution. |
+| `-addr` *address* | Specify the address(host:port) to listen. (localhost:5978 by default). This option is used with Web processor. |
+| `-maxSize` *size* | Specify the range [0, maxSize] of file sizes to be analyzed in bytes (128GB by default). This option is used with FileDistribution processor. |
+| `-step` *size* | Specify the granularity of the distribution in bytes (2MB by default). This option is used with FileDistribution processor. |
+| `-h`\|`--help` | Display the tool usage and help information and exit. |
 
 Analyzing Results
 -----------------
@@ -137,22 +151,22 @@ Due to the internal layout changes introduced by the ProtocolBuffer-based fsimag
 
 ### Usage
 
-1. Set `dfs.namenode.legacy-oiv-image.dir` to an appropriate directory to make standby NameNode or SecondaryNameNode save its namespace in the old fsimage format during checkpointing.
+1. Set `dfs.namenode.legacy-oiv-image.dir` to an appropriate directory
+   to make standby NameNode or SecondaryNameNode save its namespace in the
+   old fsimage format during checkpointing.
 
 2. Use `oiv_legacy` command to the old format fsimage.
 
-       bash$ bin/hdfs oiv_legacy -i fsimage_old -o output
+        bash$ bin/hdfs oiv_legacy -i fsimage_old -o output
 
 ### Options
 
-|                           **Flag** | **Description** |
+| **Flag** | **Description** |
 |:---- |:---- |
-|    `-i` |`--inputFile` *input file* | Specify the input fsimage file to process. Required. |
-|  `-o` |`--outputFile` *output file* | Specify the output filename, if the specified output processor generates one. If the specified file already exists, it is silently overwritten. Required. |
-|     `-p` |`--processor` *processor* | Specify the image processor to apply against the image file. Valid options are Ls (default), XML, Delimited, Indented, and FileDistribution. |
-|                      `-skipBlocks` | Do not enumerate individual blocks within files. This may save processing time and outfile file space on namespaces with very large files. The Ls processor reads the blocks to correctly determine file sizes and ignores this option. |
-|                   `-printToScreen` | Pipe output of processor to console as well as specified file. On extremely large namespaces, this may increase processing time by an order of magnitude. |
-|                 `-delimiter` *arg* | When used in conjunction with the Delimited processor, replaces the default tab delimiter with the string specified by *arg*. |
-|                      `-h` |`--help` | Display the tool usage and help information and exit. |
-
-
+| `-i`\|`--inputFile` *input file* | Specify the input fsimage file to process. Required. |
+| `-o`\|`--outputFile` *output file* | Specify the output filename, if the specified output processor generates one. If the specified file already exists, it is silently overwritten. Required. |
+| `-p`\|`--processor` *processor* | Specify the image processor to apply against the image file. Valid options are Ls (default), XML, Delimited, Indented, and FileDistribution. |
+| `-skipBlocks` | Do not enumerate individual blocks within files. This may save processing time and outfile file space on namespaces with very large files. The Ls processor reads the blocks to correctly determine file sizes and ignores this option. |
+| `-printToScreen` | Pipe output of processor to console as well as specified file. On extremely large namespaces, this may increase processing time by an order of magnitude. |
+| `-delimiter` *arg* | When used in conjunction with the Delimited processor, replaces the default tab delimiter with the string specified by *arg*. |
+| `-h`\|`--help` | Display the tool usage and help information and exit. |
