@@ -16,212 +16,110 @@ WebHDFS REST API
 ================
 
 * [WebHDFS REST API](#WebHDFS_REST_API)
-
-  * [Document Conventions](#Document_Conventions)
-
-  * [Introduction](#Introduction)
-
-      * [Operations](#Operations)
-
-      * [FileSystem URIs vs HTTP URLs](#FileSystem_URIs_vs_HTTP_URLs)
-
-      * [HDFS Configuration Options](#HDFS_Configuration_Options)
-
-  * [Authentication](#Authentication)
-
-  * [Proxy Users](#Proxy_Users)
-
-  * [File and Directory Operations](#File_and_Directory_Operations)
-
-      * [Create and Write to a File](#Create_and_Write_to_a_File)
-
-      * [Append to a File](#Append_to_a_File)
-
-      * [Concat File(s)](#Concat_Files)
-
-      * [Open and Read a File](#Open_and_Read_a_File)
-
-      * [Make a Directory](#Make_a_Directory)
-
-      * [Create a Symbolic Link](#Create_a_Symbolic_Link)
-
-      * [Rename a File/Directory](#Rename_a_FileDirectory)
-
-      * [Delete a File/Directory](#Delete_a_FileDirectory)
-
-      * [Status of a File/Directory](#Status_of_a_FileDirectory)
-
-      * [List a Directory](#List_a_Directory)
-
-  * [Other File System Operations](#Other_File_System_Operations)
-
-      * [Get Content Summary of a Directory](#Get_Content_Summary_of_a_Directory)
-
-      * [Get File Checksum](#Get_File_Checksum)
-
-      * [Get Home Directory](#Get_Home_Directory)
-
-      * [Set Permission](#Set_Permission)
-
-      * [Set Owner](#Set_Owner)
-
-      * [Set Replication Factor](#Set_Replication_Factor)
-
-      * [Set Access or Modification Time](#Set_Access_or_Modification_Time)
-
-      * [Modify ACL Entries](#Modify_ACL_Entries)
-
-      * [Remove ACL Entries](#Remove_ACL_Entries)
-
-      * [Remove Default ACL](#Remove_Default_ACL)
-
-      * [Remove ACL](#Remove_ACL)
-
-      * [Set ACL](#Set_ACL)
-
-      * [Get ACL Status](#Get_ACL_Status)
-
-      * [Check access](#Check_access)
-
-  * [Extended Attributes(XAttrs) Operations](#Extended_AttributesXAttrs_Operations)
-
-      * [Set XAttr](#Set_XAttr)
-
-      * [Remove XAttr](#Remove_XAttr)
-
-      * [Get an XAttr](#Get_an_XAttr)
-
-      * [Get multiple XAttrs](#Get_multiple_XAttrs)
-
-      * [Get all XAttrs](#Get_all_XAttrs)
-
-      * [List all XAttrs](#List_all_XAttrs)
-
-  * [Snapshot Operations](#Snapshot_Operations)
-
-      * [Create Snapshot](#Create_Snapshot)
-
-      * [Delete Snapshot](#Delete_Snapshot)
-
-      * [Rename Snapshot](#Rename_Snapshot)
-
-  * [Delegation Token Operations](#Delegation_Token_Operations)
-
-      * [Get Delegation Token](#Get_Delegation_Token)
-
-      * [Get Delegation Tokens](#Get_Delegation_Tokens)
-
-      * [Renew Delegation Token](#Renew_Delegation_Token)
-
-      * [Cancel Delegation Token](#Cancel_Delegation_Token)
-
-  * [Error Responses](#Error_Responses)
-
-      * [HTTP Response Codes](#HTTP_Response_Codes)
-
-          * [Illegal Argument Exception](#Illegal_Argument_Exception)
-
-          * [Security Exception](#Security_Exception)
-
-          * [Access Control Exception](#Access_Control_Exception)
-
-          * [File Not Found Exception](#File_Not_Found_Exception)
-
-  * [JSON Schemas](#JSON_Schemas)
-
-      * [ACL Status JSON Schema](#ACL_Status_JSON_Schema)
-
-      * [XAttrs JSON Schema](#XAttrs_JSON_Schema)
-
-      * [XAttrNames JSON Schema](#XAttrNames_JSON_Schema)
-
-      * [Boolean JSON Schema](#Boolean_JSON_Schema)
-
-      * [ContentSummary JSON Schema](#ContentSummary_JSON_Schema)
-
-      * [FileChecksum JSON Schema](#FileChecksum_JSON_Schema)
-
-      * [FileStatus JSON Schema](#FileStatus_JSON_Schema)
-
-          * [FileStatus Properties](#FileStatus_Properties)
-
-      * [FileStatuses JSON Schema](#FileStatuses_JSON_Schema)
-
-      * [Long JSON Schema](#Long_JSON_Schema)
-
-      * [Path JSON Schema](#Path_JSON_Schema)
-
-      * [RemoteException JSON Schema](#RemoteException_JSON_Schema)
-
-      * [Token JSON Schema](#Token_JSON_Schema)
-
-          * [Token Properties](#Token_Properties)
-
-      * [Tokens JSON Schema](#Tokens_JSON_Schema)
-
-  * [HTTP Query Parameter Dictionary](#HTTP_Query_Parameter_Dictionary)
-
-      * [ACL Spec](#ACL_Spec)
-
-      * [XAttr Name](#XAttr_Name)
-
-      * [XAttr Value](#XAttr_Value)
-
-      * [XAttr set flag](#XAttr_set_flag)
-
-      * [XAttr value encoding](#XAttr_value_encoding)
-
-      * [Access Time](#Access_Time)
-
-      * [Block Size](#Block_Size)
-
-      * [Buffer Size](#Buffer_Size)
-
-      * [Create Parent](#Create_Parent)
-
-      * [Delegation](#Delegation)
-
-      * [Destination](#Destination)
-
-      * [Do As](#Do_As)
-
-      * [Fs Action](#Fs_Action)
-
-      * [Group](#Group)
-
-      * [Length](#Length)
-
-      * [Modification Time](#Modification_Time)
-
-      * [Offset](#Offset)
-
-      * [Old Snapshot Name](#Old_Snapshot_Name)
-
-      * [Op](#Op)
-
-      * [Overwrite](#Overwrite)
-
-      * [Owner](#Owner)
-
-      * [Permission](#Permission)
-
-      * [Recursive](#Recursive)
-
-      * [Renewer](#Renewer)
-
-      * [Replication](#Replication)
-
-      * [Snapshot Name](#Snapshot_Name)
-
-      * [Sources](#Sources)
-
-      * [Token](#Token)
-
-      * [Token Kind](#Token_Kind)
-
-      * [Token Service](#Token_Service)
-
-      * [Username](#Username)
+    * [Document Conventions](#Document_Conventions)
+    * [Introduction](#Introduction)
+        * [Operations](#Operations)
+        * [FileSystem URIs vs HTTP URLs](#FileSystem_URIs_vs_HTTP_URLs)
+        * [HDFS Configuration Options](#HDFS_Configuration_Options)
+    * [Authentication](#Authentication)
+    * [Proxy Users](#Proxy_Users)
+    * [File and Directory Operations](#File_and_Directory_Operations)
+        * [Create and Write to a File](#Create_and_Write_to_a_File)
+        * [Append to a File](#Append_to_a_File)
+        * [Concat File(s)](#Concat_Files)
+        * [Open and Read a File](#Open_and_Read_a_File)
+        * [Make a Directory](#Make_a_Directory)
+        * [Create a Symbolic Link](#Create_a_Symbolic_Link)
+        * [Rename a File/Directory](#Rename_a_FileDirectory)
+        * [Delete a File/Directory](#Delete_a_FileDirectory)
+        * [Truncate a File](#Truncate_a_File)
+        * [Status of a File/Directory](#Status_of_a_FileDirectory)
+        * [List a Directory](#List_a_Directory)
+    * [Other File System Operations](#Other_File_System_Operations)
+        * [Get Content Summary of a Directory](#Get_Content_Summary_of_a_Directory)
+        * [Get File Checksum](#Get_File_Checksum)
+        * [Get Home Directory](#Get_Home_Directory)
+        * [Set Permission](#Set_Permission)
+        * [Set Owner](#Set_Owner)
+        * [Set Replication Factor](#Set_Replication_Factor)
+        * [Set Access or Modification Time](#Set_Access_or_Modification_Time)
+        * [Modify ACL Entries](#Modify_ACL_Entries)
+        * [Remove ACL Entries](#Remove_ACL_Entries)
+        * [Remove Default ACL](#Remove_Default_ACL)
+        * [Remove ACL](#Remove_ACL)
+        * [Set ACL](#Set_ACL)
+        * [Get ACL Status](#Get_ACL_Status)
+        * [Check access](#Check_access)
+    * [Extended Attributes(XAttrs) Operations](#Extended_AttributesXAttrs_Operations)
+        * [Set XAttr](#Set_XAttr)
+        * [Remove XAttr](#Remove_XAttr)
+        * [Get an XAttr](#Get_an_XAttr)
+        * [Get multiple XAttrs](#Get_multiple_XAttrs)
+        * [Get all XAttrs](#Get_all_XAttrs)
+        * [List all XAttrs](#List_all_XAttrs)
+    * [Snapshot Operations](#Snapshot_Operations)
+        * [Create Snapshot](#Create_Snapshot)
+        * [Delete Snapshot](#Delete_Snapshot)
+        * [Rename Snapshot](#Rename_Snapshot)
+    * [Delegation Token Operations](#Delegation_Token_Operations)
+        * [Get Delegation Token](#Get_Delegation_Token)
+        * [Get Delegation Tokens](#Get_Delegation_Tokens)
+        * [Renew Delegation Token](#Renew_Delegation_Token)
+        * [Cancel Delegation Token](#Cancel_Delegation_Token)
+    * [Error Responses](#Error_Responses)
+        * [HTTP Response Codes](#HTTP_Response_Codes)
+            * [Illegal Argument Exception](#Illegal_Argument_Exception)
+            * [Security Exception](#Security_Exception)
+            * [Access Control Exception](#Access_Control_Exception)
+            * [File Not Found Exception](#File_Not_Found_Exception)
+    * [JSON Schemas](#JSON_Schemas)
+        * [ACL Status JSON Schema](#ACL_Status_JSON_Schema)
+        * [XAttrs JSON Schema](#XAttrs_JSON_Schema)
+        * [XAttrNames JSON Schema](#XAttrNames_JSON_Schema)
+        * [Boolean JSON Schema](#Boolean_JSON_Schema)
+        * [ContentSummary JSON Schema](#ContentSummary_JSON_Schema)
+        * [FileChecksum JSON Schema](#FileChecksum_JSON_Schema)
+        * [FileStatus JSON Schema](#FileStatus_JSON_Schema)
+            * [FileStatus Properties](#FileStatus_Properties)
+        * [FileStatuses JSON Schema](#FileStatuses_JSON_Schema)
+        * [Long JSON Schema](#Long_JSON_Schema)
+        * [Path JSON Schema](#Path_JSON_Schema)
+        * [RemoteException JSON Schema](#RemoteException_JSON_Schema)
+        * [Token JSON Schema](#Token_JSON_Schema)
+            * [Token Properties](#Token_Properties)
+        * [Tokens JSON Schema](#Tokens_JSON_Schema)
+    * [HTTP Query Parameter Dictionary](#HTTP_Query_Parameter_Dictionary)
+        * [ACL Spec](#ACL_Spec)
+        * [XAttr Name](#XAttr_Name)
+        * [XAttr Value](#XAttr_Value)
+        * [XAttr set flag](#XAttr_set_flag)
+        * [XAttr value encoding](#XAttr_value_encoding)
+        * [Access Time](#Access_Time)
+        * [Block Size](#Block_Size)
+        * [Buffer Size](#Buffer_Size)
+        * [Create Parent](#Create_Parent)
+        * [Delegation](#Delegation)
+        * [Destination](#Destination)
+        * [Do As](#Do_As)
+        * [Fs Action](#Fs_Action)
+        * [Group](#Group)
+        * [Length](#Length)
+        * [Modification Time](#Modification_Time)
+        * [Offset](#Offset)
+        * [Old Snapshot Name](#Old_Snapshot_Name)
+        * [Op](#Op)
+        * [Overwrite](#Overwrite)
+        * [Owner](#Owner)
+        * [Permission](#Permission)
+        * [Recursive](#Recursive)
+        * [Renewer](#Renewer)
+        * [Replication](#Replication)
+        * [Snapshot Name](#Snapshot_Name)
+        * [Sources](#Sources)
+        * [Token](#Token)
+        * [Token Kind](#Token_Kind)
+        * [Token Service](#Token_Service)
+        * [Username](#Username)
 
 Document Conventions
 --------------------
@@ -239,75 +137,42 @@ The HTTP REST API supports the complete [FileSystem](../../api/org/apache/hadoop
 
 ### Operations
 
-* HTTP GET
-
-  * [`OPEN`](#Open_and_Read_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).open)
-
-  * [`GETFILESTATUS`](#Status_of_a_FileDirectory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileStatus)
-
-  * [`LISTSTATUS`](#List_a_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).listStatus)
-
-  * [`GETCONTENTSUMMARY`](#Get_Content_Summary_of_a_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getContentSummary)
-
-  * [`GETFILECHECKSUM`](#Get_File_Checksum) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileChecksum)
-
-  * [`GETHOMEDIRECTORY`](#Get_Home_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getHomeDirectory)
-
-  * [`GETDELEGATIONTOKEN`](#Get_Delegation_Token) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getDelegationToken)
-
-  * [`GETDELEGATIONTOKENS`](#Get_Delegation_Tokens) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getDelegationTokens)
-
-  * [`GETXATTRS`](#Get_an_XAttr) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttr)
-
-  * [`GETXATTRS`](#Get_multiple_XAttrs) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs)
-
-  * [`GETXATTRS`](#Get_all_XAttrs) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs)
-
-  * [`LISTXATTRS`](#List_all_XAttrs) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).listXAttrs)
-
-  * [`CHECKACCESS`](#Check_access) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).access)
-
-* HTTP PUT
-
-  * [`CREATE`](#Create_and_Write_to_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).create)
-
-  * [`MKDIRS`](#Make_a_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).mkdirs)
-
-  * [`CREATESYMLINK`](#Create_a_Symbolic_Link) (see [FileContext](../../api/org/apache/hadoop/fs/FileContext.html).createSymlink)
-
-  * [`RENAME`](#Rename_a_FileDirectory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).rename)
-
-  * [`SETREPLICATION`](#Set_Replication_Factor) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setReplication)
-
-  * [`SETOWNER`](#Set_Owner) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setOwner)
-
-  * [`SETPERMISSION`](#Set_Permission) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setPermission)
-
-  * [`SETTIMES`](#Set_Access_or_Modification_Time) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setTimes)
-
-  * [`RENEWDELEGATIONTOKEN`](#Renew_Delegation_Token) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).renewDelegationToken)
-
-  * [`CANCELDELEGATIONTOKEN`](#Cancel_Delegation_Token) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).cancelDelegationToken)
-
-  * [`CREATESNAPSHOT`](#Create_Snapshot) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).createSnapshot)
-
-  * [`RENAMESNAPSHOT`](#Rename_Snapshot) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).renameSnapshot)
-
-  * [`SETXATTR`](#Set_XAttr) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setXAttr)
-
-  * [`REMOVEXATTR`](#Remove_XAttr) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).removeXAttr)
-
-* HTTP POST
-
-  * [`APPEND`](#Append_to_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).append)
-
-  * [`CONCAT`](#Concat_Files) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).concat)
-
-* HTTP DELETE
-
-  * [`DELETE`](#Delete_a_FileDirectory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).delete)
-
-  * [`DELETESNAPSHOT`](#Delete_Snapshot) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).deleteSnapshot)
+*   HTTP GET
+    * [`OPEN`](#Open_and_Read_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).open)
+    * [`GETFILESTATUS`](#Status_of_a_FileDirectory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileStatus)
+    * [`LISTSTATUS`](#List_a_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).listStatus)
+    * [`GETCONTENTSUMMARY`](#Get_Content_Summary_of_a_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getContentSummary)
+    * [`GETFILECHECKSUM`](#Get_File_Checksum) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileChecksum)
+    * [`GETHOMEDIRECTORY`](#Get_Home_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getHomeDirectory)
+    * [`GETDELEGATIONTOKEN`](#Get_Delegation_Token) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getDelegationToken)
+    * [`GETDELEGATIONTOKENS`](#Get_Delegation_Tokens) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getDelegationTokens)
+    * [`GETXATTRS`](#Get_an_XAttr) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttr)
+    * [`GETXATTRS`](#Get_multiple_XAttrs) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs)
+    * [`GETXATTRS`](#Get_all_XAttrs) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs)
+    * [`LISTXATTRS`](#List_all_XAttrs) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).listXAttrs)
+    * [`CHECKACCESS`](#Check_access) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).access)
+*   HTTP PUT
+    * [`CREATE`](#Create_and_Write_to_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).create)
+    * [`MKDIRS`](#Make_a_Directory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).mkdirs)
+    * [`CREATESYMLINK`](#Create_a_Symbolic_Link) (see [FileContext](../../api/org/apache/hadoop/fs/FileContext.html).createSymlink)
+    * [`RENAME`](#Rename_a_FileDirectory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).rename)
+    * [`SETREPLICATION`](#Set_Replication_Factor) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setReplication)
+    * [`SETOWNER`](#Set_Owner) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setOwner)
+    * [`SETPERMISSION`](#Set_Permission) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setPermission)
+    * [`SETTIMES`](#Set_Access_or_Modification_Time) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setTimes)
+    * [`RENEWDELEGATIONTOKEN`](#Renew_Delegation_Token) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).renewDelegationToken)
+    * [`CANCELDELEGATIONTOKEN`](#Cancel_Delegation_Token) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).cancelDelegationToken)
+    * [`CREATESNAPSHOT`](#Create_Snapshot) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).createSnapshot)
+    * [`RENAMESNAPSHOT`](#Rename_Snapshot) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).renameSnapshot)
+    * [`SETXATTR`](#Set_XAttr) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setXAttr)
+    * [`REMOVEXATTR`](#Remove_XAttr) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).removeXAttr)
+*   HTTP POST
+    * [`APPEND`](#Append_to_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).append)
+    * [`CONCAT`](#Concat_Files) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).concat)
+    * [`TRUNCATE`](#Truncate_a_File) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).concat)
+*   HTTP DELETE
+    * [`DELETE`](#Delete_a_FileDirectory) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).delete)
+    * [`DELETESNAPSHOT`](#Delete_Snapshot) (see [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).deleteSnapshot)
 
 ### FileSystem URIs vs HTTP URLs
 
@@ -528,6 +393,22 @@ See also: [`destination`](#Destination), [FileSystem](../../api/org/apache/hadoo
 
 See also: [`recursive`](#Recursive), [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).delete
 
+### Truncate a File
+
+* Submit a HTTP POST request.
+
+        curl -i -X POST "http://<HOST>:<PORT>/webhdfs/v1/<PATH>?op=TRUNCATE&newlength=<LONG>"
+
+    The client receives a response with a [`boolean` JSON object](#Boolean_JSON_Schema):
+
+        HTTP/1.1 200 OK
+        Content-Type: application/json
+        Transfer-Encoding: chunked
+        
+        {"boolean": true}
+
+See also: [`newlength`](#New_Length), [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).truncate
+
 ### Status of a File/Directory
 
 * Submit a HTTP GET request.
@@ -540,7 +421,6 @@ See also: [`recursive`](#Recursive), [FileSystem](../../api/org/apache/hadoop/fs
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
           "FileStatus":
           {
@@ -558,7 +438,6 @@ See also: [`recursive`](#Recursive), [FileSystem](../../api/org/apache/hadoop/fs
             "type"            : "DIRECTORY"    //enum {FILE, DIRECTORY, SYMLINK}
           }
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileStatus
 
@@ -574,7 +453,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileSt
         Content-Type: application/json
         Content-Length: 427
 
-        ```json
         {
           "FileStatuses":
           {
@@ -612,7 +490,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileSt
             ]
           }
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).listStatus
 
@@ -631,7 +508,6 @@ Other File System Operations
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
           "ContentSummary":
           {
@@ -643,7 +519,6 @@ Other File System Operations
             "spaceQuota"    : -1
           }
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getContentSummary
 
@@ -665,7 +540,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getConten
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
           "FileChecksum":
           {
@@ -674,7 +548,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getConten
             "length"   : 28
           }
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getFileChecksum
 
@@ -833,7 +706,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setAcl
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
             "AclStatus": {
                 "entries": [
@@ -846,7 +718,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).setAcl
                 "stickyBit": false
             }
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getAclStatus
 
@@ -909,7 +780,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).removeXAt
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
             "XAttrs": [
                 {
@@ -918,7 +788,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).removeXAt
                 }
             ]
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttr
 
@@ -936,7 +805,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttr
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
             "XAttrs": [
                 {
@@ -949,7 +817,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttr
                 }
             ]
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs
 
@@ -966,7 +833,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
             "XAttrs": [
                 {
@@ -983,7 +849,6 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs
                 }
             ]
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs
 
@@ -999,11 +864,9 @@ See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getXAttrs
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
             "XAttrNames":"[\"XATTRNAME1\",\"XATTRNAME2\",\"XATTRNAME3\"]"
         }
-        ```
 
 See also: [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).listXAttrs
 
@@ -1068,14 +931,12 @@ Delegation Token Operations
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
           "Token":
           {
             "urlString": "JQAIaG9y..."
           }
         }
-        ```
 
 See also: [`renewer`](#Renewer), [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getDelegationToken, [`kind`](#Token_Kind), [`service`](#Token_Service)
 
@@ -1091,7 +952,6 @@ See also: [`renewer`](#Renewer), [FileSystem](../../api/org/apache/hadoop/fs/Fil
         Content-Type: application/json
         Transfer-Encoding: chunked
 
-        ```json
         {
           "Tokens":
           {
@@ -1103,7 +963,6 @@ See also: [`renewer`](#Renewer), [FileSystem](../../api/org/apache/hadoop/fs/Fil
             ]
           }
         }
-        ```
 
 See also: [`renewer`](#Renewer), [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html).getDelegationTokens
 
@@ -1160,7 +1019,6 @@ Below are examples of exception responses.
     Content-Type: application/json
     Transfer-Encoding: chunked
 
-    ```json
     {
       "RemoteException":
       {
@@ -1169,7 +1027,6 @@ Below are examples of exception responses.
         "message"      : "Invalid value for webhdfs parameter \"permission\": ..."
       }
     }
-    ```
 
 #### Security Exception
 
@@ -1177,7 +1034,6 @@ Below are examples of exception responses.
     Content-Type: application/json
     Transfer-Encoding: chunked
 
-    ```json
     {
       "RemoteException":
       {
@@ -1186,7 +1042,6 @@ Below are examples of exception responses.
         "message"      : "Failed to obtain user group information: ..."
       }
     }
-    ```
 
 #### Access Control Exception
 
@@ -1194,7 +1049,6 @@ Below are examples of exception responses.
     Content-Type: application/json
     Transfer-Encoding: chunked
 
-    ```json
     {
       "RemoteException":
       {
@@ -1203,7 +1057,6 @@ Below are examples of exception responses.
         "message"      : "Permission denied: ..."
       }
     }
-    ```
 
 #### File Not Found Exception
 
@@ -1211,7 +1064,6 @@ Below are examples of exception responses.
     Content-Type: application/json
     Transfer-Encoding: chunked
 
-    ```json
     {
       "RemoteException":
       {
@@ -1220,7 +1072,6 @@ Below are examples of exception responses.
         "message"      : "File does not exist: /foo/a.patch"
       }
     }
-    ```
 
 JSON Schemas
 ------------
@@ -1302,6 +1153,23 @@ All operations, except for [`OPEN`](#Open_and_Read_a_File), either return a zero
           }
         }
       }
+    }
+  }
+}
+```
+
+### XAttrNames JSON Schema
+
+```json
+{
+  "name"      : "XAttrNames",
+  "properties":
+  {
+    "XAttrNames":
+    {
+      "description": "XAttr names.",
+      "type"       : "string"
+      "required"   : true
     }
   }
 }
@@ -1880,6 +1748,15 @@ See also: [`OPEN`](#Open_and_Read_a_File)
 | Syntax | Any integer. |
 
 See also: [`SETTIMES`](#Set_Access_or_Modification_Time)
+
+### New Length
+
+| Name | `newlength` |
+|:---- |:---- |
+| Description | The size the file is to be truncated to. |
+| Type | long |
+| Valid Values | \>= 0 |
+| Syntax | Any long. |
 
 ### Offset
 

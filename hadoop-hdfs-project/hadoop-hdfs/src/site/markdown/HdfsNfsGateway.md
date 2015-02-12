@@ -16,33 +16,27 @@ HDFS NFS Gateway
 ================
 
 * [HDFS NFS Gateway](#HDFS_NFS_Gateway)
-
-  * [Overview](#Overview)
-
-  * [Configuration](#Configuration)
-
-  * [Start and stop NFS gateway service](#Start_and_stop_NFS_gateway_service)
-
-  * [Verify validity of NFS related services](#Verify_validity_of_NFS_related_services)
-
-  * [Mount the export "/"](#Mount_the_export_)
-
-  * [Allow mounts from unprivileged clients](#Allow_mounts_from_unprivileged_clients)
-
-  * [User authentication and mapping](#User_authentication_and_mapping)
+    * [Overview](#Overview)
+    * [Configuration](#Configuration)
+    * [Start and stop NFS gateway service](#Start_and_stop_NFS_gateway_service)
+    * [Verify validity of NFS related services](#Verify_validity_of_NFS_related_services)
+    * [Mount the export "/"](#Mount_the_export_)
+    * [Allow mounts from unprivileged clients](#Allow_mounts_from_unprivileged_clients)
+    * [User authentication and mapping](#User_authentication_and_mapping)
 
 Overview
 --------
 
 The NFS Gateway supports NFSv3 and allows HDFS to be mounted as part of the client's local file system. Currently NFS Gateway supports and enables the following usage patterns:
 
-* Users can browse the HDFS file system through their local file system on NFSv3 client compatible operating systems.
-
-* Users can download files from the the HDFS file system on to their local file system.
-
-* Users can upload files from their local file system directly to the HDFS file system.
-
-* Users can stream data directly to HDFS through the mount point. File append is supported but random write is not supported.
+* Users can browse the HDFS file system through their local file system
+  on NFSv3 client compatible operating systems.
+* Users can download files from the the HDFS file system on to their
+  local file system.
+* Users can upload files from their local file system directly to the
+  HDFS file system.
+* Users can stream data directly to HDFS through the mount point. File
+  append is supported but random write is not supported.
 
 The NFS gateway machine needs the same thing to run an HDFS client like Hadoop JAR files, HADOOP\_CONF directory. The NFS gateway can be on the same host as DataNode, NameNode, or any HDFS client.
 
@@ -97,7 +91,11 @@ Note that regular, non-AIX clients should NOT enable AIX compatibility mode. The
 
 It's strongly recommended for the users to update a few configuration properties based on their use cases. All the following configuration properties can be added or updated in hdfs-site.xml.
 
-* If the client mounts the export with access time update allowed, make sure the following property is not disabled in the configuration file. Only NameNode needs to restart after this property is changed. On some Unix systems, the user can disable access time update by mounting the export with "noatime". If the export is mounted with "noatime", the user doesn't need to change the following property and thus no need to restart namenode.
+*   If the client mounts the export with access time update allowed, make sure the following
+    property is not disabled in the configuration file. Only NameNode needs to restart after
+    this property is changed. On some Unix systems, the user can disable access time update
+    by mounting the export with "noatime". If the export is mounted with "noatime", the user
+    doesn't need to change the following property and thus no need to restart namenode.
 
         <property>
           <name>dfs.namenode.accesstime.precision</name>
@@ -108,23 +106,41 @@ It's strongly recommended for the users to update a few configuration properties
           </description>
         </property>
 
-* Users are expected to update the file dump directory. NFS client often reorders writes. Sequential writes can arrive at the NFS gateway at random order. This directory is used to temporarily save out-of-order writes before writing to HDFS. For each file, the out-of-order writes are dumped after they are accumulated to exceed certain threshold (e.g., 1MB) in memory. One needs to make sure the directory has enough space. For example, if the application uploads 10 files with each having 100MB, it is recommended for this directory to have roughly 1GB space in case if a worst-case write reorder happens to every file. Only NFS gateway needs to restart after this property is updated.
+*   Users are expected to update the file dump directory. NFS client often
+    reorders writes. Sequential writes can arrive at the NFS gateway at random
+    order. This directory is used to temporarily save out-of-order writes
+    before writing to HDFS. For each file, the out-of-order writes are dumped after
+    they are accumulated to exceed certain threshold (e.g., 1MB) in memory.
+    One needs to make sure the directory has enough
+    space. For example, if the application uploads 10 files with each having
+    100MB, it is recommended for this directory to have roughly 1GB space in case if a
+    worst-case write reorder happens to every file. Only NFS gateway needs to restart after
+    this property is updated.
 
           <property>
             <name>nfs.dump.dir</name>
             <value>/tmp/.hdfs-nfs</value>
           </property>
 
-<!-- -->
-
-* By default, the export can be mounted by any client. To better control the access, users can update the following property. The value string contains machine name and access privilege, separated by whitespace characters. The machine name format can be a single host, a Java regular expression, or an IPv4 address. The access privilege uses rw or ro to specify read/write or read-only access of the machines to exports. If the access privilege is not provided, the default is read-only. Entries are separated by ";". For example: "192.168.0.0/22 rw ; host.\*\\.example\\.com ; host1.test.org ro;". Only the NFS gateway needs to restart after this property is updated.
+*   By default, the export can be mounted by any client. To better control the access,
+    users can update the following property. The value string contains machine name and
+    access privilege, separated by whitespace
+    characters. The machine name format can be a single host, a Java regular expression, or an IPv4 address. The access
+    privilege uses rw or ro to specify read/write or read-only access of the machines to exports. If the access privilege is not provided, the default is read-only. Entries are separated by ";".
+    For example: "192.168.0.0/22 rw ; host.\*\\.example\\.com ; host1.test.org ro;". Only the NFS gateway needs to restart after
+    this property is updated.
 
         <property>
           <name>nfs.exports.allowed.hosts</name>
           <value>* rw</value>
         </property>
 
-* JVM and log settings. You can export JVM settings (e.g., heap size and GC log) in HADOOP\_NFS3\_OPTS. More NFS related settings can be found in hadoop-env.sh. To get NFS debug trace, you can edit the log4j.property file to add the following. Note, debug trace, especially for ONCRPC, can be very verbose.To change logging level:
+*   JVM and log settings. You can export JVM settings (e.g., heap size and GC log) in
+    HADOOP\_NFS3\_OPTS. More NFS related settings can be found in hadoop-env.sh.
+    To get NFS debug trace, you can edit the log4j.property file
+    to add the following. Note, debug trace, especially for ONCRPC, can be very verbose.
+
+    To change logging level:
 
             log4j.logger.org.apache.hadoop.hdfs.nfs=DEBUG
 
@@ -146,7 +162,12 @@ Three daemons are required to provide NFS service: rpcbind (or portmap), mountd 
 
         [root]> $HADOOP_PREFIX/bin/hdfs --daemon start portmap
 
-3.  Start mountd and nfsd.No root privileges are required for this command. In non-secure mode, the NFS gateway should be started by the proxy user mentioned at the beginning of this user guide. While in secure mode, any user can start NFS gateway as long as the user has read access to the Kerberos keytab defined in "nfs.keytab.file".
+3.  Start mountd and nfsd.
+
+    No root privileges are required for this command. In non-secure mode, the NFS gateway
+    should be started by the proxy user mentioned at the beginning of this user guide.
+    While in secure mode, any user can start NFS gateway
+    as long as the user has read access to the Kerberos keytab defined in "nfs.keytab.file".
 
         [hdfs]$ $HADOOP_PREFIX/bin/hdfs --daemon start nfs3
 

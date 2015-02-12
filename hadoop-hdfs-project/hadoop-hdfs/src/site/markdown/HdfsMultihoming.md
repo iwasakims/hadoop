@@ -18,27 +18,32 @@ HDFS Support for Multihomed Networks
 This document is targetted to cluster administrators deploying `HDFS` in multihomed networks. Similar support for `YARN`/`MapReduce` is work in progress and will be documented when available.
 
 * [HDFS Support for Multihomed Networks](#HDFS_Support_for_Multihomed_Networks)
-
-  * [Multihoming Background](#Multihoming_Background)
-
-  * [Fixing Hadoop Issues In Multihomed Environments](#Fixing_Hadoop_Issues_In_Multihomed_Environments)
-
-      * [Ensuring HDFS Daemons Bind All Interfaces](#Ensuring_HDFS_Daemons_Bind_All_Interfaces)
-
-      * [Clients use Hostnames when connecting to DataNodes](#Clients_use_Hostnames_when_connecting_to_DataNodes)
-
-      * [DataNodes use HostNames when connecting to other DataNodes](#DataNodes_use_HostNames_when_connecting_to_other_DataNodes)
+    * [Multihoming Background](#Multihoming_Background)
+    * [Fixing Hadoop Issues In Multihomed Environments](#Fixing_Hadoop_Issues_In_Multihomed_Environments)
+        * [Ensuring HDFS Daemons Bind All Interfaces](#Ensuring_HDFS_Daemons_Bind_All_Interfaces)
+        * [Clients use Hostnames when connecting to DataNodes](#Clients_use_Hostnames_when_connecting_to_DataNodes)
+        * [DataNodes use HostNames when connecting to other DataNodes](#DataNodes_use_HostNames_when_connecting_to_other_DataNodes)
 
 Multihoming Background
 ----------------------
 
 In multihomed networks the cluster nodes are connected to more than one network interface. There could be multiple reasons for doing so.
 
-1.  **Security**: Security requirements may dictate that intra-cluster traffic be confined to a different network than the network used to transfer data in and out of the cluster.
+1.  **Security**: Security requirements may dictate that intra-cluster
+    traffic be confined to a different network than the network used to
+    transfer data in and out of the cluster.
 
-2.  **Performance**: Intra-cluster traffic may use one or more high bandwidth interconnects like Fiber Channel, Infiniband or 10GbE.
+2.  **Performance**: Intra-cluster traffic may use one or more high bandwidth
+    interconnects like Fiber Channel, Infiniband or 10GbE.
 
-3.  **Failover/Redundancy**: The nodes may have multiple network adapters connected to a single network to handle network adapter failure.Note that NIC Bonding (also known as NIC Teaming or Link Aggregation) is a related but separate topic. The following settings are usually not applicable to a NIC bonding configuration which handles multiplexing and failover transparently while presenting a single 'logical network' to applications.
+3.  **Failover/Redundancy**: The nodes may have multiple network adapters
+    connected to a single network to handle network adapter failure.
+
+Note that NIC Bonding (also known as NIC Teaming or Link
+Aggregation) is a related but separate topic. The following settings
+are usually not applicable to a NIC bonding configuration which handles
+multiplexing and failover transparently while presenting a single 'logical
+network' to applications.
 
 Fixing Hadoop Issues In Multihomed Environments
 -----------------------------------------------

@@ -16,16 +16,11 @@ HDFS Quotas Guide
 =================
 
 * [HDFS Quotas Guide](#HDFS_Quotas_Guide)
-
-  * [Overview](#Overview)
-
-  * [Name Quotas](#Name_Quotas)
-
-  * [Space Quotas](#Space_Quotas)
-
-  * [Administrative Commands](#Administrative_Commands)
-
-  * [Reporting Command](#Reporting_Command)
+    * [Overview](#Overview)
+    * [Name Quotas](#Name_Quotas)
+    * [Space Quotas](#Space_Quotas)
+    * [Administrative Commands](#Administrative_Commands)
+    * [Reporting Command](#Reporting_Command)
 
 Overview
 --------
@@ -51,19 +46,47 @@ Administrative Commands
 
 Quotas are managed by a set of commands available only to the administrator.
 
-* `hdfs dfsadmin -setQuota <N> <directory>...<directory> `Set the name quota to be N for each directory. Best effort for each directory, with faults reported if N is not a positive long integer, the directory does not exist or it is a file, or the directory would immediately exceed the new quota.
+*   `hdfs dfsadmin -setQuota <N> <directory>...<directory>`
 
-* `hdfs dfsadmin -clrQuota <directory>...<directory> `Remove any name quota for each directory. Best effort for each directory, with faults reported if the directory does not exist or it is a file. It is not a fault if the directory has no quota.
+    Set the name quota to be N for each directory. Best effort for each
+    directory, with faults reported if N is not a positive long
+    integer, the directory does not exist or it is a file, or the
+    directory would immediately exceed the new quota.
 
-* `hdfs dfsadmin -setSpaceQuota <N> <directory>...<directory> `Set the space quota to be N bytes for each directory. This is a hard limit on total size of all the files under the directory tree. The space quota takes replication also into account, i.e. one GB of data with replication of 3 consumes 3GB of quota. N can also be specified with a binary prefix for convenience, for e.g. 50g for 50 gigabytes and 2t for 2 terabytes etc. Best effort for each directory, with faults reported if N is neither zero nor a positive integer, the directory does not exist or it is a file, or the directory would immediately exceed the new quota.
+*   `hdfs dfsadmin -clrQuota <directory>...<directory>`
 
-* `hdfs dfsadmin -clrSpaceQuota <directory>...<directory> `Remove any space quota for each directory. Best effort for each directory, with faults reported if the directory does not exist or it is a file. It is not a fault if the directory has no quota.
+    Remove any name quota for each directory. Best effort for each
+    directory, with faults reported if the directory does not exist or
+    it is a file. It is not a fault if the directory has no quota.
+
+*   `hdfs dfsadmin -setSpaceQuota <N> <directory>...<directory>`
+
+    Set the space quota to be N bytes for each directory. This is a
+    hard limit on total size of all the files under the directory tree.
+    The space quota takes replication also into account, i.e. one GB of
+    data with replication of 3 consumes 3GB of quota. N can also be
+    specified with a binary prefix for convenience, for e.g. 50g for 50
+    gigabytes and 2t for 2 terabytes etc. Best effort for each
+    directory, with faults reported if N is neither zero nor a positive
+    integer, the directory does not exist or it is a file, or the
+    directory would immediately exceed the new quota.
+
+*   `hdfs dfsadmin -clrSpaceQuota <directory>...<directory>`
+
+    Remove any space quota for each directory. Best effort for each
+    directory, with faults reported if the directory does not exist or
+    it is a file. It is not a fault if the directory has no quota.
 
 Reporting Command
 -----------------
 
 An an extension to the count command of the HDFS shell reports quota values and the current count of names and bytes in use.
 
-* `hadoop fs -count -q <directory>...<directory> `With the -q option, also report the name quota value set for each directory, the available name quota remaining, the space quota value set, and the available space quota remaining. If the directory does not have a quota set, the reported values are `none` and `inf`.
+*   `hadoop fs -count -q <directory>...<directory>`
 
+    With the -q option, also report the name quota value set for each
+    directory, the available name quota remaining, the space quota
+    value set, and the available space quota remaining. If the
+    directory does not have a quota set, the reported values are `none`
+    and `inf`.
 

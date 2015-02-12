@@ -16,18 +16,12 @@ C API libhdfs
 =============
 
 * [C API libhdfs](#C_API_libhdfs)
-
-  * [Overview](#Overview)
-
-  * [The APIs](#The_APIs)
-
-  * [A Sample Program](#A_Sample_Program)
-
-  * [How To Link With The Library](#How_To_Link_With_The_Library)
-
-  * [Common Problems](#Common_Problems)
-
-  * [Thread Safe](#Thread_Safe)
+    * [Overview](#Overview)
+    * [The APIs](#The_APIs)
+    * [A Sample Program](#A_Sample_Program)
+    * [How To Link With The Library](#How_To_Link_With_The_Library)
+    * [Common Problems](#Common_Problems)
+    * [Thread Safe](#Thread_Safe)
 
 Overview
 --------
@@ -80,8 +74,19 @@ Thread Safe
 
 libdhfs is thread safe.
 
-* Concurrency and Hadoop FS "handles"The Hadoop FS implementation includes a FS handle cache which caches based on the URI of the namenode along with the user connecting. So, all calls to `hdfsConnect` will return the same handle but calls to `hdfsConnectAsUser` with different users will return different handles. But, since HDFS client handles are completely thread safe, this has no bearing on concurrency.
+*   Concurrency and Hadoop FS "handles"
 
-* Concurrency and libhdfs/JNIThe libhdfs calls to JNI should always be creating thread local storage, so (in theory), libhdfs should be as thread safe as the underlying calls to the Hadoop FS.
+    The Hadoop FS implementation includes a FS handle cache which
+    caches based on the URI of the namenode along with the user
+    connecting. So, all calls to `hdfsConnect` will return the same
+    handle but calls to `hdfsConnectAsUser` with different users will
+    return different handles. But, since HDFS client handles are
+    completely thread safe, this has no bearing on concurrency.
+
+*   Concurrency and libhdfs/JNI
+
+    The libhdfs calls to JNI should always be creating thread local
+    storage, so (in theory), libhdfs should be as thread safe as the
+    underlying calls to the Hadoop FS.
 
 

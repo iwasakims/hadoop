@@ -16,17 +16,11 @@ Extended Attributes in HDFS
 ===========================
 
 * [Overview](#Overview)
-
-  * [HDFS extended attributes](#HDFS_extended_attributes)
-
-  * [Namespaces and Permissions](#Namespaces_and_Permissions)
-
+    * [HDFS extended attributes](#HDFS_extended_attributes)
+    * [Namespaces and Permissions](#Namespaces_and_Permissions)
 * [Interacting with extended attributes](#Interacting_with_extended_attributes)
-
-  * [getfattr](#getfattr)
-
-  * [setfattr](#setfattr)
-
+    * [getfattr](#getfattr)
+    * [setfattr](#setfattr)
 * [Configuration options](#Configuration_options)
 
 Overview
@@ -63,8 +57,9 @@ The Hadoop shell has support for interacting with extended attributes via `hadoo
 
 Displays the extended attribute names and values (if any) for a file or directory.
 
-| -R | Recursively list the attributes for all files and directories. |
+| | |
 |:---- |:---- |
+| -R | Recursively list the attributes for all files and directories. |
 | -n name | Dump the named extended attribute value. |
 | -d | Dump all extended attribute values associated with pathname. |
 | -e \<encoding\> | Encode values after retrieving them. Valid encodings are "text", "hex", and "base64". Values encoded as text strings are enclosed in double quotes ("), and values encoded as hexadecimal and base64 are prefixed with 0x and 0s, respectively. |
@@ -76,8 +71,9 @@ Displays the extended attribute names and values (if any) for a file or director
 
 Sets an extended attribute name and value for a file or directory.
 
-| -n name | The extended attribute name. |
+| | |
 |:---- |:---- |
+| -n name | The extended attribute name. |
 | -v value | The extended attribute value. There are three different encoding methods for the value. If the argument is enclosed in double quotes, then the value is the string inside the quotes. If the argument is prefixed with 0x or 0X, then it is taken as a hexadecimal number. If the argument begins with 0s or 0S, then it is taken as a base64 encoding. |
 | -x name | Remove the extended attribute. |
 | \<path\> | The file or directory. |
@@ -87,10 +83,16 @@ Configuration options
 
 HDFS supports extended attributes out of the box, without additional configuration. Administrators could potentially be interested in the options limiting the number of xattrs per inode and the size of xattrs, since xattrs increase the on-disk and in-memory space consumption of an inode.
 
-* `dfs.namenode.xattrs.enabled`Whether support for extended attributes is enabled on the NameNode. By default, extended attributes are enabled.
+*   `dfs.namenode.xattrs.enabled`
 
-* `dfs.namenode.fs-limits.max-xattrs-per-inode`The maximum number of extended attributes per inode. By default, this limit is 32.
+    Whether support for extended attributes is enabled on the NameNode. By default, extended attributes are enabled.
 
-* `dfs.namenode.fs-limits.max-xattr-size`The maximum combined size of the name and value of an extended attribute in bytes. By default, this limit is 16384 bytes.
+*   `dfs.namenode.fs-limits.max-xattrs-per-inode`
+
+    The maximum number of extended attributes per inode. By default, this limit is 32.
+
+*   `dfs.namenode.fs-limits.max-xattr-size`
+
+    The maximum combined size of the name and value of an extended attribute in bytes. By default, this limit is 16384 bytes.
 
 

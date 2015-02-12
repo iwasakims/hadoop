@@ -16,51 +16,28 @@ Centralized Cache Management in HDFS
 ====================================
 
 * [Overview](#Overview)
-
 * [Use Cases](#Use_Cases)
-
 * [Architecture](#Architecture)
-
 * [Concepts](#Concepts)
-
-  * [Cache directive](#Cache_directive)
-
-  * [Cache pool](#Cache_pool)
-
+    * [Cache directive](#Cache_directive)
+    * [Cache pool](#Cache_pool)
 * [cacheadmin command-line interface](#cacheadmin_command-line_interface)
-
-  * [Cache directive commands](#Cache_directive_commands)
-
-      * [addDirective](#addDirective)
-
-      * [removeDirective](#removeDirective)
-
-      * [removeDirectives](#removeDirectives)
-
-      * [listDirectives](#listDirectives)
-
-  * [Cache pool commands](#Cache_pool_commands)
-
-      * [addPool](#addPool)
-
-      * [modifyPool](#modifyPool)
-
-      * [removePool](#removePool)
-
-      * [listPools](#listPools)
-
-      * [help](#help)
-
+    * [Cache directive commands](#Cache_directive_commands)
+        * [addDirective](#addDirective)
+        * [removeDirective](#removeDirective)
+        * [removeDirectives](#removeDirectives)
+        * [listDirectives](#listDirectives)
+    * [Cache pool commands](#Cache_pool_commands)
+        * [addPool](#addPool)
+        * [modifyPool](#modifyPool)
+        * [removePool](#removePool)
+        * [listPools](#listPools)
+        * [help](#help)
 * [Configuration](#Configuration)
-
-  * [Native Libraries](#Native_Libraries)
-
-  * [Configuration Properties](#Configuration_Properties)
-
-      * [Required](#Required)
-
-      * [Optional](#Optional)
-
+    * [Native Libraries](#Native_Libraries)
+    * [Configuration Properties](#Configuration_Properties)
+        * [Required](#Required)
+        * [Optional](#Optional)
   * [OS Limits](#OS_Limits)
 
 Overview
@@ -136,8 +113,9 @@ Usage: `hdfs cacheadmin -addDirective -path <path> -pool <pool-name> [-force] [-
 
 Add a new cache directive.
 
-| \<path\> | A path to cache. The path can be a directory or a file. |
+| | |
 |:---- |:---- |
+| \<path\> | A path to cache. The path can be a directory or a file. |
 | \<pool-name\> | The pool to which the directive will be added. You must have write permission on the cache pool in order to add new directives. |
 | -force | Skips checking of cache pool resource limits. |
 | \<replication\> | The cache replication factor to use. Defaults to 1. |
@@ -149,8 +127,9 @@ Usage: `hdfs cacheadmin -removeDirective <id> `
 
 Remove a cache directive.
 
-| \<id\> | The id of the cache directive to remove. You must have write permission on the pool of the directive in order to remove it. To see a list of cachedirective IDs, use the -listDirectives command. |
+| | |
 |:---- |:---- |
+| \<id\> | The id of the cache directive to remove. You must have write permission on the pool of the directive in order to remove it. To see a list of cachedirective IDs, use the -listDirectives command. |
 
 #### removeDirectives
 
@@ -158,8 +137,9 @@ Usage: `hdfs cacheadmin -removeDirectives <path> `
 
 Remove every cache directive with the specified path.
 
-| \<path\> | The path of the cache directives to remove. You must have write permission on the pool of the directive in order to remove it. To see a list of cache directives, use the -listDirectives command. |
+| | |
 |:---- |:---- |
+| \<path\> | The path of the cache directives to remove. You must have write permission on the pool of the directive in order to remove it. To see a list of cache directives, use the -listDirectives command. |
 
 #### listDirectives
 
@@ -167,8 +147,9 @@ Usage: `hdfs cacheadmin -listDirectives [-stats] [-path <path>] [-pool <pool>]`
 
 List cache directives.
 
-| \<path\> | List only cache directives with this path. Note that if there is a cache directive for *path* in a cache pool that we don't have read access for, it will not be listed. |
+| | |
 |:---- |:---- |
+| \<path\> | List only cache directives with this path. Note that if there is a cache directive for *path* in a cache pool that we don't have read access for, it will not be listed. |
 | \<pool\> | List only path cache directives in that pool. |
 | -stats | List path-based cache directive statistics. |
 
@@ -180,8 +161,9 @@ Usage: `hdfs cacheadmin -addPool <name> [-owner <owner>] [-group <group>] [-mode
 
 Add a new cache pool.
 
-| \<name\> | Name of the new pool. |
+| | |
 |:---- |:---- |
+| \<name\> | Name of the new pool. |
 | \<owner\> | Username of the owner of the pool. Defaults to the current user. |
 | \<group\> | Group of the pool. Defaults to the primary group name of the current user. |
 | \<mode\> | UNIX-style permissions for the pool. Permissions are specified in octal, e.g. 0755. By default, this is set to 0755. |
@@ -194,8 +176,9 @@ Usage: `hdfs cacheadmin -modifyPool <name> [-owner <owner>] [-group <group>] [-m
 
 Modifies the metadata of an existing cache pool.
 
-| \<name\> | Name of the pool to modify. |
+| | |
 |:---- |:---- |
+| \<name\> | Name of the pool to modify. |
 | \<owner\> | Username of the owner of the pool. |
 | \<group\> | Groupname of the group of the pool. |
 | \<mode\> | Unix-style permissions of the pool in octal. |
@@ -208,8 +191,9 @@ Usage: `hdfs cacheadmin -removePool <name> `
 
 Remove a cache pool. This also uncaches paths associated with the pool.
 
-| \<name\> | Name of the cache pool to remove. |
+| | |
 |:---- |:---- |
+| \<name\> | Name of the cache pool to remove. |
 
 #### listPools
 
@@ -217,8 +201,9 @@ Usage: `hdfs cacheadmin -listPools [-stats] [<name>]`
 
 Display information about one or more cache pools, e.g. name, owner, group, permissions, etc.
 
-| -stats | Display additional cache pool statistics. |
+| | |
 |:---- |:---- |
+| -stats | Display additional cache pool statistics. |
 | \<name\> | If specified, list only the named cache pool. |
 
 #### help
@@ -227,8 +212,9 @@ Usage: `hdfs cacheadmin -help <command-name> `
 
 Get detailed help about a command.
 
-| \<command-name\> | The command for which to get detailed help. If no command is specified, print detailed help for all commands. |
+| | |
 |:---- |:---- |
+| \<command-name\> | The command for which to get detailed help. If no command is specified, print detailed help for all commands. |
 
 Configuration
 -------------
@@ -243,25 +229,35 @@ In order to lock block files into memory, the DataNode relies on native JNI code
 
 Be sure to configure the following:
 
-* dfs.datanode.max.locked.memoryThis determines the maximum amount of memory a DataNode will use for caching. On Unix-like systems, the "locked-in-memory size" ulimit (`ulimit -l`) of the DataNode user also needs to be increased to match this parameter (see below section on [OS Limits](#OS_Limits)). When setting this value, please remember that you will need space in memory for other things as well, such as the DataNode and application JVM heaps and the operating system page cache.
+*   dfs.datanode.max.locked.memory
+
+    This determines the maximum amount of memory a DataNode will use for caching. On Unix-like systems, the "locked-in-memory size" ulimit (`ulimit -l`) of the DataNode user also needs to be increased to match this parameter (see below section on [OS Limits](#OS_Limits)). When setting this value, please remember that you will need space in memory for other things as well, such as the DataNode and application JVM heaps and the operating system page cache.
 
 #### Optional
 
 The following properties are not required, but may be specified for tuning:
 
-* dfs.namenode.path.based.cache.refresh.interval.msThe NameNode will use this as the amount of milliseconds between subsequent path cache rescans. This calculates the blocks to cache and each DataNode containing a replica of the block that should cache it.
+*   dfs.namenode.path.based.cache.refresh.interval.ms
+
+    The NameNode will use this as the amount of milliseconds between subsequent path cache rescans. This calculates the blocks to cache and each DataNode containing a replica of the block that should cache it.
 
     By default, this parameter is set to 300000, which is five minutes.
 
-* dfs.datanode.fsdatasetcache.max.threads.per.volumeThe DataNode will use this as the maximum number of threads per volume to use for caching new data.
+*   dfs.datanode.fsdatasetcache.max.threads.per.volume
+
+    The DataNode will use this as the maximum number of threads per volume to use for caching new data.
 
     By default, this parameter is set to 4.
 
-* dfs.cachereport.intervalMsecThe DataNode will use this as the amount of milliseconds between sending a full report of its cache state to the NameNode.
+*   dfs.cachereport.intervalMsec
+
+    The DataNode will use this as the amount of milliseconds between sending a full report of its cache state to the NameNode.
 
     By default, this parameter is set to 10000, which is 10 seconds.
 
-* dfs.namenode.path.based.cache.block.map.allocation.percentThe percentage of the Java heap which we will allocate to the cached blocks map. The cached blocks map is a hash map which uses chained hashing. Smaller maps may be accessed more slowly if the number of cached blocks is large; larger maps will consume more memory. The default is 0.25 percent.
+*   dfs.namenode.path.based.cache.block.map.allocation.percent
+
+    The percentage of the Java heap which we will allocate to the cached blocks map. The cached blocks map is a hash map which uses chained hashing. Smaller maps may be accessed more slowly if the number of cached blocks is large; larger maps will consume more memory. The default is 0.25 percent.
 
 ### OS Limits
 

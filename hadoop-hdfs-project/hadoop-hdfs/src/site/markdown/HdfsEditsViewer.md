@@ -16,12 +16,9 @@ Offline Edits Viewer Guide
 ==========================
 
 * [Offline Edits Viewer Guide](#Offline_Edits_Viewer_Guide)
-
-  * [Overview](#Overview)
-
-  * [Usage](#Usage)
-
-  * [Case study: Hadoop cluster recovery](#Case_study:_Hadoop_cluster_recovery)
+    * [Overview](#Overview)
+    * [Usage](#Usage)
+    * [Case study: Hadoop cluster recovery](#Case_study:_Hadoop_cluster_recovery)
 
 Overview
 --------
@@ -33,16 +30,15 @@ The tool can parse the edits formats -18 (roughly Hadoop 0.19) and later. The to
 Input formats supported:
 
 1.  **binary**: native binary format that Hadoop uses internally
-
-2.  **xml**: XML format, as produced by xml processor, used if filename has `.xml` (case insensitive) extension
+2.  **xml**: XML format, as produced by xml processor, used if filename
+    has `.xml` (case insensitive) extension
 
 The Offline Edits Viewer provides several output processors (unless stated otherwise the output of the processor can be converted back to original edits file):
 
 1.  **binary**: native binary format that Hadoop uses internally
-
 2.  **xml**: XML format
-
-3.  **stats**: prints out statistics, this cannot be converted back to Edits file
+3.  **stats**: prints out statistics, this cannot be converted back to
+    Edits file
 
 Usage
 -----
@@ -51,11 +47,11 @@ Usage
 
 |                                       Flag | Description |
 |:---- |:---- |
-|        [`-i` ; `--inputFile`] *input file* | Specify the input edits log file to process. Xml (case insensitive) extension means XML format otherwise binary format is assumed. Required. |
-|  [**-o** ; **--outputFile**] *output file* | Specify the output filename, if the specified output processor generates one. If the specified file already exists, it is silently overwritten. Required. |
-|     [**-p** ; **--processor**] *processor* | Specify the image processor to apply against the image file. Currently valid options are `binary`, `xml` (default) and `stats`. |
-|                       **[-v ; --verbose]** | Print the input and output filenames and pipe output of processor to console as well as specified file. On extremely large files, this may increase processing time by an order of magnitude. |
-|                          **[-h ; --help]** | Display the tool usage and help information and exit. |
+| [`-i` ; `--inputFile`] *input file* | Specify the input edits log file to process. Xml (case insensitive) extension means XML format otherwise binary format is assumed. Required. |
+| [`-o` ; `--outputFile`] *output file* | Specify the output filename, if the specified output processor generates one. If the specified file already exists, it is silently overwritten. Required. |
+| [`-p` ; `--processor`] *processor* | Specify the image processor to apply against the image file. Currently valid options are `binary`, `xml` (default) and `stats`. |
+| [`-v` ; `--verbose`] | Print the input and output filenames and pipe output of processor to console as well as specified file. On extremely large files, this may increase processing time by an order of magnitude. |
+| [`-h` ; `--help`] | Display the tool usage and help information and exit. |
 
 Case study: Hadoop cluster recovery
 -----------------------------------

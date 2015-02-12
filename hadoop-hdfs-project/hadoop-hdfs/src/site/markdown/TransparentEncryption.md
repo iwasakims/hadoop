@@ -16,50 +16,28 @@ Transparent Encryption in HDFS
 ==============================
 
 * [Overview](#Overview)
-
 * [Background](#Background)
-
 * [Use Cases](#Use_Cases)
-
 * [Architecture](#Architecture)
-
-  * [Overview](#Overview)
-
-  * [Accessing data within an encryption zone](#Accessing_data_within_an_encryption_zone)
-
-  * [Key Management Server, KeyProvider, EDEKs](#Key_Management_Server_KeyProvider_EDEKs)
-
+    * [Overview](#Overview)
+    * [Accessing data within an encryption zone](#Accessing_data_within_an_encryption_zone)
+    * [Key Management Server, KeyProvider, EDEKs](#Key_Management_Server_KeyProvider_EDEKs)
 * [Configuration](#Configuration)
-
-  * [Configuring the cluster KeyProvider](#Configuring_the_cluster_KeyProvider)
-
-  * [Selecting an encryption algorithm and codec](#Selecting_an_encryption_algorithm_and_codec)
-
-  * [Namenode configuration](#Namenode_configuration)
-
+    * [Configuring the cluster KeyProvider](#Configuring_the_cluster_KeyProvider)
+    * [Selecting an encryption algorithm and codec](#Selecting_an_encryption_algorithm_and_codec)
+    * [Namenode configuration](#Namenode_configuration)
 * [crypto command-line interface](#crypto_command-line_interface)
-
-  * [createZone](#createZone)
-
-  * [listZones](#listZones)
-
+    * [createZone](#createZone)
+    * [listZones](#listZones)
 * [Example usage](#Example_usage)
-
 * [Distcp considerations](#Distcp_considerations)
-
-  * [Running as the superuser](#Running_as_the_superuser)
-
-  * [Copying between encrypted and unencrypted locations](#Copying_between_encrypted_and_unencrypted_locations)
-
+    * [Running as the superuser](#Running_as_the_superuser)
+    * [Copying between encrypted and unencrypted locations](#Copying_between_encrypted_and_unencrypted_locations)
 * [Attack vectors](#Attack_vectors)
-
-  * [Hardware access exploits](#Hardware_access_exploits)
-
-  * [Root access exploits](#Root_access_exploits)
-
-  * [HDFS admin exploits](#HDFS_admin_exploits)
-
-  * [Rogue user exploits](#Rogue_user_exploits)
+    * [Hardware access exploits](#Hardware_access_exploits)
+    * [Root access exploits](#Root_access_exploits)
+    * [HDFS admin exploits](#HDFS_admin_exploits)
+    * [Rogue user exploits](#Rogue_user_exploits)
 
 Overview
 --------
@@ -187,8 +165,9 @@ Usage: `[-createZone -keyName <keyName> -path <path>]`
 
 Create a new encryption zone.
 
-| *path* | The path of the encryption zone to create. It must be an empty directory. |
+| | |
 |:---- |:---- |
+| *path* | The path of the encryption zone to create. It must be an empty directory. |
 | *keyName* | Name of the key to use for the encryption zone. |
 
 ### listZones
@@ -240,13 +219,13 @@ These exploits assume that attacker has gained physical access to hard drives fr
 
 1.  Access to swap files of processes containing data encryption keys.
 
-  * By itself, this does not expose cleartext, as it also requires access to encrypted block files.
+    * By itself, this does not expose cleartext, as it also requires access to encrypted block files.
 
-  * This can be mitigated by disabling swap, using encrypted swap, or using mlock to prevent keys from being swapped out.
+    * This can be mitigated by disabling swap, using encrypted swap, or using mlock to prevent keys from being swapped out.
 
 2.  Access to encrypted block files.
 
-  * By itself, this does not expose cleartext, as it also requires access to DEKs.
+    * By itself, this does not expose cleartext, as it also requires access to DEKs.
 
 ### Root access exploits
 
@@ -254,23 +233,23 @@ These exploits assume that attacker has gained root shell access to cluster mach
 
 1.  Access to encrypted block files.
 
-  * By itself, this does not expose cleartext, as it also requires access to encryption keys.
+    * By itself, this does not expose cleartext, as it also requires access to encryption keys.
 
 2.  Dump memory of client processes to obtain DEKs, delegation tokens, cleartext.
 
-  * No mitigation.
+    * No mitigation.
 
 3.  Recording network traffic to sniff encryption keys and encrypted data in transit.
 
-  * By itself, insufficient to read cleartext without the EDEK encryption key.
+    * By itself, insufficient to read cleartext without the EDEK encryption key.
 
 4.  Dump memory of datanode process to obtain encrypted block data.
 
-  * By itself, insufficient to read cleartext without the DEK.
+    * By itself, insufficient to read cleartext without the DEK.
 
 5.  Dump memory of namenode process to obtain encrypted data encryption keys.
 
-  * By itself, insufficient to read cleartext without the EDEK's encryption key and encrypted block files.
+    * By itself, insufficient to read cleartext without the EDEK's encryption key and encrypted block files.
 
 ### HDFS admin exploits
 
@@ -278,11 +257,11 @@ These exploits assume that the attacker has compromised HDFS, but does not have 
 
 1.  Access to encrypted block files.
 
-  * By itself, insufficient to read cleartext without the EDEK and EDEK encryption key.
+    * By itself, insufficient to read cleartext without the EDEK and EDEK encryption key.
 
 2.  Access to encryption zone and encrypted file metadata (including encrypted data encryption keys), via -fetchImage.
 
-  * By itself, insufficient to read cleartext without EDEK encryption keys.
+    * By itself, insufficient to read cleartext without EDEK encryption keys.
 
 ### Rogue user exploits
 
