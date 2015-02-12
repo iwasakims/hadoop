@@ -59,9 +59,11 @@ Prior to Hadoop 2.0.0, the NameNode was a single point of failure (SPOF) in an H
 
 This impacted the total availability of the HDFS cluster in two major ways:
 
-* In the case of an unplanned event such as a machine crash, the cluster would be unavailable until an operator restarted the NameNode.
+* In the case of an unplanned event such as a machine crash, the cluster would
+  be unavailable until an operator restarted the NameNode.
 
-* Planned maintenance events such as software or hardware upgrades on the NameNode machine would result in windows of cluster downtime.
+* Planned maintenance events such as software or hardware upgrades on the
+  NameNode machine would result in windows of cluster downtime.
 
 The HDFS High Availability feature addresses the above problems by providing the option of running two redundant NameNodes in the same cluster in an Active/Passive configuration with a hot standby. This allows a fast failover to a new NameNode in the case that a machine crashes, or a graceful administrator-initiated failover for the purpose of planned maintenance.
 
@@ -81,9 +83,21 @@ Hardware resources
 
 In order to deploy an HA cluster, you should prepare the following:
 
-* **NameNode machines** - the machines on which you run the Active and Standby NameNodes should have equivalent hardware to each other, and equivalent hardware to what would be used in a non-HA cluster.
+* **NameNode machines** - the machines on which you run the Active and
+  Standby NameNodes should have equivalent hardware to each other, and
+  equivalent hardware to what would be used in a non-HA cluster.
 
-* **JournalNode machines** - the machines on which you run the JournalNodes. The JournalNode daemon is relatively lightweight, so these daemons may reasonably be collocated on machines with other Hadoop daemons, for example NameNodes, the JobTracker, or the YARN ResourceManager. **Note:** There must be at least 3 JournalNode daemons, since edit log modifications must be written to a majority of JNs. This will allow the system to tolerate the failure of a single machine. You may also run more than 3 JournalNodes, but in order to actually increase the number of failures the system can tolerate, you should run an odd number of JNs, (i.e. 3, 5, 7, etc.). Note that when running with N JournalNodes, the system can tolerate at most (N - 1) / 2 failures and continue to function normally.
+* **JournalNode machines** - the machines on which you run the JournalNodes.
+  The JournalNode daemon is relatively lightweight, so these daemons may
+  reasonably be collocated on machines with other Hadoop daemons, for example
+  NameNodes, the JobTracker, or the YARN ResourceManager. **Note:** There
+  must be at least 3 JournalNode daemons, since edit log modifications must be
+  written to a majority of JNs. This will allow the system to tolerate the
+  failure of a single machine. You may also run more than 3 JournalNodes, but
+  in order to actually increase the number of failures the system can tolerate,
+  you should run an odd number of JNs, (i.e. 3, 5, 7, etc.). Note that when
+  running with N JournalNodes, the system can tolerate at most (N - 1) / 2
+  failures and continue to function normally.
 
 Note that, in an HA cluster, the Standby NameNode also performs checkpoints of the namespace state, and thus it is not necessary to run a Secondary NameNode, CheckpointNode, or BackupNode in an HA cluster. In fact, to do so would be an error. This also allows one who is reconfiguring a non-HA-enabled HDFS cluster to be HA-enabled to reuse the hardware which they had previously dedicated to the Secondary NameNode.
 
@@ -102,16 +116,29 @@ To configure HA NameNodes, you must add several configuration options to your **
 
 The order in which you set these configurations is unimportant, but the values you choose for **dfs.nameservices** and **dfs.ha.namenodes.[nameservice ID]** will determine the keys of those that follow. Thus, you should decide on these values before setting the rest of the configuration options.
 
-* **dfs.nameservices** - the logical name for this new nameserviceChoose a logical name for this nameservice, for example "mycluster", and use this logical name for the value of this config option. The name you choose is arbitrary. It will be used both for configuration and as the authority component of absolute HDFS paths in the cluster.
+*   **dfs.nameservices** - the logical name for this new nameservice
 
-    **Note:** If you are also using HDFS Federation, this configuration setting should also include the list of other nameservices, HA or otherwise, as a comma-separated list.
+    Choose a logical name for this nameservice, for example "mycluster", and use
+    this logical name for the value of this config option. The name you choose is
+    arbitrary. It will be used both for configuration and as the authority
+    component of absolute HDFS paths in the cluster.
+
+    **Note:** If you are also using HDFS Federation, this configuration setting
+    should also include the list of other nameservices, HA or otherwise, as a
+    comma-separated list.
 
         <property>
           <name>dfs.nameservices</name>
           <value>mycluster</value>
         </property>
 
-* **dfs.ha.namenodes.[nameservice ID]** - unique identifiers for each NameNode in the nameserviceConfigure with a list of comma-separated NameNode IDs. This will be used by DataNodes to determine all the NameNodes in the cluster. For example, if you used "mycluster" as the nameservice ID previously, and you wanted to use "nn1" and "nn2" as the individual IDs of the NameNodes, you would configure this as such:
+*   **dfs.ha.namenodes.[nameservice ID]** - unique identifiers for each NameNode in the nameservice
+
+    Configure with a list of comma-separated NameNode IDs. This will be used by
+    DataNodes to determine all the NameNodes in the cluster. For example, if you
+    used "mycluster" as the nameservice ID previously, and you wanted to use "nn1"
+    and "nn2" as the individual IDs of the NameNodes, you would configure this as
+    such:
 
         <property>
           <name>dfs.ha.namenodes.mycluster</name>
@@ -120,7 +147,11 @@ The order in which you set these configurations is unimportant, but the values y
 
     **Note:** Currently, only a maximum of two NameNodes may be configured per nameservice.
 
-* **dfs.namenode.rpc-address.[nameservice ID].[name node ID]** - the fully-qualified RPC address for each NameNode to listen onFor both of the previously-configured NameNode IDs, set the full address and IPC port of the NameNode processs. Note that this results in two separate configuration options. For example:
+*   **dfs.namenode.rpc-address.[nameservice ID].[name node ID]** - the fully-qualified RPC address for each NameNode to listen on
+
+    For both of the previously-configured NameNode IDs, set the full address and
+    IPC port of the NameNode processs. Note that this results in two separate
+    configuration options. For example:
 
         <property>
           <name>dfs.namenode.rpc-address.mycluster.nn1</name>
@@ -133,7 +164,10 @@ The order in which you set these configurations is unimportant, but the values y
 
     **Note:** You may similarly configure the "**servicerpc-address**" setting if you so desire.
 
-* **dfs.namenode.http-address.[nameservice ID].[name node ID]** - the fully-qualified HTTP address for each NameNode to listen onSimilarly to *rpc-address* above, set the addresses for both NameNodes' HTTP servers to listen on. For example:
+*   **dfs.namenode.http-address.[nameservice ID].[name node ID]** - the fully-qualified HTTP address for each NameNode to listen on
+
+    Similarly to *rpc-address* above, set the addresses for both NameNodes' HTTP
+    servers to listen on. For example:
 
         <property>
           <name>dfs.namenode.http-address.mycluster.nn1</name>
@@ -144,29 +178,78 @@ The order in which you set these configurations is unimportant, but the values y
           <value>machine2.example.com:50070</value>
         </property>
 
-    **Note:** If you have Hadoop's security features enabled, you should also set the *https-address* similarly for each NameNode.
+    **Note:** If you have Hadoop's security features enabled, you should also set
+    the *https-address* similarly for each NameNode.
 
-* **dfs.namenode.shared.edits.dir** - the URI which identifies the group of JNs where the NameNodes will write/read editsThis is where one configures the addresses of the JournalNodes which provide the shared edits storage, written to by the Active nameNode and read by the Standby NameNode to stay up-to-date with all the file system changes the Active NameNode makes. Though you must specify several JournalNode addresses, **you should only configure one of these URIs.** The URI should be of the form: `qjournal://*host1:port1*;*host2:port2*;*host3:port3*/*journalId*`. The Journal ID is a unique identifier for this nameservice, which allows a single set of JournalNodes to provide storage for multiple federated namesystems. Though not a requirement, it's a good idea to reuse the nameservice ID for the journal identifier.
+*   **dfs.namenode.shared.edits.dir** - the URI which identifies the group of JNs where the NameNodes will write/read edits
 
-    For example, if the JournalNodes for this cluster were running on the machines "node1.example.com", "node2.example.com", and "node3.example.com" and the nameservice ID were "mycluster", you would use the following as the value for this setting (the default port for the JournalNode is 8485):
+    This is where one configures the addresses of the JournalNodes which provide
+    the shared edits storage, written to by the Active nameNode and read by the
+    Standby NameNode to stay up-to-date with all the file system changes the Active
+    NameNode makes. Though you must specify several JournalNode addresses,
+    **you should only configure one of these URIs.** The URI should be of the form:
+    `qjournal://*host1:port1*;*host2:port2*;*host3:port3*/*journalId*`. The Journal
+    ID is a unique identifier for this nameservice, which allows a single set of
+    JournalNodes to provide storage for multiple federated namesystems. Though not
+    a requirement, it's a good idea to reuse the nameservice ID for the journal
+    identifier.
+
+    For example, if the JournalNodes for this cluster were running on the
+    machines "node1.example.com", "node2.example.com", and "node3.example.com" and
+    the nameservice ID were "mycluster", you would use the following as the value
+    for this setting (the default port for the JournalNode is 8485):
 
         <property>
           <name>dfs.namenode.shared.edits.dir</name>
           <value>qjournal://node1.example.com:8485;node2.example.com:8485;node3.example.com:8485/mycluster</value>
         </property>
 
-* **dfs.client.failover.proxy.provider.[nameservice ID]** - the Java class that HDFS clients use to contact the Active NameNodeConfigure the name of the Java class which will be used by the DFS Client to determine which NameNode is the current Active, and therefore which NameNode is currently serving client requests. The only implementation which currently ships with Hadoop is the **ConfiguredFailoverProxyProvider**, so use this unless you are using a custom one. For example:
+*   **dfs.client.failover.proxy.provider.[nameservice ID]** - the Java class that HDFS clients use to contact the Active NameNode
+
+    Configure the name of the Java class which will be used by the DFS Client to
+    determine which NameNode is the current Active, and therefore which NameNode is
+    currently serving client requests. The only implementation which currently
+    ships with Hadoop is the **ConfiguredFailoverProxyProvider**, so use this
+    unless you are using a custom one. For example:
 
         <property>
           <name>dfs.client.failover.proxy.provider.mycluster</name>
           <value>org.apache.hadoop.hdfs.server.namenode.ha.ConfiguredFailoverProxyProvider</value>
         </property>
 
-* **dfs.ha.fencing.methods** - a list of scripts or Java classes which will be used to fence the Active NameNode during a failoverIt is desirable for correctness of the system that only one NameNode be in the Active state at any given time. **Importantly, when using the Quorum Journal Manager, only one NameNode will ever be allowed to write to the JournalNodes, so there is no potential for corrupting the file system metadata from a split-brain scenario.** However, when a failover occurs, it is still possible that the previous Active NameNode could serve read requests to clients, which may be out of date until that NameNode shuts down when trying to write to the JournalNodes. For this reason, it is still desirable to configure some fencing methods even when using the Quorum Journal Manager. However, to improve the availability of the system in the event the fencing mechanisms fail, it is advisable to configure a fencing method which is guaranteed to return success as the last fencing method in the list. Note that if you choose to use no actual fencing methods, you still must configure something for this setting, for example "`shell(/bin/true)`".
+*   **dfs.ha.fencing.methods** - a list of scripts or Java classes which will be used to fence the Active NameNode during a failover
 
-    The fencing methods used during a failover are configured as a carriage-return-separated list, which will be attempted in order until one indicates that fencing has succeeded. There are two methods which ship with Hadoop: *shell* and *sshfence*. For information on implementing your own custom fencing method, see the *org.apache.hadoop.ha.NodeFencer* class.
+    It is desirable for correctness of the system that only one NameNode be in
+    the Active state at any given time. **Importantly, when using the Quorum
+    Journal Manager, only one NameNode will ever be allowed to write to the
+    JournalNodes, so there is no potential for corrupting the file system metadata
+    from a split-brain scenario.** However, when a failover occurs, it is still
+    possible that the previous Active NameNode could serve read requests to
+    clients, which may be out of date until that NameNode shuts down when trying to
+    write to the JournalNodes. For this reason, it is still desirable to configure
+    some fencing methods even when using the Quorum Journal Manager. However, to
+    improve the availability of the system in the event the fencing mechanisms
+    fail, it is advisable to configure a fencing method which is guaranteed to
+    return success as the last fencing method in the list. Note that if you choose
+    to use no actual fencing methods, you still must configure something for this
+    setting, for example "`shell(/bin/true)`".
 
-  * **sshfence** - SSH to the Active NameNode and kill the processThe *sshfence* option SSHes to the target node and uses *fuser* to kill the process listening on the service's TCP port. In order for this fencing option to work, it must be able to SSH to the target node without providing a passphrase. Thus, one must also configure the **dfs.ha.fencing.ssh.private-key-files** option, which is a comma-separated list of SSH private key files. For example:
+    The fencing methods used during a failover are configured as a
+    carriage-return-separated list, which will be attempted in order until
+    one indicates that fencing has succeeded. There are two methods which ship with
+    Hadoop: *shell* and *sshfence*. For information on implementing your own custom
+    fencing method, see the *org.apache.hadoop.ha.NodeFencer* class.
+
+    - - -
+
+    **sshfence** - SSH to the Active NameNode and kill the process
+
+    The *sshfence* option SSHes to the target node and uses *fuser* to kill the
+    process listening on the service's TCP port. In order for this fencing option
+    to work, it must be able to SSH to the target node without providing a
+    passphrase. Thus, one must also configure the
+    **dfs.ha.fencing.ssh.private-key-files** option, which is a
+    comma-separated list of SSH private key files. For example:
 
             <property>
               <name>dfs.ha.fencing.methods</name>
@@ -178,7 +261,10 @@ The order in which you set these configurations is unimportant, but the values y
               <value>/home/exampleuser/.ssh/id_rsa</value>
             </property>
 
-        Optionally, one may configure a non-standard username or port to perform the SSH. One may also configure a timeout, in milliseconds, for the SSH, after which this fencing method will be considered to have failed. It may be configured like so:
+    Optionally, one may configure a non-standard username or port to perform the
+    SSH. One may also configure a timeout, in milliseconds, for the SSH, after
+    which this fencing method will be considered to have failed. It may be
+    configured like so:
 
             <property>
               <name>dfs.ha.fencing.methods</name>
@@ -189,45 +275,78 @@ The order in which you set these configurations is unimportant, but the values y
               <value>30000</value>
             </property>
 
-  * **shell** - run an arbitrary shell command to fence the Active NameNodeThe *shell* fencing method runs an arbitrary shell command. It may be configured like so:
+    - - -
+
+    **shell** - run an arbitrary shell command to fence the Active NameNode
+
+    The *shell* fencing method runs an arbitrary shell command. It may be
+    configured like so:
 
             <property>
               <name>dfs.ha.fencing.methods</name>
               <value>shell(/path/to/my/script.sh arg1 arg2 ...)</value>
             </property>
 
-        The string between '(' and ')' is passed directly to a bash shell and may not include any closing parentheses.
+    The string between '(' and ')' is passed directly to a bash shell and may not
+    include any closing parentheses.
 
-        The shell command will be run with an environment set up to contain all of the current Hadoop configuration variables, with the '\_' character replacing any '.' characters in the configuration keys. The configuration used has already had any namenode-specific configurations promoted to their generic forms -- for example **dfs\_namenode\_rpc-address** will contain the RPC address of the target node, even though the configuration may specify that variable as **dfs.namenode.rpc-address.ns1.nn1**.
+    The shell command will be run with an environment set up to contain all of the
+    current Hadoop configuration variables, with the '\_' character replacing any
+    '.' characters in the configuration keys. The configuration used has already had
+    any namenode-specific configurations promoted to their generic forms -- for example
+    **dfs\_namenode\_rpc-address** will contain the RPC address of the target node, even
+    though the configuration may specify that variable as
+    **dfs.namenode.rpc-address.ns1.nn1**.
 
-        Additionally, the following variables referring to the target node to be fenced are also available:
+    Additionally, the following variables referring to the target node to be fenced
+    are also available:
 
-|           $target\_host | hostname of the node to be fenced |
-|:---- |:---- |
-|           $target\_port | IPC port of the node to be fenced |
-|        $target\_address | the above two, combined as host:port |
-|  $target\_nameserviceid | the nameservice ID of the NN to be fenced |
-|     $target\_namenodeid | the namenode ID of the NN to be fenced |
+    | | |
+    |:---- |:---- |
+    | $target\_host | hostname of the node to be fenced |
+    | $target\_port | IPC port of the node to be fenced |
+    | $target\_address | the above two, combined as host:port |
+    | $target\_nameserviceid | the nameservice ID of the NN to be fenced |
+    | $target\_namenodeid | the namenode ID of the NN to be fenced |
 
-        These environment variables may also be used as substitutions in the shell command itself. For example:
+    These environment variables may also be used as substitutions in the shell
+    command itself. For example:
 
             <property>
               <name>dfs.ha.fencing.methods</name>
               <value>shell(/path/to/my/script.sh --nameservice=$target_nameserviceid $target_host:$target_port)</value>
             </property>
 
-        If the shell command returns an exit code of 0, the fencing is determined to be successful. If it returns any other exit code, the fencing was not successful and the next fencing method in the list will be attempted.
+    If the shell command returns an exit
+    code of 0, the fencing is determined to be successful. If it returns any other
+    exit code, the fencing was not successful and the next fencing method in the
+    list will be attempted.
 
-        **Note:** This fencing method does not implement any timeout. If timeouts are necessary, they should be implemented in the shell script itself (eg by forking a subshell to kill its parent in some number of seconds).
+    **Note:** This fencing method does not implement any timeout. If timeouts are
+    necessary, they should be implemented in the shell script itself (eg by forking
+    a subshell to kill its parent in some number of seconds).
 
-* **fs.defaultFS** - the default path prefix used by the Hadoop FS client when none is givenOptionally, you may now configure the default path for Hadoop clients to use the new HA-enabled logical URI. If you used "mycluster" as the nameservice ID earlier, this will be the value of the authority portion of all of your HDFS paths. This may be configured like so, in your **core-site.xml** file:
+    - - -
+
+*   **fs.defaultFS** - the default path prefix used by the Hadoop FS client when none is given
+
+    Optionally, you may now configure the default path for Hadoop clients to use
+    the new HA-enabled logical URI. If you used "mycluster" as the nameservice ID
+    earlier, this will be the value of the authority portion of all of your HDFS
+    paths. This may be configured like so, in your **core-site.xml** file:
 
         <property>
           <name>fs.defaultFS</name>
           <value>hdfs://mycluster</value>
         </property>
 
-* **dfs.journalnode.edits.dir** - the path where the JournalNode daemon will store its local stateThis is the absolute path on the JournalNode machines where the edits and other local state used by the JNs will be stored. You may only use a single path for this configuration. Redundancy for this data is provided by running multiple separate JournalNodes, or by configuring this directory on a locally-attached RAID array. For example:
+*   **dfs.journalnode.edits.dir** - the path where the JournalNode daemon will store its local state
+
+    This is the absolute path on the JournalNode machines where the edits and
+    other local state used by the JNs will be stored. You may only use a single
+    path for this configuration. Redundancy for this data is provided by running
+    multiple separate JournalNodes, or by configuring this directory on a
+    locally-attached RAID array. For example:
 
         <property>
           <name>dfs.journalnode.edits.dir</name>
@@ -240,11 +359,20 @@ After all of the necessary configuration options have been set, you must start t
 
 Once the JournalNodes have been started, one must initially synchronize the two HA NameNodes' on-disk metadata.
 
-* If you are setting up a fresh HDFS cluster, you should first run the format command (*hdfs namenode -format*) on one of NameNodes.
+* If you are setting up a fresh HDFS cluster, you should first run the format
+  command (*hdfs namenode -format*) on one of NameNodes.
 
-* If you have already formatted the NameNode, or are converting a non-HA-enabled cluster to be HA-enabled, you should now copy over the contents of your NameNode metadata directories to the other, unformatted NameNode by running the command "*hdfs namenode -bootstrapStandby*" on the unformatted NameNode. Running this command will also ensure that the JournalNodes (as configured by **dfs.namenode.shared.edits.dir**) contain sufficient edits transactions to be able to start both NameNodes.
+* If you have already formatted the NameNode, or are converting a
+  non-HA-enabled cluster to be HA-enabled, you should now copy over the
+  contents of your NameNode metadata directories to the other, unformatted
+  NameNode by running the command "*hdfs namenode -bootstrapStandby*" on the
+  unformatted NameNode. Running this command will also ensure that the
+  JournalNodes (as configured by **dfs.namenode.shared.edits.dir**) contain
+  sufficient edits transactions to be able to start both NameNodes.
 
-* If you are converting a non-HA NameNode to be HA, you should run the command "*hdfs -initializeSharedEdits*", which will initialize the JournalNodes with the edits data from the local NameNode edits directories.
+* If you are converting a non-HA NameNode to be HA, you should run the
+  command "*hdfs -initializeSharedEdits*", which will initialize the
+  JournalNodes with the edits data from the local NameNode edits directories.
 
 At this point you may start both of your HA NameNodes as you normally would start a NameNode.
 
@@ -264,15 +392,41 @@ Now that your HA NameNodes are configured and started, you will have access to s
 
 This guide describes high-level uses of each of these subcommands. For specific usage information of each subcommand, you should run "*hdfs haadmin -help \<command*\>".
 
-* **transitionToActive** and **transitionToStandby** - transition the state of the given NameNode to Active or StandbyThese subcommands cause a given NameNode to transition to the Active or Standby state, respectively. **These commands do not attempt to perform any fencing, and thus should rarely be used.** Instead, one should almost always prefer to use the "*hdfs haadmin -failover*" subcommand.
+*   **transitionToActive** and **transitionToStandby** - transition the state of the given NameNode to Active or Standby
 
-* **failover** - initiate a failover between two NameNodesThis subcommand causes a failover from the first provided NameNode to the second. If the first NameNode is in the Standby state, this command simply transitions the second to the Active state without error. If the first NameNode is in the Active state, an attempt will be made to gracefully transition it to the Standby state. If this fails, the fencing methods (as configured by **dfs.ha.fencing.methods**) will be attempted in order until one succeeds. Only after this process will the second NameNode be transitioned to the Active state. If no fencing method succeeds, the second NameNode will not be transitioned to the Active state, and an error will be returned.
+    These subcommands cause a given NameNode to transition to the Active or Standby
+    state, respectively. **These commands do not attempt to perform any fencing,
+    and thus should rarely be used.** Instead, one should almost always prefer to
+    use the "*hdfs haadmin -failover*" subcommand.
 
-* **getServiceState** - determine whether the given NameNode is Active or StandbyConnect to the provided NameNode to determine its current state, printing either "standby" or "active" to STDOUT appropriately. This subcommand might be used by cron jobs or monitoring scripts which need to behave differently based on whether the NameNode is currently Active or Standby.
+*   **failover** - initiate a failover between two NameNodes
 
-* **checkHealth** - check the health of the given NameNodeConnect to the provided NameNode to check its health. The NameNode is capable of performing some diagnostics on itself, including checking if internal services are running as expected. This command will return 0 if the NameNode is healthy, non-zero otherwise. One might use this command for monitoring purposes.
+    This subcommand causes a failover from the first provided NameNode to the
+    second. If the first NameNode is in the Standby state, this command simply
+    transitions the second to the Active state without error. If the first NameNode
+    is in the Active state, an attempt will be made to gracefully transition it to
+    the Standby state. If this fails, the fencing methods (as configured by
+    **dfs.ha.fencing.methods**) will be attempted in order until one
+    succeeds. Only after this process will the second NameNode be transitioned to
+    the Active state. If no fencing method succeeds, the second NameNode will not
+    be transitioned to the Active state, and an error will be returned.
 
-    **Note:** This is not yet implemented, and at present will always return success, unless the given NameNode is completely down.
+*   **getServiceState** - determine whether the given NameNode is Active or Standby
+
+    Connect to the provided NameNode to determine its current state, printing
+    either "standby" or "active" to STDOUT appropriately. This subcommand might be
+    used by cron jobs or monitoring scripts which need to behave differently based
+    on whether the NameNode is currently Active or Standby.
+
+*   **checkHealth** - check the health of the given NameNode
+
+    Connect to the provided NameNode to check its health. The NameNode is capable
+    of performing some diagnostics on itself, including checking if internal
+    services are running as expected. This command will return 0 if the NameNode is
+    healthy, non-zero otherwise. One might use this command for monitoring purposes.
+
+    **Note:** This is not yet implemented, and at present will always return
+    success, unless the given NameNode is completely down.
 
 Automatic Failover
 ------------------
@@ -287,17 +441,37 @@ Automatic failover adds two new components to an HDFS deployment: a ZooKeeper qu
 
 Apache ZooKeeper is a highly available service for maintaining small amounts of coordination data, notifying clients of changes in that data, and monitoring clients for failures. The implementation of automatic HDFS failover relies on ZooKeeper for the following things:
 
-* **Failure detection** - each of the NameNode machines in the cluster maintains a persistent session in ZooKeeper. If the machine crashes, the ZooKeeper session will expire, notifying the other NameNode that a failover should be triggered.
+* **Failure detection** - each of the NameNode machines in the cluster
+  maintains a persistent session in ZooKeeper. If the machine crashes, the
+  ZooKeeper session will expire, notifying the other NameNode that a failover
+  should be triggered.
 
-* **Active NameNode election** - ZooKeeper provides a simple mechanism to exclusively elect a node as active. If the current active NameNode crashes, another node may take a special exclusive lock in ZooKeeper indicating that it should become the next active.
+* **Active NameNode election** - ZooKeeper provides a simple mechanism to
+  exclusively elect a node as active. If the current active NameNode crashes,
+  another node may take a special exclusive lock in ZooKeeper indicating that
+  it should become the next active.
 
 The ZKFailoverController (ZKFC) is a new component which is a ZooKeeper client which also monitors and manages the state of the NameNode. Each of the machines which runs a NameNode also runs a ZKFC, and that ZKFC is responsible for:
 
-* **Health monitoring** - the ZKFC pings its local NameNode on a periodic basis with a health-check command. So long as the NameNode responds in a timely fashion with a healthy status, the ZKFC considers the node healthy. If the node has crashed, frozen, or otherwise entered an unhealthy state, the health monitor will mark it as unhealthy.
+* **Health monitoring** - the ZKFC pings its local NameNode on a periodic
+  basis with a health-check command. So long as the NameNode responds in a
+  timely fashion with a healthy status, the ZKFC considers the node
+  healthy. If the node has crashed, frozen, or otherwise entered an unhealthy
+  state, the health monitor will mark it as unhealthy.
 
-* **ZooKeeper session management** - when the local NameNode is healthy, the ZKFC holds a session open in ZooKeeper. If the local NameNode is active, it also holds a special "lock" znode. This lock uses ZooKeeper's support for "ephemeral" nodes; if the session expires, the lock node will be automatically deleted.
+* **ZooKeeper session management** - when the local NameNode is healthy, the
+  ZKFC holds a session open in ZooKeeper. If the local NameNode is active, it
+  also holds a special "lock" znode. This lock uses ZooKeeper's support for
+  "ephemeral" nodes; if the session expires, the lock node will be
+  automatically deleted.
 
-* **ZooKeeper-based election** - if the local NameNode is healthy, and the ZKFC sees that no other node currently holds the lock znode, it will itself try to acquire the lock. If it succeeds, then it has "won the election", and is responsible for running a failover to make its local NameNode active. The failover process is similar to the manual failover described above: first, the previous active is fenced if necessary, and then the local NameNode transitions to active state.
+* **ZooKeeper-based election** - if the local NameNode is healthy, and the
+  ZKFC sees that no other node currently holds the lock znode, it will itself
+  try to acquire the lock. If it succeeds, then it has "won the election", and
+  is responsible for running a failover to make its local NameNode active. The
+  failover process is similar to the manual failover described above: first,
+  the previous active is fenced if necessary, and then the local NameNode
+  transitions to active state.
 
 For more details on the design of automatic failover, refer to the design document attached to HDFS-2185 on the Apache HDFS JIRA.
 
@@ -402,17 +576,37 @@ If the test does not succeed, you may have a misconfiguration. Check the logs fo
 Automatic Failover FAQ
 ----------------------
 
-* **Is it important that I start the ZKFC and NameNode daemons in any particular order?**No. On any given node you may start the ZKFC before or after its corresponding NameNode.
+*   **Is it important that I start the ZKFC and NameNode daemons in any particular order?**
 
-* **What additional monitoring should I put in place?**You should add monitoring on each host that runs a NameNode to ensure that the ZKFC remains running. In some types of ZooKeeper failures, for example, the ZKFC may unexpectedly exit, and should be restarted to ensure that the system is ready for automatic failover.
+    No. On any given node you may start the ZKFC before or after its corresponding NameNode.
 
-    Additionally, you should monitor each of the servers in the ZooKeeper quorum. If ZooKeeper crashes, then automatic failover will not function.
+*   **What additional monitoring should I put in place?**
 
-* **What happens if ZooKeeper goes down?**If the ZooKeeper cluster crashes, no automatic failovers will be triggered. However, HDFS will continue to run without any impact. When ZooKeeper is restarted, HDFS will reconnect with no issues.
+    You should add monitoring on each host that runs a NameNode to ensure that the
+    ZKFC remains running. In some types of ZooKeeper failures, for example, the
+    ZKFC may unexpectedly exit, and should be restarted to ensure that the system
+    is ready for automatic failover.
 
-* **Can I designate one of my NameNodes as primary/preferred?**No. Currently, this is not supported. Whichever NameNode is started first will become active. You may choose to start the cluster in a specific order such that your preferred node starts first.
+    Additionally, you should monitor each of the servers in the ZooKeeper
+    quorum. If ZooKeeper crashes, then automatic failover will not function.
 
-* **How can I initiate a manual failover when automatic failover is configured?**Even if automatic failover is configured, you may initiate a manual failover using the same `hdfs haadmin` command. It will perform a coordinated failover.
+*   **What happens if ZooKeeper goes down?**
+
+    If the ZooKeeper cluster crashes, no automatic failovers will be triggered.
+    However, HDFS will continue to run without any impact. When ZooKeeper is
+    restarted, HDFS will reconnect with no issues.
+
+*   **Can I designate one of my NameNodes as primary/preferred?**
+
+    No. Currently, this is not supported. Whichever NameNode is started first will
+    become active. You may choose to start the cluster in a specific order such
+    that your preferred node starts first.
+
+*   **How can I initiate a manual failover when automatic failover is configured?**
+
+    Even if automatic failover is configured, you may initiate a manual failover
+    using the same `hdfs haadmin` command. It will perform a coordinated
+    failover.
 
 HDFS Upgrade/Finalization/Rollback with HA Enabled
 --------------------------------------------------
@@ -423,13 +617,23 @@ When moving between versions of HDFS, sometimes the newer software can simply be
 
 1.  Shut down all of the NNs as normal, and install the newer software.
 
-2.  Start up all of the JNs. Note that it is **critical** that all the JNs be running when performing the upgrade, rollback, or finalization operations. If any of the JNs are down at the time of running any of these operations, the operation will fail.
+2.  Start up all of the JNs. Note that it is **critical** that all the
+    JNs be running when performing the upgrade, rollback, or finalization
+    operations. If any of the JNs are down at the time of running any of these
+    operations, the operation will fail.
 
 3.  Start one of the NNs with the `'-upgrade'` flag.
 
-4.  On start, this NN will not enter the standby state as usual in an HA setup. Rather, this NN will immediately enter the active state, perform an upgrade of its local storage dirs, and also perform an upgrade of the shared edit log.
+4.  On start, this NN will not enter the standby state as usual in an HA
+    setup. Rather, this NN will immediately enter the active state, perform an
+    upgrade of its local storage dirs, and also perform an upgrade of the shared
+    edit log.
 
-5.  At this point the other NN in the HA pair will be out of sync with the upgraded NN. In order to bring it back in sync and once again have a highly available setup, you should re-bootstrap this NameNode by running the NN with the `'-bootstrapStandby'` flag. It is an error to start this second NN with the `'-upgrade'` flag.
+5.  At this point the other NN in the HA pair will be out of sync with
+    the upgraded NN. In order to bring it back in sync and once again have a highly
+    available setup, you should re-bootstrap this NameNode by running the NN with
+    the `'-bootstrapStandby'` flag. It is an error to start this second NN with
+    the `'-upgrade'` flag.
 
 Note that if at any time you want to restart the NameNodes before finalizing or rolling back the upgrade, you should start the NNs as normal, i.e. without any special startup flag.
 
