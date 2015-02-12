@@ -40,24 +40,19 @@ Background
 HDFS has two main layers:
 
 * **Namespace**
-
-  * Consists of directories, files and blocks.
-
-  * It supports all the namespace related file system operations such as create, delete, modify and list files and directories.
-
+    * Consists of directories, files and blocks.
+    * It supports all the namespace related file system operations such as
+      create, delete, modify and list files and directories.
 * **Block Storage Service**, which has two parts:
-
-  * Block Management (performed in the Namenode)
-
-      * Provides Datanode cluster membership by handling registrations, and periodic heart beats.
-
-      * Processes block reports and maintains location of blocks.
-
-      * Supports block related operations such as create, delete, modify and get block location.
-
-      * Manages replica placement, block replication for under replicated blocks, and deletes blocks that are over replicated.
-
-  * Storage - is provided by Datanodes by storing blocks on the local file system and allowing read/write access.
+    * Block Management (performed in the Namenode)
+        * Provides Datanode cluster membership by handling registrations, and periodic heart beats.
+        * Processes block reports and maintains location of blocks.
+        * Supports block related operations such as create, delete, modify and
+          get block location.
+        * Manages replica placement, block replication for under
+          replicated blocks, and deletes blocks that are over replicated.
+    * Storage - is provided by Datanodes by storing blocks on the local file
+      system and allowing read/write access.
 
     The prior HDFS architecture allows only a single namespace for the entire cluster. In that configuration, a single Namenode manages the namespace. HDFS Federation addresses this limitation by adding support for multiple Namenodes/namespaces to HDFS.
 
@@ -82,11 +77,18 @@ A **ClusterID** identifier is used to identify all the nodes in the cluster. Whe
 
 ### Key Benefits
 
-* Namespace Scalability - Federation adds namespace horizontal scaling. Large deployments or deployments using lot of small files benefit from namespace scaling by allowing more Namenodes to be added to the cluster.
-
-* Performance - File system throughput is not limited by a single Namenode. Adding more Namenodes to the cluster scales the file system read/write throughput.
-
-* Isolation - A single Namenode offers no isolation in a multi user environment. For example, an experimental application can overload the Namenode and slow down production critical applications. By using multiple Namenodes, different categories of applications and users can be isolated to different namespaces.
+* Namespace Scalability - Federation adds namespace horizontal
+  scaling. Large deployments or deployments using lot of small files
+  benefit from namespace scaling by allowing more Namenodes to be
+  added to the cluster.
+* Performance - File system throughput is not limited by a single
+  Namenode. Adding more Namenodes to the cluster scales the file
+  system read/write throughput.
+* Isolation - A single Namenode offers no isolation in a multi user
+  environment. For example, an experimental application can overload
+  the Namenode and slow down production critical applications. By using
+  multiple Namenodes, different categories of applications and users
+  can be isolated to different namespaces.
 
 Federation Configuration
 ------------------------
@@ -172,7 +174,9 @@ Perform the following steps:
 
 * Add `dfs.nameservices` to the configuration.
 
-* Update the configuration with the NameServiceID suffix. Configuration key names changed post release 0.20. You must use the new configuration parameter names in order to use federation.
+* Update the configuration with the NameServiceID suffix. Configuration
+  key names changed post release 0.20. You must use the new configuration
+  parameter names in order to use federation.
 
 * Add the new Namenode related config to the configuration file.
 
@@ -180,7 +184,8 @@ Perform the following steps:
 
 * Start the new Namenode and Secondary/Backup.
 
-* Refresh the Datanodes to pickup the newly added Namenode by running the following command against all the Datanodes in the cluster:
+* Refresh the Datanodes to pickup the newly added Namenode by running
+  the following command against all the Datanodes in the cluster:
 
         [hdfs]$ $HADOOP_PREFIX/bin/hdfs dfsadmin -refreshNameNode <datanode_host_name>:<datanode_rpc_port>
 
@@ -207,9 +212,14 @@ The Balancer has been changed to work with multiple Namenodes. The Balancer can 
 
 The policy parameter can be any of the following:
 
-* `datanode` - this is the *default* policy. This balances the storage at the Datanode level. This is similar to balancing policy from prior releases.
+* `datanode` - this is the *default* policy. This balances the storage at
+  the Datanode level. This is similar to balancing policy from prior releases.
 
-* `blockpool` - this balances the storage at the block pool level which also balances at the Datanode level.Note that Balancer only balances the data and does not balance the namespace. For the complete command usage, see [balancer](../hadoop-common/CommandsManual.html#balancer).
+* `blockpool` - this balances the storage at the block pool
+  level which also balances at the Datanode level.
+
+Note that Balancer only balances the data and does not balance the namespace.
+For the complete command usage, see [balancer](../hadoop-common/CommandsManual.html#balancer).
 
 ### Decommissioning
 
@@ -231,9 +241,13 @@ Similar to the Namenode status web page, when using federation a Cluster Web Con
 
 The Cluster Web Console provides the following information:
 
-* A cluster summary that shows the number of files, number of blocks, total configured storage capacity, and the available and used storage for the entire cluster.
+* A cluster summary that shows the number of files, number of blocks,
+  total configured storage capacity, and the available and used storage
+  for the entire cluster.
 
-* A list of Namenodes and a summary that includes the number of files, blocks, missing blocks, and live and dead data nodes for each Namenode. It also provides a link to access each Namenode's web UI.
+* A list of Namenodes and a summary that includes the number of files,
+  blocks, missing blocks, and live and dead data nodes for each
+  Namenode. It also provides a link to access each Namenode's web UI.
 
 * The decommissioning status of Datanodes.
 
