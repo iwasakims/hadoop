@@ -50,37 +50,63 @@ HDFS is the primary distributed storage used by Hadoop applications. A HDFS clus
 
 The following are some of the salient features that could be of interest to many users.
 
-* Hadoop, including HDFS, is well suited for distributed storage and distributed processing using commodity hardware. It is fault tolerant, scalable, and extremely simple to expand. MapReduce, well known for its simplicity and applicability for large set of distributed applications, is an integral part of Hadoop.
+*   Hadoop, including HDFS, is well suited for distributed storage and
+    distributed processing using commodity hardware. It is fault
+    tolerant, scalable, and extremely simple to expand. MapReduce, well
+    known for its simplicity and applicability for large set of
+    distributed applications, is an integral part of Hadoop.
 
-* HDFS is highly configurable with a default configuration well suited for many installations. Most of the time, configuration needs to be tuned only for very large clusters.
+*   HDFS is highly configurable with a default configuration well
+    suited for many installations. Most of the time, configuration
+    needs to be tuned only for very large clusters.
 
-* Hadoop is written in Java and is supported on all major platforms.
+*   Hadoop is written in Java and is supported on all major platforms.
 
-* Hadoop supports shell-like commands to interact with HDFS directly.
+*   Hadoop supports shell-like commands to interact with HDFS directly.
 
-* The NameNode and Datanodes have built in web servers that makes it easy to check current status of the cluster.
+*   The NameNode and Datanodes have built in web servers that makes it
+    easy to check current status of the cluster.
 
-* New features and improvements are regularly implemented in HDFS. The following is a subset of useful features in HDFS:
+*   New features and improvements are regularly implemented in HDFS.
+    The following is a subset of useful features in HDFS:
 
-  * File permissions and authentication.
+    *   File permissions and authentication.
 
-  * Rack awareness: to take a node's physical location into account while scheduling tasks and allocating storage.
+    *   Rack awareness: to take a node's physical location into
+        account while scheduling tasks and allocating storage.
 
-  * Safemode: an administrative mode for maintenance.
+    *   Safemode: an administrative mode for maintenance.
 
-  * `fsck`: a utility to diagnose health of the file system, to find missing files or blocks.
+    *   `fsck`: a utility to diagnose health of the file system, to find
+        missing files or blocks.
 
-  * `fetchdt`: a utility to fetch DelegationToken and store it in a file on the local system.
+    *   `fetchdt`: a utility to fetch DelegationToken and store it in a
+        file on the local system.
 
-  * Balancer: tool to balance the cluster when the data is unevenly distributed among DataNodes.
+    *   Balancer: tool to balance the cluster when the data is
+        unevenly distributed among DataNodes.
 
-  * Upgrade and rollback: after a software upgrade, it is possible to rollback to HDFS' state before the upgrade in case of unexpected problems.
+    *   Upgrade and rollback: after a software upgrade, it is possible
+        to rollback to HDFS' state before the upgrade in case of unexpected problems.
 
-  * Secondary NameNode: performs periodic checkpoints of the namespace and helps keep the size of file containing log of HDFS modifications within certain limits at the NameNode.
+    *   Secondary NameNode: performs periodic checkpoints of the
+        namespace and helps keep the size of file containing log of
+        HDFS modifications within certain limits at the NameNode.
 
-  * Checkpoint node: performs periodic checkpoints of the namespace and helps minimize the size of the log stored at the NameNode containing changes to the HDFS. Replaces the role previously filled by the Secondary NameNode, though is not yet battle hardened. The NameNode allows multiple Checkpoint nodes simultaneously, as long as there are no Backup nodes registered with the system.
+    *   Checkpoint node: performs periodic checkpoints of the
+        namespace and helps minimize the size of the log stored at the
+        NameNode containing changes to the HDFS. Replaces the role
+        previously filled by the Secondary NameNode, though is not yet
+        battle hardened. The NameNode allows multiple Checkpoint nodes
+        simultaneously, as long as there are no Backup nodes
+        registered with the system.
 
-  * Backup node: An extension to the Checkpoint node. In addition to checkpointing it also receives a stream of edits from the NameNode and maintains its own in-memory copy of the namespace, which is always in sync with the active NameNode namespace state. Only one Backup node may be registered with the NameNode at once.
+    *   Backup node: An extension to the Checkpoint node. In addition
+        to checkpointing it also receives a stream of edits from the
+        NameNode and maintains its own in-memory copy of the
+        namespace, which is always in sync with the active NameNode
+        namespace state. Only one Backup node may be registered with
+        the NameNode at once.
 
 Prerequisites
 -------------
@@ -88,7 +114,6 @@ Prerequisites
 The following documents describe how to install and set up a Hadoop cluster:
 
 * [Single Node Setup](../hadoop-common/SingleCluster.html) for first-time users.
-
 * [Cluster Setup](../hadoop-common/ClusterSetup.html) for large, distributed clusters.
 
 The rest of this document assumes the user is able to set up and run a HDFS with at least one DataNode. For the purpose of this document, both the NameNode and DataNode could be running on the same physical machine.
@@ -107,15 +132,30 @@ Hadoop includes various shell-like commands that directly interact with HDFS and
 
 The `bin/hdfs dfsadmin` command supports a few HDFS administration related operations. The `bin/hdfs dfsadmin -help` command lists all the commands currently supported. For e.g.:
 
-* `-report`: reports basic statistics of HDFS. Some of this information is also available on the NameNode front page.
+* `-report`: reports basic statistics of HDFS. Some of this
+  information is also available on the NameNode front page.
 
-* `-safemode`: though usually not required, an administrator can manually enter or leave Safemode.
+* `-safemode`: though usually not required, an administrator can
+  manually enter or leave Safemode.
 
-* `-finalizeUpgrade`: removes previous backup of the cluster made during last upgrade.
+* `-finalizeUpgrade`: removes previous backup of the cluster made
+  during last upgrade.
 
-* `-refreshNodes`: Updates the namenode with the set of datanodes allowed to connect to the namenode. Namenodes re-read datanode hostnames in the file defined by `dfs.hosts`, `dfs.hosts.exclude`. Hosts defined in `dfs.hosts` are the datanodes that are part of the cluster. If there are entries in `dfs.hosts`, only the hosts in it are allowed to register with the namenode. Entries in `dfs.hosts.exclude` are datanodes that need to be decommissioned. Datanodes complete decommissioning when all the replicas from them are replicated to other datanodes. Decommissioned nodes are not automatically shutdown and are not chosen for writing for new replicas.
+* `-refreshNodes`: Updates the namenode with the set of datanodes
+  allowed to connect to the namenode. Namenodes re-read datanode
+  hostnames in the file defined by `dfs.hosts`, `dfs.hosts.exclude`
+   Hosts defined in `dfs.hosts` are the datanodes that are part of the
+   cluster. If there are entries in `dfs.hosts`, only the hosts in it
+   are allowed to register with the namenode. Entries in
+   `dfs.hosts.exclude` are datanodes that need to be decommissioned.
+   Datanodes complete decommissioning when all the replicas from them
+   are replicated to other datanodes. Decommissioned nodes are not
+   automatically shutdown and are not chosen for writing for new
+   replicas.
 
-* `-printTopology` : Print the topology of the cluster. Display a tree of racks and datanodes attached to the tracks as viewed by the NameNode.
+* `-printTopology` : Print the topology of the cluster. Display a tree
+  of racks and datanodes attached to the tracks as viewed by the
+  NameNode.
 
 For command usage, see [dfsadmin](./HDFSCommands.html#dfsadmin).
 
@@ -128,9 +168,13 @@ The secondary NameNode merges the fsimage and the edits log files periodically a
 
 The start of the checkpoint process on the secondary NameNode is controlled by two configuration parameters.
 
-* `dfs.namenode.checkpoint.period`, set to 1 hour by default, specifies the maximum delay between two consecutive checkpoints, and
+* `dfs.namenode.checkpoint.period`, set to 1 hour by default, specifies
+  the maximum delay between two consecutive checkpoints, and
 
-* `dfs.namenode.checkpoint.txns`, set to 1 million by default, defines the number of uncheckpointed transactions on the NameNode which will force an urgent checkpoint, even if the checkpoint period has not been reached.
+* `dfs.namenode.checkpoint.txns`, set to 1 million by default, defines the
+  number of uncheckpointed transactions on the NameNode which will
+  force an urgent checkpoint, even if the checkpoint period has not
+  been reached.
 
 The secondary NameNode stores the latest checkpoint in a directory which is structured the same way as the primary NameNode's directory. So that the check pointed image is always ready to be read by the primary NameNode if necessary.
 
@@ -147,9 +191,13 @@ The location of the Checkpoint (or Backup) node and its accompanying web interfa
 
 The start of the checkpoint process on the Checkpoint node is controlled by two configuration parameters.
 
-* `dfs.namenode.checkpoint.period`, set to 1 hour by default, specifies the maximum delay between two consecutive checkpoints
+* `dfs.namenode.checkpoint.period`, set to 1 hour by default, specifies
+  the maximum delay between two consecutive checkpoints
 
-* `dfs.namenode.checkpoint.txns`, set to 1 million by default, defines the number of uncheckpointed transactions on the NameNode which will force an urgent checkpoint, even if the checkpoint period has not been reached.
+* `dfs.namenode.checkpoint.txns`, set to 1 million by default, defines the
+  number of uncheckpointed transactions on the NameNode which will
+  force an urgent checkpoint, even if the checkpoint period has not
+  been reached.
 
 The Checkpoint node stores the latest checkpoint in a directory that is structured the same as the NameNode's directory. This allows the checkpointed image to be always available for reading by the NameNode if necessary. See Import checkpoint.
 
@@ -181,9 +229,11 @@ Import Checkpoint
 
 The latest checkpoint can be imported to the NameNode if all other copies of the image and the edits files are lost. In order to do that one should:
 
-* Create an empty directory specified in the `dfs.namenode.name.dir` configuration variable;
+* Create an empty directory specified in the `dfs.namenode.name.dir`
+  configuration variable;
 
-* Specify the location of the checkpoint directory in the configuration variable `dfs.namenode.checkpoint.dir`;
+* Specify the location of the checkpoint directory in the
+  configuration variable `dfs.namenode.checkpoint.dir`;
 
 * and start the NameNode with `-importCheckpoint` option.
 
@@ -196,11 +246,14 @@ Balancer
 
 HDFS data might not always be be placed uniformly across the DataNode. One common reason is addition of new DataNodes to an existing cluster. While placing new blocks (data for a file is stored as a series of blocks), NameNode considers various parameters before choosing the DataNodes to receive these blocks. Some of the considerations are:
 
-* Policy to keep one of the replicas of a block on the same node as the node that is writing the block.
+* Policy to keep one of the replicas of a block on the same node as
+  the node that is writing the block.
 
-* Need to spread different replicas of a block across the racks so that cluster can survive loss of whole rack.
+* Need to spread different replicas of a block across the racks so
+  that cluster can survive loss of whole rack.
 
-* One of the replicas is usually placed on the same rack as the node writing to the file so that cross-rack network I/O is reduced.
+* One of the replicas is usually placed on the same rack as the node
+  writing to the file so that cross-rack network I/O is reduced.
 
 * Spread HDFS data uniformly across the DataNodes in the cluster.
 
@@ -248,19 +301,25 @@ Upgrade and Rollback
 
 When Hadoop is upgraded on an existing cluster, as with any software upgrade, it is possible there are new bugs or incompatible changes that affect existing applications and were not discovered earlier. In any non-trivial HDFS installation, it is not an option to loose any data, let alone to restart HDFS from scratch. HDFS allows administrators to go back to earlier version of Hadoop and rollback the cluster to the state it was in before the upgrade. HDFS upgrade is described in more detail in [Hadoop Upgrade](http://wiki.apache.org/hadoop/Hadoop_Upgrade) Wiki page. HDFS can have one such backup at a time. Before upgrading, administrators need to remove existing backup using bin/hadoop dfsadmin `-finalizeUpgrade` command. The following briefly describes the typical upgrade procedure:
 
-* Before upgrading Hadoop software, finalize if there an existing backup. `dfsadmin -upgradeProgress` status can tell if the cluster needs to be finalized.
+*   Before upgrading Hadoop software, finalize if there an existing
+    backup. `dfsadmin -upgradeProgress` status can tell if the cluster
+    needs to be finalized.
 
-* Stop the cluster and distribute new version of Hadoop.
+*   Stop the cluster and distribute new version of Hadoop.
 
-* Run the new version with `-upgrade` option (`bin/start-dfs.sh -upgrade`).
+*   Run the new version with `-upgrade` option (`bin/start-dfs.sh -upgrade`).
 
-* Most of the time, cluster works just fine. Once the new HDFS is considered working well (may be after a few days of operation), finalize the upgrade. Note that until the cluster is finalized, deleting the files that existed before the upgrade does not free up real disk space on the DataNodes.
+*   Most of the time, cluster works just fine. Once the new HDFS is
+    considered working well (may be after a few days of operation),
+    finalize the upgrade. Note that until the cluster is finalized,
+    deleting the files that existed before the upgrade does not free up
+    real disk space on the DataNodes.
 
-* If there is a need to move back to the old version,
+*   If there is a need to move back to the old version,
 
-  * stop the cluster and distribute earlier version of Hadoop.
+    * stop the cluster and distribute earlier version of Hadoop.
 
-  * start the cluster with rollback option. (`bin/start-dfs.sh -rollback`).
+    * start the cluster with rollback option. (`bin/start-dfs.sh -rollback`).
 
 When upgrading to a new version of HDFS, it is necessary to rename or delete any paths that are reserved in the new version of HDFS. If the NameNode encounters a reserved path during upgrade, it will print an error like the following:
 
@@ -277,13 +336,19 @@ DataNode Hot Swap Drive
 
 Datanode supports hot swappable drives. The user can add or replace HDFS data volumes without shutting down the DataNode. The following briefly describes the typical hot swapping drive procedure:
 
-* If there are new storage directories, the user should format them and mount them appropriately.
+* If there are new storage directories, the user should format them and mount them
+  appropriately.
 
-* The user updates the DataNode configuration `dfs.datanode.data.dir` to reflect the data volume directories that will be actively in use.
+* The user updates the DataNode configuration `dfs.datanode.data.dir`
+  to reflect the data volume directories that will be actively in use.
 
-* The user runs `dfsadmin -reconfig datanode HOST:PORT start` to start the reconfiguration process. The user can use `dfsadmin -reconfig datanode HOST:PORT status` to query the running status of the reconfiguration task.
+* The user runs `dfsadmin -reconfig datanode HOST:PORT start` to start
+  the reconfiguration process. The user can use
+  `dfsadmin -reconfig datanode HOST:PORT status`
+  to query the running status of the reconfiguration task.
 
-* Once the reconfiguration task has completed, the user can safely `umount` the removed data volume directories and physically remove the disks.
+* Once the reconfiguration task has completed, the user can safely `umount`
+  the removed data volume directories and physically remove the disks.
 
 File Permissions and Security
 -----------------------------
@@ -301,17 +366,10 @@ Related Documentation
 This user guide is a good starting point for working with HDFS. While the user guide continues to improve, there is a large wealth of documentation about Hadoop and HDFS. The following list is a starting point for further exploration:
 
 * [Hadoop Site](http://hadoop.apache.org): The home page for the Apache Hadoop site.
-
 * [Hadoop Wiki](http://wiki.apache.org/hadoop/FrontPage): The home page (FrontPage) for the Hadoop Wiki. Unlike the released documentation, which is part of Hadoop source tree, Hadoop Wiki is regularly edited by Hadoop Community.
-
 * [FAQ](http://wiki.apache.org/hadoop/FAQ): The FAQ Wiki page.
-
 * [Hadoop JavaDoc API](../../api/index.html).
-
 * Hadoop User Mailing List: user[at]hadoop.apache.org.
-
 * Explore [hdfs-default.xml](./hdfs-default.xml). It includes brief description of most of the configuration variables available.
-
 * [HDFS Commands Guide](./HDFSCommands.html): HDFS commands usage.
-
 
