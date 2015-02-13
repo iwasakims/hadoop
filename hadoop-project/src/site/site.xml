@@ -51,10 +51,10 @@
       <item name="Single Node Setup" href="hadoop-project-dist/hadoop-common/SingleCluster.html"/>
       <item name="Cluster Setup" href="hadoop-project-dist/hadoop-common/ClusterSetup.html"/>
       <item name="Commands Reference" href="hadoop-project-dist/hadoop-common/CommandsManual.html"/>
+      <item name="Compatibility" href="hadoop-project-dist/hadoop-common/Compatibility.html"/>
       <item name="FileSystem Shell" href="hadoop-project-dist/hadoop-common/FileSystemShell.html"/>
       <item name="FileSystem Specification"
         href="hadoop-project-dist/hadoop-common/filesystem/index.html"/>
-      <item name="Hadoop Compatibility" href="hadoop-project-dist/hadoop-common/Compatibility.html"/>
       <item name="Interface Classification" href="hadoop-project-dist/hadoop-common/InterfaceClassification.html"/>
       <item name="Secure Mode" href="hadoop-project-dist/hadoop-common/SecureMode.html"/>
     </menu>
@@ -100,7 +100,7 @@
     <menu name="MapReduce" inherit="top">
       <item name="Tutorial" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduceTutorial.html"/>
       <item name="Commands Reference" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapredCommands.html"/>
-      <item name="Compatibilty to 1.x" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduce_Compatibility_Hadoop1_Hadoop2.html"/>
+      <item name="Compatibility to 1.x" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/MapReduce_Compatibility_Hadoop1_Hadoop2.html"/>
       <item name="Distributed Cache Deploy" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/DistributedCacheDeploy.html"/>
       <item name="Encrypted Shuffle" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/EncryptedShuffle.html"/>
       <item name="Pluggable Shuffle/Sort" href="hadoop-mapreduce-client/hadoop-mapreduce-client-core/PluggableShuffleAndPluggableSort.html"/>
@@ -119,10 +119,10 @@
       <item name="DockerContainerExecutor" href="hadoop-yarn/hadoop-yarn-site/DockerContainerExecutor.html"/>
       <item name="Fair Scheduler" href="hadoop-yarn/hadoop-yarn-site/FairScheduler.html"/>
       <item name="NodeManager Restart" href="hadoop-yarn/hadoop-yarn-site/NodeManagerRestart.html"/>
-      <item name="Registry" href="hadoop-yarn/hadoop-yarn-site/registry/index.html"/>
       <item name="ResourceManager Restart" href="hadoop-yarn/hadoop-yarn-site/ResourceManagerRestart.html"/>
       <item name="ResourceManager HA" href="hadoop-yarn/hadoop-yarn-site/ResourceManagerHA.html"/>
       <item name="Secure Containers" href="hadoop-yarn/hadoop-yarn-site/SecureContainer.html"/>
+      <item name="Service Registry" href="hadoop-yarn/hadoop-yarn-site/registry/index.html"/>
       <item name="Timeline Server" href="hadoop-yarn/hadoop-yarn-site/TimelineServer.html"/>
       <item name="Using CGroups" href="hadoop-yarn/hadoop-yarn-site/NodeManagerCGroups.html"/>
       <item name="Web Application Proxy" href="hadoop-yarn/hadoop-yarn-site/WebApplicationProxy.html"/>
