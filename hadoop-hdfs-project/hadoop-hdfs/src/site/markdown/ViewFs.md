@@ -63,25 +63,25 @@ Hence on Cluster X where the `core-site.xml` is set as above, the typical pathna
 
 1.  `/foo/bar`
 
-  * This is equivalent to `hdfs://namenodeOfClusterX:port/foo/bar` as before.
+    * This is equivalent to `hdfs://namenodeOfClusterX:port/foo/bar` as before.
 
 2.  `hdfs://namenodeOfClusterX:port/foo/bar`
 
-  * While this is a valid pathname, one is better using `/foo/bar` as it allows the application and its data to be transparently moved to another cluster when needed.
+    * While this is a valid pathname, one is better using `/foo/bar` as it allows the application and its data to be transparently moved to another cluster when needed.
 
 3.  `hdfs://namenodeOfClusterY:port/foo/bar`
 
-  * It is an URI for referring a pathname on another cluster such as Cluster Y. In particular, the command for copying files from cluster Y to Cluster Z looks like:
+    * It is an URI for referring a pathname on another cluster such as Cluster Y. In particular, the command for copying files from cluster Y to Cluster Z looks like:
 
             distcp hdfs://namenodeClusterY:port/pathSrc hdfs://namenodeClusterZ:port/pathDest
 
 4.  `webhdfs://namenodeClusterX:http_port/foo/bar` and `hftp://namenodeClusterX:http_port/foo/bar`
 
-  * These are file system URIs respectively for accessing files via the WebHDFS file system and the HFTP file system. Note that WebHDFS and HFTP use the HTTP port of the namenode but not the RPC port.
+    * These are file system URIs respectively for accessing files via the WebHDFS file system and the HFTP file system. Note that WebHDFS and HFTP use the HTTP port of the namenode but not the RPC port.
 
 5.  `http://namenodeClusterX:http_port/webhdfs/v1/foo/bar` and `http://proxyClusterX:http_port/foo/bar`
 
-  * These are HTTP URLs respectively for accessing files via [WebHDFS REST API](./WebHDFS.html) and HDFS proxy.
+    * These are HTTP URLs respectively for accessing files via [WebHDFS REST API](./WebHDFS.html) and HDFS proxy.
 
 ### Pathname Usage Best Practices
 
@@ -100,7 +100,7 @@ Operations decide what is stored on each namenode within a cluster based on the 
 
 In order to provide transparency with the old world, the ViewFs file system (i.e. client-side mount table) is used to create each cluster an independent cluster namespace view, which is similar to the namespace in the old world. The client-side mount tables like the Unix mount tables and they mount the new namespace volumes using the old naming convention. The following figure shows a mount table mounting four namespace volumes `/user`, `/data`, `/projects`, and `/tmp`:
 
-![](./images/viewfs_TypicalMountTable.png)
+![Typical Mount Table for each Cluster](./images/viewfs_TypicalMountTable.png)
 
 ViewFs implements the Hadoop file system interface just like HDFS and the local file system. It is a trivial file system in the sense that it only allows linking to other file systems. Because ViewFs implements the Hadoop file system interface, it works transparently Hadoop tools. For example, all the shell commands work with ViewFs as with HDFS and local file system.
 
@@ -121,25 +121,25 @@ Hence on Cluster X, where the `core-site.xml` is set to make the default fs to u
 
 1.  `/foo/bar`
 
-  * This is equivalent to `viewfs://clusterX/foo/bar`. If such pathname is used in the old non-federated world, then the transition to federation world is transparent.
+    * This is equivalent to `viewfs://clusterX/foo/bar`. If such pathname is used in the old non-federated world, then the transition to federation world is transparent.
 
 2.  `viewfs://clusterX/foo/bar`
 
-  * While this a valid pathname, one is better using `/foo/bar` as it allows the application and its data to be transparently moved to another cluster when needed.
+    * While this a valid pathname, one is better using `/foo/bar` as it allows the application and its data to be transparently moved to another cluster when needed.
 
 3.  `viewfs://clusterY/foo/bar`
 
-  * It is an URI for referring a pathname on another cluster such as Cluster Y. In particular, the command for copying files from cluster Y to Cluster Z looks like:
+    * It is an URI for referring a pathname on another cluster such as Cluster Y. In particular, the command for copying files from cluster Y to Cluster Z looks like:
 
             distcp viewfs://clusterY:/pathSrc viewfs://clusterZ/pathDest
 
 4.  `viewfs://clusterX-webhdfs/foo/bar` and `viewfs://clusterX-hftp/foo/bar`
 
-  * These are URIs respectively for accessing files via the WebHDFS file system and the HFTP file system.
+    * These are URIs respectively for accessing files via the WebHDFS file system and the HFTP file system.
 
 5.  `http://namenodeClusterX:http_port/webhdfs/v1/foo/bar` and `http://proxyClusterX:http_port/foo/bar`
 
-  * These are HTTP URLs respectively for accessing files via [WebHDFS REST API](./WebHDFS.html) and HDFS proxy. Note that they are the same as before.
+    * These are HTTP URLs respectively for accessing files via [WebHDFS REST API](./WebHDFS.html) and HDFS proxy. Note that they are the same as before.
 
 ### Pathname Usage Best Practices
 
@@ -155,27 +155,45 @@ This will NOT work in the new world if `/user` and `/data` are actually stored o
 
 ### FAQ
 
-1.  **As I move from non-federated world to the federated world, I will have to keep track of namenodes for different volumes; how do I do that?**No, you won’t. See the examples above – you are either using a relative name and taking advantage of the default file system, or changing your path from `hdfs://namenodeCLusterX/foo/bar` to `viewfs://clusterX/foo/bar`.
+1.  **As I move from non-federated world to the federated world, I will have to keep track of namenodes for different volumes; how do I do that?**
 
-2.  **What happens of Operations move some files from one namenode to another namenode within a cluster?**Operations may move files from one namenode to another in order to deal with storage capacity issues. They will do this in a way to avoid applications from breaking. Let's take some examples.
+    No, you won’t. See the examples above – you are either using a relative name and taking advantage of the default file system, or changing your path from `hdfs://namenodeCLusterX/foo/bar` to `viewfs://clusterX/foo/bar`.
 
-  * Example 1: `/user` and `/data` were on one namenode and later they need to be on separate namenodes to deal with capacity issues. Indeed, operations would have created separate mount points for `/user` and `/data`. Prior to the change the mounts for `/user` and `/data` would have pointed to the same namenode, say `namenodeContainingUserAndData`. Operations will update the mount tables so that the mount points are changed to `namenodeContaingUser` and `namenodeContainingData`, respectively.
+2.  **What happens of Operations move some files from one namenode to another namenode within a cluster?**
 
-  * Example 2: All projects were fitted on one namenode and but later they need two or more namenodes. ViewFs allows mounts like `/project/foo` and `/project/bar`. This allows mount tables to be updated to point to the corresponding namenode.
+    Operations may move files from one namenode to another in order to deal with storage capacity issues. They will do this in a way to avoid applications from breaking. Let's take some examples.
 
-3.  **Is the mount table in each** `core-site.xml` **or in a separate file of its own?**The plan is to keep the mount tables in separate files and have the `core-site.xml` [xincluding](http://www.w3.org/2001/XInclude) it. While one can keep these files on each machine locally, it is better to use HTTP to access it from a central location.
+    *   Example 1: `/user` and `/data` were on one namenode and later they need to be on separate namenodes to deal with capacity issues. Indeed, operations would have created separate mount points for `/user` and `/data`. Prior to the change the mounts for `/user` and `/data` would have pointed to the same namenode, say `namenodeContainingUserAndData`. Operations will update the mount tables so that the mount points are changed to `namenodeContaingUser` and `namenodeContainingData`, respectively.
 
-4.  **Should the configuration have the mount table definitions for only one cluster or all clusters?**The configuration should have the mount definitions for all clusters since one needs to have access to data in other clusters such as with distcp.
+    *   Example 2: All projects were fitted on one namenode and but later they need two or more namenodes. ViewFs allows mounts like `/project/foo` and `/project/bar`. This allows mount tables to be updated to point to the corresponding namenode.
 
-5.  **When is the mount table actually read given that Operations may change a mount table over time?**The mount table is read when the job is submitted to the cluster. The `XInclude` in `core-site.xml` is expanded at job submission time. This means that if the mount table are changed then the jobs need to be resubmitted. Due to this reason, we want to implement merge-mount which will greatly reduce the need to change mount tables. Further, we would like to read the mount tables via another mechanism that is initialized at job start time in the future.
+3.  **Is the mount table in each** `core-site.xml` **or in a separate file of its own?**
 
-6.  **Will JobTracker (or Yarn’s Resource Manager) itself use the ViewFs?**No, it does not need to. Neither does the NodeManager.
+    The plan is to keep the mount tables in separate files and have the `core-site.xml` [xincluding](http://www.w3.org/2001/XInclude) it. While one can keep these files on each machine locally, it is better to use HTTP to access it from a central location.
 
-7.  **Does ViewFs allow only mounts at the top level?**No; it is more general. For example, one can mount `/user/joe` and `/user/jane`. In this case, an internal read-only directory is created for `/user` in the mount table. All operations on `/user` are valid except that `/user` is read-only.
+4.  **Should the configuration have the mount table definitions for only one cluster or all clusters?**
 
-8.  **An application works across the clusters and needs to persistently store file paths. Which paths should it store?**You should store `viewfs://cluster/path` type path names, the same as it uses when running applications. This insulates you from movement of data within namenodes inside a cluster as long as operations do the moves in a transparent fashion. It does not insulate you if data gets moved from one cluster to another; the older (pre-federation) world did not protect you form such data movements across clusters anyway.
+    The configuration should have the mount definitions for all clusters since one needs to have access to data in other clusters such as with distcp.
 
-9.  **What about delegation tokens?**Delegation tokens for the cluster to which you are submitting the job (including all mounted volumes for that cluster’s mount table), and for input and output paths to your map-reduce job (including all volumes mounted via mount tables for the specified input and output paths) are all handled automatically. In addition, there is a way to add additional delegation tokens to the base cluster configuration for special circumstances.
+5.  **When is the mount table actually read given that Operations may change a mount table over time?**
+
+    The mount table is read when the job is submitted to the cluster. The `XInclude` in `core-site.xml` is expanded at job submission time. This means that if the mount table are changed then the jobs need to be resubmitted. Due to this reason, we want to implement merge-mount which will greatly reduce the need to change mount tables. Further, we would like to read the mount tables via another mechanism that is initialized at job start time in the future.
+
+6.  **Will JobTracker (or Yarn’s Resource Manager) itself use the ViewFs?**
+
+    No, it does not need to. Neither does the NodeManager.
+
+7.  **Does ViewFs allow only mounts at the top level?**
+
+    No; it is more general. For example, one can mount `/user/joe` and `/user/jane`. In this case, an internal read-only directory is created for `/user` in the mount table. All operations on `/user` are valid except that `/user` is read-only.
+
+8.  **An application works across the clusters and needs to persistently store file paths. Which paths should it store?**
+
+    You should store `viewfs://cluster/path` type path names, the same as it uses when running applications. This insulates you from movement of data within namenodes inside a cluster as long as operations do the moves in a transparent fashion. It does not insulate you if data gets moved from one cluster to another; the older (pre-federation) world did not protect you form such data movements across clusters anyway.
+
+9.  **What about delegation tokens?**
+
+    Delegation tokens for the cluster to which you are submitting the job (including all mounted volumes for that cluster’s mount table), and for input and output paths to your map-reduce job (including all volumes mounted via mount tables for the specified input and output paths) are all handled automatically. In addition, there is a way to add additional delegation tokens to the base cluster configuration for special circumstances.
 
 Appendix: A Mount Table Configuration Example
 ---------------------------------------------
@@ -193,9 +211,7 @@ The mount tables can be described in `core-site.xml` but it is better to use ind
 In the file `mountTable.xml`, there is a definition of the mount table "ClusterX" for the hypothetical cluster that is a federation of the three namespace volumes managed by the three namenodes
 
 1.  nn1-clusterx.example.com:8020,
-
 2.  nn2-clusterx.example.com:8020, and
-
 3.  nn3-clusterx.example.com:8020.
 
 Here `/home` and `/tmp` are in the namespace managed by namenode nn1-clusterx.example.com:8020, and projects `/foo` and `/bar` are hosted on the other namenodes of the federated cluster. The home directory base path is set to `/home` so that each user can access its home directory using the getHomeDirectory() method defined in [FileSystem](../../api/org/apache/hadoop/fs/FileSystem.html)/[FileContext](../../api/org/apache/hadoop/fs/FileContext.html).
