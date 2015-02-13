@@ -36,21 +36,42 @@ The synopsis of the command is:
 
 Options include:
 
-* `-readProbability` *read probability*The probability of the read operation; default is 0.3333.
+*   `-readProbability` *read probability*
 
-* `-writeProbability` *write probability*The probability of the write operations; default is 0.3333.
+    The probability of the read operation; default is 0.3333.
 
-* `-root` *test space root*The root of the test space; default is /testLoadSpace.
+*   `-writeProbability` *write probability*
 
-* `-maxDelayBetweenOps` *maxDelayBetweenOpsInMillis*The maximum delay between two consecutive operations in a thread; default is 0 indicating no delay.
+    The probability of the write operations; default is 0.3333.
 
-* `-numOfThreads` *numOfThreads*The number of threads to spawn; default is 200.
+*   `-root` *test space root*
 
-* `-elapsedTime` *elapsedTimeInSecs*The number of seconds that the program will run; A value of zero indicates that the program runs forever. The default value is 0.
+    The root of the test space; default is /testLoadSpace.
 
-* `-startTime` *startTimeInMillis*The time that all worker threads start to run. By default it is 10 seconds after the main program starts running.This creates a barrier if more than one load generator is running.
+*   `-maxDelayBetweenOps` *maxDelayBetweenOpsInMillis*
 
-* `-seed` *seed*The random generator seed for repeating requests to NameNode when running with a single thread; default is the current time.
+    The maximum delay between two consecutive operations in a thread;
+    default is 0 indicating no delay.
+
+*   `-numOfThreads` *numOfThreads*
+
+    The number of threads to spawn; default is 200.
+
+*   `-elapsedTime` *elapsedTimeInSecs*
+
+    The number of seconds that the program will run; A value of zero
+    indicates that the program runs forever. The default value is 0.
+
+*   `-startTime` *startTimeInMillis*
+
+    The time that all worker threads start to run. By default it is 10
+    seconds after the main program starts running.This creates a
+    barrier if more than one load generator is running.
+
+*   `-seed` *seed*
+
+    The random generator seed for repeating requests to NameNode when
+    running with a single thread; default is the current time.
 
 After command line argument parsing, the load generator traverses the test space and builds a table of all directories and another table of all files in the test space. It then waits until the start time to spawn the number of worker threads as specified by the user. Each thread sends a stream of requests to NameNode. At each iteration, it first decides if it is going to read a file, create a file, or list a directory following the read and write probabilities specified by the user. The listing probability is equal to 1-read probability-write probability. When reading, it randomly picks a file in the test space and reads the entire file. When writing, it randomly picks a directory in the test space and creates a file there.
 
@@ -67,11 +88,15 @@ The user needs to populate a test space before running a load generator. The str
 
 This tool generates a random namespace structure with the following constraints:
 
-1.  The number of subdirectories that a directory can have is a random number in [minWidth, maxWidth].
+1.  The number of subdirectories that a directory can have is a random
+    number in [minWidth, maxWidth].
 
-2.  The maximum depth of each subdirectory is a random number [2\*maxDepth/3, maxDepth].
+2.  The maximum depth of each subdirectory is a random number
+    [2\*maxDepth/3, maxDepth].
 
-3.  Files are randomly placed in leaf directories. The size of each file follows Gaussian distribution with an average size of 1 block and a standard deviation of 1.
+3.  Files are randomly placed in leaf directories. The size of each
+    file follows Gaussian distribution with an average size of 1 block
+    and a standard deviation of 1.
 
 The generated namespace structure is described by two files in the output directory. Each line of the first file contains the full name of a leaf directory. Each line of the second file contains the full name of a file and its size, separated by a blank.
 
@@ -81,19 +106,33 @@ The synopsis of the command is:
 
 Options include:
 
-* `-maxDepth` *maxDepth*Maximum depth of the directory tree; default is 5.
+*   `-maxDepth` *maxDepth*
 
-* `-minWidth` *minWidth*Minimum number of subdirectories per directories; default is 1.
+    Maximum depth of the directory tree; default is 5.
 
-* `-maxWidth` *maxWidth*Maximum number of subdirectories per directories; default is 5.
+*   `-minWidth` *minWidth*
 
-* `-numOfFiles` *\#OfFiles*The total number of files in the test space; default is 10.
+    Minimum number of subdirectories per directories; default is 1.
 
-* `-avgFileSize` *avgFileSizeInBlocks*Average size of blocks; default is 1.
+*   `-maxWidth` *maxWidth*
 
-* `-outDir` *outDir*Output directory; default is the current directory.
+    Maximum number of subdirectories per directories; default is 5.
 
-* `-seed` *seed*Random number generator seed; default is the current time.
+*   `-numOfFiles` *\#OfFiles*
+
+    The total number of files in the test space; default is 10.
+
+*   `-avgFileSize` *avgFileSizeInBlocks*
+
+    Average size of blocks; default is 1.
+
+*   `-outDir` *outDir*
+
+    Output directory; default is the current directory.
+
+*   `-seed` *seed*
+
+    Random number generator seed; default is the current time.
 
 ### Data Generator
 
@@ -105,8 +144,14 @@ The synopsis of the command is:
 
 Options include:
 
-* `-inDir` *inDir*Input directory name where directory/file structures are stored; default is the current directory.
+*   `-inDir` *inDir*
 
-* `-root` *test space root*The name of the root directory which the new namespace is going to be placed under; default is "/testLoadSpace".
+    Input directory name where directory/file structures are stored;
+    default is the current directory.
+
+*   `-root` *test space root*
+
+    The name of the root directory which the new namespace is going to
+    be placed under; default is "/testLoadSpace".
 
 
