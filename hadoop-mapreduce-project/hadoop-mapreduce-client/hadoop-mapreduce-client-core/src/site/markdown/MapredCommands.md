@@ -16,28 +16,17 @@ MapReduce Commands Guide
 ========================
 
 * [Overview](#Overview)
-
 * [User Commands](#User_Commands)
-
-  * [archive](#archive)
-
-  * [classpath](#classpath)
-
-  * [distcp](#distcp)
-
-  * [job](#job)
-
-  * [pipes](#pipes)
-
-  * [queue](#queue)
-
-  * [version](#version)
-
+    * [archive](#archive)
+    * [classpath](#classpath)
+    * [distcp](#distcp)
+    * [job](#job)
+    * [pipes](#pipes)
+    * [queue](#queue)
+    * [version](#version)
 * [Administration Commands](#Administration_Commands)
-
-  * [historyserver](#historyserver)
-
-  * [hsadmin](#hsadmin)
+    * [historyserver](#historyserver)
+    * [hsadmin](#hsadmin)
 
 Overview
 --------
@@ -50,8 +39,8 @@ Hadoop has an option parsing framework that employs parsing generic options as w
 
 | COMMAND\_OPTIONS | Description |
 |:---- |:---- |
-| SHELL\_OPTIONS | The common set of shell options. These are documented on the [Commands Manual](../../hadoop-project-dist/hadoop-common/CommandsManual.html#Shell_Options) page. |
-| GENERIC\_OPTIONS | The common set of options supported by multiple commands. See the Hadoop [Commands Manual](../../hadoop-project-dist/hadoop-common/CommandsManual.html#Generic_Options) for more information. |
+| SHELL\_OPTIONS | The common set of shell options. These are documented on the [Hadoop Commands Reference](../../hadoop-project-dist/hadoop-common/CommandsManual.html#Shell_Options) page. |
+| GENERIC\_OPTIONS | The common set of options supported by multiple commands. See the [Hadoop Commands Reference](../../hadoop-project-dist/hadoop-common/CommandsManual.html#Generic_Options) for more information. |
 | COMMAND COMMAND\_OPTIONS | Various commands with their options are described in the following sections. The commands have been grouped into [User Commands](#User_Commands) and [Administration Commands](#Administration_Commands). |
 
 User Commands
@@ -61,7 +50,8 @@ Commands useful for users of a hadoop cluster.
 
 ### `archive`
 
-Creates a hadoop archive. More information can be found at [Hadoop Archives Guide](./HadoopArchives.html).
+Creates a hadoop archive. More information can be found at
+[Hadoop Archives Guide](./HadoopArchives.html).
 
 ### `classpath`
 
@@ -71,7 +61,8 @@ Usage: `mapred classpath`
 
 ### `distcp`
 
-Copy file or directories recursively. More information can be found at [Hadoop DistCp Guide](./DistCp.html).
+Copy file or directories recursively. More information can be found at
+[Hadoop DistCp Guide](./DistCp.html).
 
 ### `job`
 
