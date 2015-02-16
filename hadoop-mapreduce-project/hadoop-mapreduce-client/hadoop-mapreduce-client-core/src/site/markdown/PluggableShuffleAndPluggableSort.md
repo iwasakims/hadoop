@@ -25,12 +25,15 @@ The pluggable shuffle and pluggable sort capabilities allow replacing the built 
 Implementing a Custom Shuffle and a Custom Sort
 -----------------------------------------------
 
-A custom shuffle implementation requires a `org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServices.AuxiliaryService` implementation class running in the NodeManagers and a `org.apache.hadoop.mapred.ShuffleConsumerPlugin` implementation class running in the Reducer tasks.
+A custom shuffle implementation requires a
+`org.apache.hadoop.yarn.server.nodemanager.containermanager.AuxServices.AuxiliaryService`
+implementation class running in the NodeManagers and a
+`org.apache.hadoop.mapred.ShuffleConsumerPlugin`
+implementation class running in the Reducer tasks.
 
 The default implementations provided by Hadoop can be used as references:
 
 * `org.apache.hadoop.mapred.ShuffleHandler`
-
 * `org.apache.hadoop.mapreduce.task.reduce.Shuffle`
 
 A custom sort implementation requires a `org.apache.hadoop.mapred.MapOutputCollector` implementation class running in the Mapper tasks and (optionally, depending on the sort implementation) a `org.apache.hadoop.mapred.ShuffleConsumerPlugin` implementation class running in the Reducer tasks.
@@ -38,7 +41,6 @@ A custom sort implementation requires a `org.apache.hadoop.mapred.MapOutputColle
 The default implementations provided by Hadoop can be used as references:
 
 * `org.apache.hadoop.mapred.MapTask$MapOutputBuffer`
-
 * `org.apache.hadoop.mapreduce.task.reduce.Shuffle`
 
 Configuration
@@ -64,4 +66,8 @@ The collector class configuration may specify a comma-separated list of collecto
 | `yarn.nodemanager.aux-services` | `...,mapreduce_shuffle` | The auxiliary service name |
 | `yarn.nodemanager.aux-services.mapreduce_shuffle.class` | `org.apache.hadoop.mapred.ShuffleHandler` | The auxiliary service class to use |
 
-**IMPORTANT:** If setting an auxiliary service in addition the default `mapreduce_shuffle` service, then a new service key should be added to the `yarn.nodemanager.aux-services` property, for example `mapred.shufflex`. Then the property defining the corresponding class must be `yarn.nodemanager.aux-services.mapreduce_shufflex.class`.
+**IMPORTANT:** If setting an auxiliary service in addition the default
+`mapreduce_shuffle` service, then a new service key should be added to the
+`yarn.nodemanager.aux-services` property, for example `mapred.shufflex`.
+Then the property defining the corresponding class must be
+`yarn.nodemanager.aux-services.mapreduce_shufflex.class`.
