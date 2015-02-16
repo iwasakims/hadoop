@@ -16,46 +16,26 @@ MapReduce History Server REST API's.
 ====================================
 
 * [MapReduce History Server REST API's.](#MapReduce_History_Server_REST_APIs.)
-
-  * [Overview](#Overview)
-
-  * [History Server Information API](#History_Server_Information_API)
-
-      * [URI](#URI)
-
-      * [HTTP Operations Supported](#HTTP_Operations_Supported)
-
-      * [Query Parameters Supported](#Query_Parameters_Supported)
-
-      * [Elements of the historyInfo object](#Elements_of_the_historyInfo_object)
-
-      * [Response Examples](#Response_Examples)
-
-  * [MapReduce API's](#MapReduce_APIs)
-
-      * [Jobs API](#Jobs_API)
-
-      * [Job API](#Job_API)
-
-      * [Elements of the acls object](#Elements_of_the_acls_object)
-
-      * [Job Attempts API](#Job_Attempts_API)
-
-      * [Job Counters API](#Job_Counters_API)
-
-      * [Job Conf API](#Job_Conf_API)
-
-      * [Tasks API](#Tasks_API)
-
-      * [Task API](#Task_API)
-
-      * [Task Counters API](#Task_Counters_API)
-
-      * [Task Attempts API](#Task_Attempts_API)
-
-      * [Task Attempt API](#Task_Attempt_API)
-
-      * [Task Attempt Counters API](#Task_Attempt_Counters_API)
+    * [Overview](#Overview)
+    * [History Server Information API](#History_Server_Information_API)
+        * [URI](#URI)
+        * [HTTP Operations Supported](#HTTP_Operations_Supported)
+        * [Query Parameters Supported](#Query_Parameters_Supported)
+        * [Elements of the historyInfo object](#Elements_of_the_historyInfo_object)
+        * [Response Examples](#Response_Examples)
+    * [MapReduce API's](#MapReduce_APIs)
+        * [Jobs API](#Jobs_API)
+        * [Job API](#Job_API)
+        * [Elements of the acls object](#Elements_of_the_acls_object)
+        * [Job Attempts API](#Job_Attempts_API)
+        * [Job Counters API](#Job_Counters_API)
+        * [Job Conf API](#Job_Conf_API)
+        * [Tasks API](#Tasks_API)
+        * [Task API](#Task_API)
+        * [Task Counters API](#Task_Counters_API)
+        * [Task Attempts API](#Task_Attempts_API)
+        * [Task Attempt API](#Task_Attempt_API)
+        * [Task Attempt Counters API](#Task_Attempt_Counters_API)
 
 Overview
 --------
@@ -173,7 +153,9 @@ Multiple paramters can be specified. The started and finished times have a begin
 
 #### Elements of the *jobs* object
 
-When you make a request for the list of jobs, the information will be returned as an array of job objects. See also [Job API](#Job_API) for syntax of the job object. Except this is a subset of a full job. Only startTime, finishTime, id, name, queue, user, state, mapsTotal, mapsCompleted, reducesTotal, and reducesCompleted are returned.
+When you make a request for the list of jobs, the information will be returned as an array of job objects. See also
+[Job API](#Job_API)
+for syntax of the job object. Except this is a subset of a full job. Only startTime, finishTime, id, name, queue, user, state, mapsTotal, mapsCompleted, reducesTotal, and reducesCompleted are returned.
 
 | Item | Data Type | Description |
 |:---- |:---- |:---- |
@@ -1251,7 +1233,9 @@ With the tasks API, you can obtain a collection of resources that represent a ta
 
 #### Elements of the *tasks* object
 
-When you make a request for the list of tasks , the information will be returned as an array of task objects. See also [Task API](#Task_API) for syntax of the task object.
+When you make a request for the list of tasks , the information will be returned as an array of task objects. See also
+[Task API](#Task_API)
+for syntax of the task object.
 
 | Item | Data Type | Description |
 |:---- |:---- |:---- |
@@ -1819,7 +1803,9 @@ With the task attempts API, you can obtain a collection of resources that repres
 
 #### Elements of the *taskAttempts* object
 
-When you make a request for the list of task attempts, the information will be returned as an array of task attempt objects. See also [Task Attempt API](#Task_Attempt_API) for syntax of the task object.
+When you make a request for the list of task attempts, the information will be returned as an array of task attempt objects. See also
+[Task Attempt API](#Task_Attempt_API)
+for syntax of the task object.
 
 | Item | Data Type | Description |
 |:---- |:---- |:---- |
