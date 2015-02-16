@@ -12,6 +12,10 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
+#set ( $H3 = '###' )
+#set ( $H4 = '####' )
+#set ( $H5 = '#####' )
+
 Hadoop: Distributed Cache Deploy
 ================================
 
@@ -25,24 +29,47 @@ Preconditions and Limitations
 
 The support for deploying the MapReduce framework via the distributed cache currently does not address the job client code used to submit and query jobs. It also does not address the `ShuffleHandler` code that runs as an auxilliary service within each NodeManager. As a result the following limitations apply to MapReduce versions that can be successfully deployed via the distributed cache in a rolling upgrade fashion:
 
-* The MapReduce version must be compatible with the job client code used to submit and query jobs. If it is incompatible then the job client must be upgraded separately on any node from which jobs using the new MapReduce version will be submitted or queried.
+* The MapReduce version must be compatible with the job client code used to
+  submit and query jobs. If it is incompatible then the job client must be
+  upgraded separately on any node from which jobs using the new MapReduce
+  version will be submitted or queried.
 
-* The MapReduce version must be compatible with the configuration files used by the job client submitting the jobs. If it is incompatible with that configuration (e.g.: a new property must be set or an existing property value changed) then the configuration must be updated first.
+* The MapReduce version must be compatible with the configuration files used
+  by the job client submitting the jobs. If it is incompatible with that
+  configuration (e.g.: a new property must be set or an existing property
+  value changed) then the configuration must be updated first.
 
-* The MapReduce version must be compatible with the `ShuffleHandler` version running on the nodes in the cluster. If it is incompatible then the new `ShuffleHandler` code must be deployed to all the nodes in the cluster, and the NodeManagers must be restarted to pick up the new `ShuffleHandler` code.
+* The MapReduce version must be compatible with the `ShuffleHandler`
+  version running on the nodes in the cluster. If it is incompatible then the
+  new `ShuffleHandler` code must be deployed to all the nodes in the
+  cluster, and the NodeManagers must be restarted to pick up the new
+  `ShuffleHandler` code.
 
 Deploying a New MapReduce Version via the Distributed Cache
 -----------------------------------------------------------
 
 Deploying a new MapReduce version consists of three steps:
 
-1.  Upload the MapReduce archive to a location that can be accessed by the job submission client. Ideally the archive should be on the cluster's default filesystem at a publicly-readable path. See the archive location discussion below for more details.
+1.  Upload the MapReduce archive to a location that can be accessed by the
+    job submission client. Ideally the archive should be on the cluster's default
+    filesystem at a publicly-readable path. See the archive location discussion
+    below for more details.
 
-2.  Configure `mapreduce.application.framework.path` to point to the location where the archive is located. As when specifying distributed cache files for a job, this is a URL that also supports creating an alias for the archive if a URL fragment is specified. For example, `hdfs:/mapred/framework/hadoop-mapreduce-${project.version}.tar.gz#mrframework` will be localized as `mrframework` rather than `hadoop-mapreduce-${project.version}.tar.gz`.
+2.  Configure `mapreduce.application.framework.path` to point to the
+    location where the archive is located. As when specifying distributed cache
+    files for a job, this is a URL that also supports creating an alias for the
+    archive if a URL fragment is specified. For example,
+    `hdfs:/mapred/framework/hadoop-mapreduce-${project.version}.tar.gz#mrframework`
+    will be localized as `mrframework` rather than
+    `hadoop-mapreduce-${project.version}.tar.gz`.
 
-3.  Configure `mapreduce.application.classpath` to set the proper classpath to use with the MapReduce archive configured above. NOTE: An error occurs if `mapreduce.application.framework.path` is configured but `mapreduce.application.classpath` does not reference the base name of the archive path or the alias if an alias was specified.
+3.  Configure `mapreduce.application.classpath` to set the proper
+    classpath to use with the MapReduce archive configured above. NOTE: An error
+    occurs if `mapreduce.application.framework.path` is configured but
+    `mapreduce.application.classpath` does not reference the base name of the
+    archive path or the alias if an alias was specified.
 
-### Location of the MapReduce Archive and How It Affects Job Performance
+$H3 Location of the MapReduce Archive and How It Affects Job Performance
 
 Note that the location of the MapReduce archive can be critical to job submission and job startup performance. If the archive is not located on the cluster's default filesystem then it will be copied to the job staging directory for each job and localized to each node where the job's tasks run. This will slow down job submission and task startup performance.
 
@@ -61,7 +88,7 @@ Another possible approach is to have the archive consist of just the MapReduce j
 
 `$HADOOP_CONF_DIR,$PWD/hadoop-mapreduce-${project.version}.tar.gz/hadoop-mapreduce-${project.version}/share/hadoop/mapreduce/*,$PWD/hadoop-mapreduce-${project.version}.tar.gz/hadoop-mapreduce-${project.version}/share/hadoop/mapreduce/lib/*,$HADOOP_COMMON_HOME/share/hadoop/common/*,$HADOOP_COMMON_HOME/share/hadoop/common/lib/*,$HADOOP_HDFS_HOME/share/hadoop/hdfs/*,$HADOOP_HDFS_HOME/share/hadoop/hdfs/lib/*,$HADOOP_YARN_HOME/share/hadoop/yarn/*,$HADOOP_YARN_HOME/share/hadoop/yarn/lib/*`
 
-### NOTE:
+$H3 NOTE:
 
 If shuffle encryption is also enabled in the cluster, then we could meet the problem that MR job get failed with exception like below:
 
