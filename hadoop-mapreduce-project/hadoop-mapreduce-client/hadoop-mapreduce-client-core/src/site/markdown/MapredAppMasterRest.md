@@ -16,37 +16,24 @@ MapReduce Application Master REST API's.
 ========================================
 
 * [MapReduce Application Master REST API's.](#MapReduce_Application_Master_REST_APIs.)
-
-  * [Overview](#Overview)
-
-  * [Mapreduce Application Master Info API](#Mapreduce_Application_Master_Info_API)
-
-  * [Jobs API](#Jobs_API)
-
-  * [Job API](#Job_API)
-
-  * [Job Attempts API](#Job_Attempts_API)
-
-  * [Job Counters API](#Job_Counters_API)
-
-  * [Job Conf API](#Job_Conf_API)
-
-  * [Tasks API](#Tasks_API)
-
-  * [Task API](#Task_API)
-
-  * [Task Counters API](#Task_Counters_API)
-
-  * [Task Attempts API](#Task_Attempts_API)
-
-  * [Task Attempt API](#Task_Attempt_API)
-
-  * [Task Attempt Counters API](#Task_Attempt_Counters_API)
+    * [Overview](#Overview)
+    * [Mapreduce Application Master Info API](#Mapreduce_Application_Master_Info_API)
+    * [Jobs API](#Jobs_API)
+    * [Job API](#Job_API)
+    * [Job Attempts API](#Job_Attempts_API)
+    * [Job Counters API](#Job_Counters_API)
+    * [Job Conf API](#Job_Conf_API)
+    * [Tasks API](#Tasks_API)
+    * [Task API](#Task_API)
+    * [Task Counters API](#Task_Counters_API)
+    * [Task Attempts API](#Task_Attempts_API)
+    * [Task Attempt API](#Task_Attempt_API)
+    * [Task Attempt Counters API](#Task_Attempt_Counters_API)
 
 Overview
 --------
 
-The MapReduce Application Master REST API's allow the user to get status on the running MapReduce application master. Currently this is the equivalent to a running MapReduce job. The information includes the jobs the app master is running and all the job particulars like tasks, counters, configuration, attempts, etc. The application master should be accessed via the proxy. This proxy is configurable to run either on the resource manager or on a separate host. The proxy URL usually looks like: http://*proxy http address:port*/proxy/appid.
+The MapReduce Application Master REST API's allow the user to get status on the running MapReduce application master. Currently this is the equivalent to a running MapReduce job. The information includes the jobs the app master is running and all the job particulars like tasks, counters, configuration, attempts, etc. The application master should be accessed via the proxy. This proxy is configurable to run either on the resource manager or on a separate host. The proxy URL usually looks like: `http://<proxy http address:port>/proxy/appid`.
 
 Mapreduce Application Master Info API
 -------------------------------------
