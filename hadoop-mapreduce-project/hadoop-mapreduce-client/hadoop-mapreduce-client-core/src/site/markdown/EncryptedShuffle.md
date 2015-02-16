@@ -20,11 +20,15 @@ Introduction
 
 The Encrypted Shuffle capability allows encryption of the MapReduce shuffle using HTTPS and with optional client authentication (also known as bi-directional HTTPS, or HTTPS with client certificates). It comprises:
 
-* A Hadoop configuration setting for toggling the shuffle between HTTP and HTTPS.
+*   A Hadoop configuration setting for toggling the shuffle between HTTP and
+    HTTPS.
 
-* A Hadoop configuration settings for specifying the keystore and truststore properties (location, type, passwords) used by the shuffle service and the reducers tasks fetching shuffle data.
+*   A Hadoop configuration settings for specifying the keystore and truststore
+    properties (location, type, passwords) used by the shuffle service and the
+    reducers tasks fetching shuffle data.
 
-* A way to re-load truststores across the cluster (when a node is added or removed).
+*   A way to re-load truststores across the cluster (when a node is added or
+    removed).
 
 Configuration
 -------------
@@ -42,7 +46,7 @@ To enable encrypted shuffle, set the following properties in core-site.xml of al
 | `hadoop.ssl.client.conf` | `ssl-client.xml` | Resource file from which ssl server keystore information will be extracted. This file is looked up in the classpath, typically it should be in Hadoop conf/ directory |
 | `hadoop.ssl.enabled.protocols` | `TLSv1` | The supported SSL protocols (JDK6 can use **TLSv1**, JDK7+ can use **TLSv1,TLSv1.1,TLSv1.2**) |
 
-**IMPORTANT:** Currently requiring client certificates should be set to false. Refer the [Client Certificates](#ClientCertificates) section for details.
+**IMPORTANT:** Currently requiring client certificates should be set to false. Refer the [Client Certificates](#Client_Certificates) section for details.
 
 **IMPORTANT:** All these properties should be marked as final in the cluster configuration files.
 
@@ -222,8 +226,8 @@ When you have made the above configuration changes, activate Encrypted Shuffle b
 
 **IMPORTANT:** Using encrypted shuffle will incur in a significant performance impact. Users should profile this and potentially reserve 1 or more cores for encrypted shuffle.
 
-ClientCertificates Client Certificates
---------------------------------------
+Client Certificates
+-------------------
 
 Using Client Certificates does not fully ensure that the client is a reducer task for the job. Currently, Client Certificates (their private key) keystore files must be readable by all users submitting jobs to the cluster. This means that a rogue job could read such those keystore files and use the client certificates in them to establish a secure connection with a Shuffle server. However, unless the rogue job has a proper JobToken, it won't be able to retrieve shuffle data from the Shuffle server. A job, using its own JobToken, can only retrieve shuffle data that belongs to itself.
 
