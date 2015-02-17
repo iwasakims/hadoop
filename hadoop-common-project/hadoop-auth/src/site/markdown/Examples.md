@@ -12,8 +12,8 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-Hadoop Auth, Java HTTP SPNEGO MAVEN\_PROJECT\_VERSION - Examples
-================================================================
+Hadoop Auth, Java HTTP SPNEGO - Examples
+========================================
 
 Accessing a Hadoop Auth protected URL Using a browser
 -----------------------------------------------------
@@ -41,11 +41,12 @@ Login to the KDC using **kinit** and then use `curl` to fetch protected URL:
 
     Hello Hadoop Auth Examples!
 
-* The `--negotiate` option enables SPNEGO in `curl`.
+*   The `--negotiate` option enables SPNEGO in `curl`.
 
-* The `-u foo` option is required but the user ignored (the principal that has been kinit-ed is used).
+*   The `-u foo` option is required but the user ignored (the principal
+    that has been kinit-ed is used).
 
-* The `-b` and `-c` are use to store and send HTTP Cookies.
+*   The `-b` and `-c` are use to store and send HTTP Cookies.
 
 Using the Java Client
 ---------------------

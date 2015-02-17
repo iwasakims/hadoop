@@ -12,8 +12,8 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-Hadoop Auth, Java HTTP SPNEGO MAVEN\_PROJECT\_VERSION - Server Side Configuration
-=================================================================================
+Hadoop Auth, Java HTTP SPNEGO - Server Side Configuration
+=========================================================
 
 Server Side Configuration Setup
 -------------------------------
@@ -28,19 +28,32 @@ Hadoop Auth uses SLF4J-API for logging. Auth Maven POM dependencies define the S
 
 ### Common Configuration parameters
 
-* `config.prefix`: If specified, all other configuration parameter names must start with the prefix. The default value is no prefix.
+*   `config.prefix`: If specified, all other configuration parameter names
+    must start with the prefix. The default value is no prefix.
 
-* `[PREFIX.]type`: the authentication type keyword (`simple` or `kerberos`) or a Authentication handler implementation.
+*   `[PREFIX.]type`: the authentication type keyword (`simple` or \
+    `kerberos`) or a Authentication handler implementation.
 
-* `[PREFIX.]signature.secret`: When `signer.secret.provider` is set to `string` or not specified, this is the value for the secret used to sign the HTTP cookie.
+*   `[PREFIX.]signature.secret`: When `signer.secret.provider` is set to
+    `string` or not specified, this is the value for the secret used to sign
+    the HTTP cookie.
 
-* `[PREFIX.]token.validity`: The validity -in seconds- of the generated authentication token. The default value is `3600` seconds. This is also used for the rollover interval when `signer.secret.provider` is set to `random` or `zookeeper`.
+*   `[PREFIX.]token.validity`: The validity -in seconds- of the generated
+    authentication token. The default value is `3600` seconds. This is also
+    used for the rollover interval when `signer.secret.provider` is set to
+    `random` or `zookeeper`.
 
-* `[PREFIX.]cookie.domain`: domain to use for the HTTP cookie that stores the authentication token.
+*   `[PREFIX.]cookie.domain`: domain to use for the HTTP cookie that stores
+    the authentication token.
 
-* `[PREFIX.]cookie.path`: path to use for the HTTP cookie that stores the authentication token.
+*   `[PREFIX.]cookie.path`: path to use for the HTTP cookie that stores the
+    authentication token.
 
-* `signer.secret.provider`: indicates the name of the SignerSecretProvider class to use. Possible values are: `string`, `random`, `zookeeper`, or a classname. If not specified, the `string` implementation will be used; and failing that, the `random` implementation will be used.
+*   `signer.secret.provider`: indicates the name of the SignerSecretProvider
+    class to use. Possible values are: `string`, `random`,
+    `zookeeper`, or a classname. If not specified, the `string`
+    implementation will be used; and failing that, the `random`
+    implementation will be used.
 
 ### Kerberos Configuration
 
@@ -48,11 +61,15 @@ Hadoop Auth uses SLF4J-API for logging. Auth Maven POM dependencies define the S
 
 To use Kerberos SPNEGO as the authentication mechanism, the authentication filter must be configured with the following init parameters:
 
-* `[PREFIX.]type`: the keyword `kerberos`.
+*   `[PREFIX.]type`: the keyword `kerberos`.
 
-* `[PREFIX.]kerberos.principal`: The web-application Kerberos principal name. The Kerberos principal name must start with `HTTP/...`. For example: `HTTP/localhost@LOCALHOST`. There is no default value.
+*   `[PREFIX.]kerberos.principal`: The web-application Kerberos principal
+    name. The Kerberos principal name must start with `HTTP/...`. For
+    example: `HTTP/localhost@LOCALHOST`. There is no default value.
 
-* `[PREFIX.]kerberos.keytab`: The path to the keytab file containing the credentials for the kerberos principal. For example: `/Users/tucu/tucu.keytab`. There is no default value.
+*   `[PREFIX.]kerberos.keytab`: The path to the keytab file containing
+    the credentials for the kerberos principal. For example:
+    `/Users/tucu/tucu.keytab`. There is no default value.
 
 **Example**:
 
@@ -100,9 +117,11 @@ To use Kerberos SPNEGO as the authentication mechanism, the authentication filte
 
 To use Pseudo/Simple as the authentication mechanism (trusting the value of the query string parameter 'user.name'), the authentication filter must be configured with the following init parameters:
 
-* `[PREFIX.]type`: the keyword `simple`.
+*   `[PREFIX.]type`: the keyword `simple`.
 
-* `[PREFIX.]simple.anonymous.allowed`: is a boolean parameter that indicates if anonymous requests are allowed or not. The default value is `false`.
+*   `[PREFIX.]simple.anonymous.allowed`: is a boolean parameter that
+    indicates if anonymous requests are allowed or not. The default value is
+    `false`.
 
 **Example**:
 
@@ -148,9 +167,11 @@ To use Pseudo/Simple as the authentication mechanism (trusting the value of the 
 
 The AltKerberos authentication mechanism is a partially implemented derivative of the Kerberos SPNEGO authentication mechanism which allows a "mixed" form of authentication where Kerberos SPNEGO is used by non-browsers while an alternate form of authentication (to be implemented by the user) is used for browsers. To use AltKerberos as the authentication mechanism (besides providing an implementation), the authentication filter must be configured with the following init parameters, in addition to the previously mentioned Kerberos SPNEGO ones:
 
-* `[PREFIX.]type`: the full class name of the implementation of AltKerberosAuthenticationHandler to use.
+*   `[PREFIX.]type`: the full class name of the implementation of
+    AltKerberosAuthenticationHandler to use.
 
-* `[PREFIX.]alt-kerberos.non-browser.user-agents`: a comma-separated list of which user-agents should be considered non-browsers.
+*   `[PREFIX.]alt-kerberos.non-browser.user-agents`: a comma-separated
+    list of which user-agents should be considered non-browsers.
 
 **Example**:
 
@@ -204,23 +225,40 @@ The SignerSecretProvider is used to provide more advanced behaviors for the secr
 
 These are the relevant configuration properties:
 
-* `signer.secret.provider`: indicates the name of the SignerSecretProvider class to use. Possible values are: "string", "random", "zookeeper", or a classname. If not specified, the "string" implementation will be used; and failing that, the "random" implementation will be used.
+*   `signer.secret.provider`: indicates the name of the
+    SignerSecretProvider class to use. Possible values are: "string",
+    "random", "zookeeper", or a classname. If not specified, the "string"
+    implementation will be used; and failing that, the "random" implementation
+    will be used.
 
-* `[PREFIX.]signature.secret`: When `signer.secret.provider` is set to `string` or not specified, this is the value for the secret used to sign the HTTP cookie.
+*   `[PREFIX.]signature.secret`: When `signer.secret.provider` is set
+    to `string` or not specified, this is the value for the secret used to
+    sign the HTTP cookie.
 
-* `[PREFIX.]token.validity`: The validity -in seconds- of the generated authentication token. The default value is `3600` seconds. This is also used for the rollover interval when `signer.secret.provider` is set to `random` or `zookeeper`.
+*   `[PREFIX.]token.validity`: The validity -in seconds- of the generated
+    authentication token. The default value is `3600` seconds. This is
+    also used for the rollover interval when `signer.secret.provider` is
+    set to `random` or `zookeeper`.
 
 The following configuration properties are specific to the `zookeeper` implementation:
 
-* `signer.secret.provider.zookeeper.connection.string`: Indicates the ZooKeeper connection string to connect with.
+*   `signer.secret.provider.zookeeper.connection.string`: Indicates the
+    ZooKeeper connection string to connect with.
 
-* `signer.secret.provider.zookeeper.path`: Indicates the ZooKeeper path to use for storing and retrieving the secrets. All servers that need to coordinate their secret should point to the same path
+*   `signer.secret.provider.zookeeper.path`: Indicates the ZooKeeper path
+    to use for storing and retrieving the secrets. All servers
+    that need to coordinate their secret should point to the same path
 
-* `signer.secret.provider.zookeeper.auth.type`: Indicates the auth type to use. Supported values are `none` and `sasl`. The default value is `none`.
+*   `signer.secret.provider.zookeeper.auth.type`: Indicates the auth type
+    to use. Supported values are `none` and `sasl`. The default
+    value is `none`.
 
-* `signer.secret.provider.zookeeper.kerberos.keytab`: Set this to the path with the Kerberos keytab file. This is only required if using Kerberos.
+*   `signer.secret.provider.zookeeper.kerberos.keytab`: Set this to the
+    path with the Kerberos keytab file. This is only required if using
+    Kerberos.
 
-* `signer.secret.provider.zookeeper.kerberos.principal`: Set this to the Kerberos principal to use. This only required if using Kerberos.
+*   `signer.secret.provider.zookeeper.kerberos.principal`: Set this to the
+    Kerberos principal to use. This only required if using Kerberos.
 
 **Example**:
 

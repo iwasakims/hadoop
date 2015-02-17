@@ -12,8 +12,8 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-Hadoop Auth, Java HTTP SPNEGO MAVEN\_PROJECT\_VERSION
-=====================================================
+Hadoop Auth, Java HTTP SPNEGO
+=============================
 
 Hadoop Auth is a Java library consisting of a client and a server components to enable Kerberos SPNEGO authentication for HTTP.
 
@@ -39,9 +39,5 @@ User Documentation
 ------------------
 
 * [Examples](./Examples.html)
-
 * [Configuration](./Configuration.html)
-
 * [Building It](./BuildingIt.html)
-
-

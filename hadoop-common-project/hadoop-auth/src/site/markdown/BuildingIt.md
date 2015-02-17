@@ -12,16 +12,14 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-Hadoop Auth, Java HTTP SPNEGO MAVEN\_PROJECT\_VERSION - Building It
-===================================================================
+Hadoop Auth, Java HTTP SPNEGO - Building It
+===========================================
 
 Requirements
 ------------
 
 * Java 6+
-
 * Maven 3+
-
 * Kerberos KDC (for running Kerberos test cases)
 
 Building
@@ -45,11 +43,8 @@ To run Kerberos tescases use the `testKerberos` Maven profile:
 The following Maven `-D` options can be used to change the default values:
 
 * `hadoop-auth.test.kerberos.realm`: default value **LOCALHOST**
-
 * `hadoop-auth.test.kerberos.client.principal`: default value **client**
-
 * `hadoop-auth.test.kerberos.server.principal`: default value **HTTP/localhost** (it must start 'HTTP/')
-
 * `hadoop-auth.test.kerberos.keytab.file`: default value **$HOME/$USER.keytab**
 
 ### Generating Documentation
