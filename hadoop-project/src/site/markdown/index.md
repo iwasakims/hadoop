@@ -12,10 +12,10 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
-Apache Hadoop MAVEN\_PROJECT\_VERSION
-=====================================
+Apache Hadoop ${project.version}
+================================
 
-Apache Hadoop MAVEN\_PROJECT\_VERSION consists of significant improvements over the previous stable release (hadoop-1.x).
+Apache Hadoop ${project.version} consists of significant improvements over the previous stable release (hadoop-1.x).
 
 Here is a short overview of the improvments to both HDFS and MapReduce.
 
