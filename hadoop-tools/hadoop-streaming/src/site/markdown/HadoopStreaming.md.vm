@@ -16,76 +16,41 @@ Hadoop Streaming
 ================
 
 * [Hadoop Streaming](#Hadoop_Streaming)
-
-  * [Hadoop Streaming](#Hadoop_Streaming)
-
-  * [How Streaming Works](#How_Streaming_Works)
-
-  * [Streaming Command Options](#Streaming_Command_Options)
-
-      * [Specifying a Java Class as the Mapper/Reducer](#Specifying_a_Java_Class_as_the_MapperReducer)
-
-      * [Packaging Files With Job Submissions](#Packaging_Files_With_Job_Submissions)
-
-      * [Specifying Other Plugins for Jobs](#Specifying_Other_Plugins_for_Jobs)
-
-      * [Setting Environment Variables](#Setting_Environment_Variables)
-
-  * [Generic Command Options](#Generic_Command_Options)
-
-      * [Specifying Configuration Variables with the -D Option](#Specifying_Configuration_Variables_with_the_-D_Option)
-
-          * [Specifying Directories](#Specifying_Directories)
-
-          * [Specifying Map-Only Jobs](#Specifying_Map-Only_Jobs)
-
-          * [Specifying the Number of Reducers](#Specifying_the_Number_of_Reducers)
-
-          * [Customizing How Lines are Split into Key/Value Pairs](#Customizing_How_Lines_are_Split_into_KeyValue_Pairs)
-
-      * [Working with Large Files and Archives](#Working_with_Large_Files_and_Archives)
-
-          * [Making Files Available to Tasks](#Making_Files_Available_to_Tasks)
-
-          * [Making Archives Available to Tasks](#Making_Archives_Available_to_Tasks)
-
-  * [More Usage Examples](#More_Usage_Examples)
-
-      * [Hadoop Partitioner Class](#Hadoop_Partitioner_Class)
-
-      * [Hadoop Comparator Class](#Hadoop_Comparator_Class)
-
-      * [Hadoop Aggregate Package](#Hadoop_Aggregate_Package)
-
-      * [Hadoop Field Selection Class](#Hadoop_Field_Selection_Class)
-
-  * [Frequently Asked Questions](#Frequently_Asked_Questions)
-
-      * [How do I use Hadoop Streaming to run an arbitrary set of (semi) independent tasks?](#How_do_I_use_Hadoop_Streaming_to_run_an_arbitrary_set_of_semi_independent_tasks)
-
-      * [How do I process files, one per map?](#How_do_I_process_files_one_per_map)
-
-      * [How many reducers should I use?](#How_many_reducers_should_I_use)
-
-      * [If I set up an alias in my shell script, will that work after -mapper?](#If_I_set_up_an_alias_in_my_shell_script_will_that_work_after_-mapper)
-
-      * [Can I use UNIX pipes?](#Can_I_use_UNIX_pipes)
-
-      * [What do I do if I get the "No space left on device" error?](#What_do_I_do_if_I_get_the_No_space_left_on_device_error)
-
-      * [How do I specify multiple input directories?](#How_do_I_specify_multiple_input_directories)
-
-      * [How do I generate output files with gzip format?](#How_do_I_generate_output_files_with_gzip_format)
-
-      * [How do I provide my own input/output format with streaming?](#How_do_I_provide_my_own_inputoutput_format_with_streaming)
-
-      * [How do I parse XML documents using streaming?](#How_do_I_parse_XML_documents_using_streaming)
-
-      * [How do I update counters in streaming applications?](#How_do_I_update_counters_in_streaming_applications)
-
-      * [How do I update status in streaming applications?](#How_do_I_update_status_in_streaming_applications)
-
-      * [How do I get the Job variables in a streaming job's mapper/reducer?](#How_do_I_get_the_Job_variables_in_a_streaming_jobs_mapperreducer)
+    * [Hadoop Streaming](#Hadoop_Streaming)
+    * [How Streaming Works](#How_Streaming_Works)
+    * [Streaming Command Options](#Streaming_Command_Options)
+        * [Specifying a Java Class as the Mapper/Reducer](#Specifying_a_Java_Class_as_the_MapperReducer)
+        * [Packaging Files With Job Submissions](#Packaging_Files_With_Job_Submissions)
+        * [Specifying Other Plugins for Jobs](#Specifying_Other_Plugins_for_Jobs)
+        * [Setting Environment Variables](#Setting_Environment_Variables)
+    * [Generic Command Options](#Generic_Command_Options)
+        * [Specifying Configuration Variables with the -D Option](#Specifying_Configuration_Variables_with_the_-D_Option)
+            * [Specifying Directories](#Specifying_Directories)
+            * [Specifying Map-Only Jobs](#Specifying_Map-Only_Jobs)
+            * [Specifying the Number of Reducers](#Specifying_the_Number_of_Reducers)
+            * [Customizing How Lines are Split into Key/Value Pairs](#Customizing_How_Lines_are_Split_into_KeyValue_Pairs)
+        * [Working with Large Files and Archives](#Working_with_Large_Files_and_Archives)
+            * [Making Files Available to Tasks](#Making_Files_Available_to_Tasks)
+            * [Making Archives Available to Tasks](#Making_Archives_Available_to_Tasks)
+    * [More Usage Examples](#More_Usage_Examples)
+        * [Hadoop Partitioner Class](#Hadoop_Partitioner_Class)
+        * [Hadoop Comparator Class](#Hadoop_Comparator_Class)
+        * [Hadoop Aggregate Package](#Hadoop_Aggregate_Package)
+        * [Hadoop Field Selection Class](#Hadoop_Field_Selection_Class)
+    * [Frequently Asked Questions](#Frequently_Asked_Questions)
+        * [How do I use Hadoop Streaming to run an arbitrary set of (semi) independent tasks?](#How_do_I_use_Hadoop_Streaming_to_run_an_arbitrary_set_of_semi_independent_tasks)
+        * [How do I process files, one per map?](#How_do_I_process_files_one_per_map)
+        * [How many reducers should I use?](#How_many_reducers_should_I_use)
+        * [If I set up an alias in my shell script, will that work after -mapper?](#If_I_set_up_an_alias_in_my_shell_script_will_that_work_after_-mapper)
+        * [Can I use UNIX pipes?](#Can_I_use_UNIX_pipes)
+        * [What do I do if I get the "No space left on device" error?](#What_do_I_do_if_I_get_the_No_space_left_on_device_error)
+        * [How do I specify multiple input directories?](#How_do_I_specify_multiple_input_directories)
+        * [How do I generate output files with gzip format?](#How_do_I_generate_output_files_with_gzip_format)
+        * [How do I provide my own input/output format with streaming?](#How_do_I_provide_my_own_inputoutput_format_with_streaming)
+        * [How do I parse XML documents using streaming?](#How_do_I_parse_XML_documents_using_streaming)
+        * [How do I update counters in streaming applications?](#How_do_I_update_counters_in_streaming_applications)
+        * [How do I update status in streaming applications?](#How_do_I_update_status_in_streaming_applications)
+        * [How do I get the Job variables in a streaming job's mapper/reducer?](#How_do_I_get_the_Job_variables_in_a_streaming_jobs_mapperreducer)
 
 Hadoop Streaming
 ----------------
@@ -563,7 +528,7 @@ Instead of plain text files, you can generate gzip files as your generated outpu
 
 ### How do I provide my own input/output format with streaming?
 
-You can specify your own custom class by packing them and putting the custom jar to \\${HADOOP\_CLASSPATH}.
+You can specify your own custom class by packing them and putting the custom jar to `$HADOOP_CLASSPATH`.
 
 ### How do I parse XML documents using streaming?
 
