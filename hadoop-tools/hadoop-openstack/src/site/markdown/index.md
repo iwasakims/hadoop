@@ -13,66 +13,36 @@
 -->
 
 * [Hadoop OpenStack Support: Swift Object Store](#Hadoop_OpenStack_Support:_Swift_Object_Store)
-
-  * [Introduction](#Introduction)
-
-  * [Features](#Features)
-
-  * [Using the Hadoop Swift Filesystem Client](#Using_the_Hadoop_Swift_Filesystem_Client)
-
-      * [Concepts: services and containers](#Concepts:_services_and_containers)
-
-      * [Containers and Objects](#Containers_and_Objects)
-
-      * [Eventual Consistency](#Eventual_Consistency)
-
-      * [Non-atomic "directory" operations.](#Non-atomic_directory_operations.)
-
-  * [Working with Swift Object Stores in Hadoop](#Working_with_Swift_Object_Stores_in_Hadoop)
-
-      * [Swift Filesystem URIs](#Swift_Filesystem_URIs)
-
-      * [Installing](#Installing)
-
-      * [Configuring](#Configuring)
-
-          * [Example: Rackspace US, in-cluster access using API key](#Example:_Rackspace_US_in-cluster_access_using_API_key)
-
-          * [Example: Rackspace UK: remote access with password authentication](#Example:_Rackspace_UK:_remote_access_with_password_authentication)
-
-          * [Example: HP cloud service definition](#Example:_HP_cloud_service_definition)
-
-      * [General Swift Filesystem configuration options](#General_Swift_Filesystem_configuration_options)
-
-          * [Blocksize fs.swift.blocksize](#Blocksize_fs.swift.blocksize)
-
-          * [Partition size fs.swift.partsize](#Partition_size_fs.swift.partsize)
-
-          * [Request size fs.swift.requestsize](#Request_size_fs.swift.requestsize)
-
-          * [Connection timeout fs.swift.connect.timeout](#Connection_timeout_fs.swift.connect.timeout)
-
-          * [Connection timeout fs.swift.socket.timeout](#Connection_timeout_fs.swift.socket.timeout)
-
-          * [Connection Retry Count fs.swift.connect.retry.count](#Connection_Retry_Count_fs.swift.connect.retry.count)
-
-          * [Connection Throttle Delay fs.swift.connect.throttle.delay](#Connection_Throttle_Delay_fs.swift.connect.throttle.delay)
-
-          * [HTTP Proxy](#HTTP_Proxy)
-
-      * [Troubleshooting](#Troubleshooting)
-
-          * [ClassNotFoundException](#ClassNotFoundException)
-
-          * [Failure to Authenticate](#Failure_to_Authenticate)
-
-          * [Timeout connecting to the Swift Service](#Timeout_connecting_to_the_Swift_Service)
-
-      * [Warnings](#Warnings)
-
-      * [Limits](#Limits)
-
-      * [Testing the hadoop-openstack module](#Testing_the_hadoop-openstack_module)
+    * [Introduction](#Introduction)
+    * [Features](#Features)
+    * [Using the Hadoop Swift Filesystem Client](#Using_the_Hadoop_Swift_Filesystem_Client)
+        * [Concepts: services and containers](#Concepts:_services_and_containers)
+        * [Containers and Objects](#Containers_and_Objects)
+        * [Eventual Consistency](#Eventual_Consistency)
+        * [Non-atomic "directory" operations.](#Non-atomic_directory_operations.)
+    * [Working with Swift Object Stores in Hadoop](#Working_with_Swift_Object_Stores_in_Hadoop)
+        * [Swift Filesystem URIs](#Swift_Filesystem_URIs)
+        * [Installing](#Installing)
+        * [Configuring](#Configuring)
+            * [Example: Rackspace US, in-cluster access using API key](#Example:_Rackspace_US_in-cluster_access_using_API_key)
+            * [Example: Rackspace UK: remote access with password authentication](#Example:_Rackspace_UK:_remote_access_with_password_authentication)
+            * [Example: HP cloud service definition](#Example:_HP_cloud_service_definition)
+        * [General Swift Filesystem configuration options](#General_Swift_Filesystem_configuration_options)
+            * [Blocksize fs.swift.blocksize](#Blocksize_fs.swift.blocksize)
+            * [Partition size fs.swift.partsize](#Partition_size_fs.swift.partsize)
+            * [Request size fs.swift.requestsize](#Request_size_fs.swift.requestsize)
+            * [Connection timeout fs.swift.connect.timeout](#Connection_timeout_fs.swift.connect.timeout)
+            * [Connection timeout fs.swift.socket.timeout](#Connection_timeout_fs.swift.socket.timeout)
+            * [Connection Retry Count fs.swift.connect.retry.count](#Connection_Retry_Count_fs.swift.connect.retry.count)
+            * [Connection Throttle Delay fs.swift.connect.throttle.delay](#Connection_Throttle_Delay_fs.swift.connect.throttle.delay)
+            * [HTTP Proxy](#HTTP_Proxy)
+        * [Troubleshooting](#Troubleshooting)
+            * [ClassNotFoundException](#ClassNotFoundException)
+            * [Failure to Authenticate](#Failure_to_Authenticate)
+            * [Timeout connecting to the Swift Service](#Timeout_connecting_to_the_Swift_Service)
+        * [Warnings](#Warnings)
+        * [Limits](#Limits)
+        * [Testing the hadoop-openstack module](#Testing_the_hadoop-openstack_module)
 
 Hadoop OpenStack Support: Swift Object Store
 ============================================
@@ -89,13 +59,16 @@ Features
 
 * Read and write of data stored in a Swift object store
 
-* Support of a pseudo-hierachical file system (directories, subdirectories and files)
+* Support of a pseudo-hierachical file system (directories, subdirectories and
+  files)
 
-* Standard filesystem operations: `create`, `delete`, `mkdir`, `ls`, `mv`, `stat`.
+* Standard filesystem operations: `create`, `delete`, `mkdir`,
+  `ls`, `mv`, `stat`.
 
 * Can act as a source of data in a MapReduce job, or a sink.
 
-* Support for multiple OpenStack services, and multiple containers from a single service.
+* Support for multiple OpenStack services, and multiple containers from a
+  single service.
 
 * Supports in-cluster and remote access to Swift data.
 
@@ -103,9 +76,11 @@ Features
 
 * Released under the Apache Software License
 
-* Tested against the Hadoop 3.x and 1.x branches, against multiple public OpenStack clusters: Rackspace US, Rackspace UK, HP Cloud.
+* Tested against the Hadoop 3.x and 1.x branches, against multiple public
+  OpenStack clusters: Rackspace US, Rackspace UK, HP Cloud.
 
-* Tested against private OpenStack clusters, including scalability tests of large file uploads.
+* Tested against private OpenStack clusters, including scalability tests of
+  large file uploads.
 
 Using the Hadoop Swift Filesystem Client
 ----------------------------------------
@@ -118,19 +93,29 @@ The Hadoop Swift filesystem library adds another concept, the *service*, which d
 
 ### Containers and Objects
 
-* Containers are created by users with accounts on the Swift filestore, and hold *objects*.
+*   Containers are created by users with accounts on the Swift filestore, and hold
+    *objects*.
 
-* Objects can be zero bytes long, or they can contain data.
+*   Objects can be zero bytes long, or they can contain data.
 
-* Objects in the container can be up to 5GB; there is a special support for larger files than this, which merges multiple objects in to one.
+*   Objects in the container can be up to 5GB; there is a special support for
+    larger files than this, which merges multiple objects in to one.
 
-* Each object is referenced by it's *name*; there is no notion of directories.
+*   Each object is referenced by it's *name*; there is no notion of directories.
 
-* You can use any characters in an object name that can be 'URL-encoded'; the maximum length of a name is 1034 characters -after URL encoding.
+*   You can use any characters in an object name that can be 'URL-encoded'; the
+    maximum length of a name is 1034 characters -after URL encoding.
 
-* Names can have `/` characters in them, which are used to create the illusion of a directory structure. For example `dir/dir2/name`. Even though this looks like a directory, *it is still just a name*. There is no requirement to have any entries in the container called `dir` or `dir/dir2`
+*   Names can have `/` characters in them, which are used to create the illusion of
+    a directory structure. For example `dir/dir2/name`. Even though this looks
+    like a directory, *it is still just a name*. There is no requirement to have
+    any entries in the container called `dir` or `dir/dir2`
 
-* That said. if the container has zero-byte objects that look like directory names above other objects, they can pretend to be directories. Continuing the example, a 0-byte object called `dir` would tell clients that it is a directory while `dir/dir2` or `dir/dir2/name` were present. This creates an illusion of containers holding a filesystem.
+*   That said. if the container has zero-byte objects that look like directory
+    names above other objects, they can pretend to be directories. Continuing the
+    example, a 0-byte object called `dir` would tell clients that it is a
+    directory while `dir/dir2` or `dir/dir2/name` were present. This creates an
+    illusion of containers holding a filesystem.
 
 Client applications talk to Swift over HTTP or HTTPS, reading, writing and deleting objects using standard HTTP operations (GET, PUT and DELETE, respectively). There is also a COPY operation, that creates a new object in the container, with a new name, containing the old data. There is no rename operation itself, objects need to be copied -then the original entry deleted.
 
@@ -146,9 +131,15 @@ Hadoop expects some operations to be atomic, especially `rename()`, which is som
 
 Other consequences of the non-atomic operations are:
 
-1. If a program is looking for the presence of the directory before acting on the data -it may start prematurely. This can be avoided by using other mechanisms to co-ordinate the programs, such as the presence of a file that is written *after* any bulk directory operations.
+1.  If a program is looking for the presence of the directory before acting
+    on the data -it may start prematurely. This can be avoided by using
+    other mechanisms to co-ordinate the programs, such as the presence of a file
+    that is written *after* any bulk directory operations.
 
-2. A `rename()` or `delete()` operation may include files added under the source directory tree during the operation, may unintentionally delete it, or delete the 0-byte swift entries that mimic directories and act as parents for the files. Try to avoid doing this.
+2.  A `rename()` or `delete()` operation may include files added under
+    the source directory tree during the operation, may unintentionally delete
+    it, or delete the 0-byte swift entries that mimic directories and act
+    as parents for the files. Try to avoid doing this.
 
 The best ways to avoid all these problems is not using Swift as the filesystem between MapReduce jobs or other Hadoop workflows. It can act as a source of data, and a final destination, but it doesn't meet all of Hadoop's expectations of what a filesystem is -it's a *blobstore*.
 
@@ -356,9 +347,15 @@ When should this value be changed from its default?
 
 While there is no need to ever change it for basic operation of the Swift filesystem client, it can be tuned
 
-* If a Swift filesystem is location aware, then breaking a file up into smaller partitions scatters the data round the cluster. For best performance, the property `fs.swift.blocksize` should be set to a smaller value than the partition size of files.
+*   If a Swift filesystem is location aware, then breaking a file up into
+    smaller partitions scatters the data round the cluster. For best performance,
+    the property `fs.swift.blocksize` should be set to a smaller value than the
+    partition size of files.
 
-* When writing to an unpartitioned file, the entire write is done in the `close()` operation. When a file is partitioned, the outstanding data to be written whenever the outstanding amount of data is greater than the partition size. This means that data will be written more incrementally
+*   When writing to an unpartitioned file, the entire write is done in the
+    `close()` operation. When a file is partitioned, the outstanding data to
+    be written whenever the outstanding amount of data is greater than the
+    partition size. This means that data will be written more incrementally
 
 #### Request size fs.swift.requestsize
 
@@ -453,11 +450,14 @@ A `SwiftAuthenticationFailedException` is thrown when the client cannot authenti
 
 2.  Use a Swift client such as CyberDuck to validate your credentials
 
-3.  If you have included a tenant ID, try leaving it out. Similarly, try adding it if you had not included it.
+3.  If you have included a tenant ID, try leaving it out. Similarly,
+    try adding it if you had not included it.
 
-4.  Try switching from API key authentication to password-based authentication, by setting the password.
+4.  Try switching from API key authentication to password-based authentication,
+    by setting the password.
 
-5.  Change your credentials. As with Amazon AWS clients, some credentials don't seem to like going over the network.
+5.  Change your credentials. As with Amazon AWS clients, some credentials
+    don't seem to like going over the network.
 
 #### Timeout connecting to the Swift Service
 
@@ -465,27 +465,42 @@ This happens if the client application is running outside an OpenStack cluster, 
 
 ### Warnings
 
-1.  Do not share your login details with anyone, which means do not log the details, or check the XML configuration files into any revision control system to which you do not have exclusive access.
+1.  Do not share your login details with anyone, which means do not log the
+    details, or check the XML configuration files into any revision control system
+    to which you do not have exclusive access.
 
-2.  Similarly, do not use your real account details in any documentation \*or any bug reports submitted online\*
+2.  Similarly, do not use your real account details in any
+    documentation \*or any bug reports submitted online\*
 
-3.  Prefer the apikey authentication over passwords as it is easier to revoke a key -and some service providers allow you to set an automatic expiry date on a key when issued.
+3.  Prefer the apikey authentication over passwords as it is easier
+    to revoke a key -and some service providers allow you to set
+    an automatic expiry date on a key when issued.
 
-4.  Do not use the public service endpoint from within a public OpenStack cluster, as it will run up large bills.
+4.  Do not use the public service endpoint from within a public OpenStack
+    cluster, as it will run up large bills.
 
-5.  Remember: it's not a real filesystem or hierarchical directory structure. Some operations (directory rename and delete) take time and are not atomic or isolated from other operations taking place.
+5.  Remember: it's not a real filesystem or hierarchical directory structure.
+    Some operations (directory rename and delete) take time and are not atomic or
+    isolated from other operations taking place.
 
 6.  Append is not supported.
 
-7.  Unix-style permissions are not supported. All accounts with write access to a repository have unlimited access; the same goes for those with read access.
+7.  Unix-style permissions are not supported. All accounts with write access to
+    a repository have unlimited access; the same goes for those with read access.
 
-8.  In the public clouds, do not make the containers public unless you are happy with anyone reading your data, and are prepared to pay the costs of their downloads.
+8.  In the public clouds, do not make the containers public unless you are happy
+    with anyone reading your data, and are prepared to pay the costs of their
+    downloads.
 
 ### Limits
 
-* Maximum length of an object path: 1024 characters
+*   Maximum length of an object path: 1024 characters
 
-* Maximum size of a binary object: no absolute limit. Files \> 5GB are partitioned into separate files in the native filesystem, and merged during retrieval. *Warning:* the partitioned/large file support is the most complex part of the Hadoop/Swift FS integration, and, along with authentication, the most troublesome to support.
+*   Maximum size of a binary object: no absolute limit. Files \> 5GB are
+    partitioned into separate files in the native filesystem, and merged during
+    retrieval. *Warning:* the partitioned/large file support is the
+    most complex part of the Hadoop/Swift FS integration, and, along with
+    authentication, the most troublesome to support.
 
 ### Testing the hadoop-openstack module
 
