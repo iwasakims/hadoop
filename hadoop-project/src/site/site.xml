@@ -49,24 +49,24 @@
     <menu name="General" inherit="top">
       <item name="Overview" href="index.html"/>
       <item name="Single Node Setup" href="hadoop-project-dist/hadoop-common/SingleCluster.html"/>
+      <item name="Secure Mode" href="hadoop-project-dist/hadoop-common/SecureMode.html"/>
       <item name="Cluster Setup" href="hadoop-project-dist/hadoop-common/ClusterSetup.html"/>
-      <item name="Commands Reference" href="hadoop-project-dist/hadoop-common/CommandsManual.html"/>
       <item name="Compatibility" href="hadoop-project-dist/hadoop-common/Compatibility.html"/>
-      <item name="FileSystem Shell" href="hadoop-project-dist/hadoop-common/FileSystemShell.html"/>
       <item name="FileSystem Specification"
         href="hadoop-project-dist/hadoop-common/filesystem/index.html"/>
       <item name="Interface Classification" href="hadoop-project-dist/hadoop-common/InterfaceClassification.html"/>
-      <item name="Secure Mode" href="hadoop-project-dist/hadoop-common/SecureMode.html"/>
     </menu>
 
     <menu name="Common" inherit="top">
       <item name="CLI Mini Cluster" href="hadoop-project-dist/hadoop-common/CLIMiniCluster.html"/>
-      <item name="HTTP AuthN" href="hadoop-project-dist/hadoop-common/HttpAuthentication.html"/>
+      <item name="Commands Reference" href="hadoop-project-dist/hadoop-common/CommandsManual.html"/>
+      <item name="FileSystem Shell" href="hadoop-project-dist/hadoop-common/FileSystemShell.html"/>
+      <item name="HTTP Authentication" href="hadoop-project-dist/hadoop-common/HttpAuthentication.html"/>
       <item name="Key Management Server" href="hadoop-kms/index.html"/>
       <item name="Native Libraries" href="hadoop-project-dist/hadoop-common/NativeLibraries.html"/>
       <item name="Proxy User" href="hadoop-project-dist/hadoop-common/Superusers.html"/>
       <item name="Rack Awareness" href="hadoop-project-dist/hadoop-common/RackAwareness.html"/>
-      <item name="Service Level AuthZ" href="hadoop-project-dist/hadoop-common/ServiceLevelAuth.html"/>
+      <item name="Service Level Authorization" href="hadoop-project-dist/hadoop-common/ServiceLevelAuth.html"/>
       <item name="Tracing" href="hadoop-project-dist/hadoop-common/Tracing.html"/>
     </menu>
     
@@ -80,7 +80,6 @@
       <item name="Federation" href="hadoop-project-dist/hadoop-hdfs/Federation.html"/>
       <item name="HA with NFS" href="hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithNFS.html"/>
       <item name="HA with QJM" href="hadoop-project-dist/hadoop-hdfs/HDFSHighAvailabilityWithQJM.html"/>
-      <item name="Heterogeneous Storage" href="hadoop-project-dist/hadoop-hdfs/ArchivalStorage.html"/>
       <item name="HttpFS Gateway" href="hadoop-hdfs-httpfs/index.html"/>
       <item name="Image Viewer" href="hadoop-project-dist/hadoop-hdfs/HdfsImageViewer.html"/>
       <item name="libhdfs (C API)" href="hadoop-project-dist/hadoop-hdfs/LibHdfs.html"/>
@@ -92,6 +91,7 @@
       <item name="Short Circuit Local Reads"
           href="hadoop-project-dist/hadoop-hdfs/ShortCircuitLocalReads.html"/>
       <item name="Snapshots" href="hadoop-project-dist/hadoop-hdfs/HdfsSnapshots.html"/>
+      <item name="Storage Policy" href="hadoop-project-dist/hadoop-hdfs/ArchivalStorage.html"/>
       <item name="Transparent Encryption" href="hadoop-project-dist/hadoop-hdfs/TransparentEncryption.html"/>
       <item name="ViewFs" href="hadoop-project-dist/hadoop-hdfs/ViewFs.html"/>
       <item name="WebHDFS (REST API)" href="hadoop-project-dist/hadoop-hdfs/WebHDFS.html"/>
