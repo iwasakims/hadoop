@@ -35,24 +35,20 @@ YARN Commands
     * [scmadmin](#scmadmin)
     * [sharedcachemanager](#sharedcachemanager)
     * [timelineserver](#timelineserver)
-* [Files](#Files)
-    * [etc/hadoop/hadoop-env.sh](#etchadoophadoop-env.sh)
-    * [etc/hadoop/yarn-env.sh](#etchadoopyarn-env.sh)
-    * [etc/hadoop/hadoop-user-functions.sh](#etchadoophadoop-user-functions.sh)
-    * [~/.hadooprc](#a.hadooprc)
 
 Overview
 --------
 
 YARN commands are invoked by the bin/yarn script. Running the yarn script without any arguments prints the description for all commands.
 
-Usage: `yarn [SHELL_OPTIONS] COMMAND [GENERIC_OPTIONS] [COMMAND_OPTIONS]`
+Usage: `yarn [--config confdir] COMMAND [--loglevel loglevel] [GENERIC_OPTIONS] [COMMAND_OPTIONS]`
 
 YARN has an option parsing framework that employs parsing generic options as well as running classes.
 
 | COMMAND\_OPTIONS | Description |
 |:---- |:---- |
-| SHELL\_OPTIONS | The common set of shell options. These are documented on the [Commands Manual](../../hadoop-project-dist/hadoop-common/CommandsManual.html#Shell_Options) page. |
+| `--config confdir` | Overwrites the default Configuration directory. Default is `${HADOOP_PREFIX}/conf`. |
+| `--loglevel loglevel` | Overwrites the log level. Valid log levels are FATAL, ERROR, WARN, INFO, DEBUG, and TRACE. Default is INFO. |
 | GENERIC\_OPTIONS | The common set of options supported by multiple commands. See the Hadoop [Commands Manual](../../hadoop-project-dist/hadoop-common/CommandsManual.html#Generic_Options) for more information. |
 | COMMAND COMMAND\_OPTIONS | Various commands with their options are described in the following sections. The commands have been grouped into [User Commands](#User_Commands) and [Administration Commands](#Administration_Commands). |
 
@@ -260,13 +256,3 @@ Start the Shared Cache Manager
 Usage: `yarn timelineserver`
 
 Start the TimeLineServer
-
-Files
------
-
-| File | Description |
-|:---- |:---- |
-| etc/hadoop/hadoop-env.sh | This file stores the global settings used by all Hadoop shell commands. |
-| etc/hadoop/yarn-env.sh | This file stores overrides used by all YARN shell commands. |
-| etc/hadoop/hadoop-user-functions.sh | This file allows for advanced users to override some shell functionality. |
-| ~/.hadooprc | This stores the personal environment for an individual user. It is processed after the `hadoop-env.sh`, `hadoop-user-functions.sh`, and `yarn-env.sh` files and can contain the same settings. |

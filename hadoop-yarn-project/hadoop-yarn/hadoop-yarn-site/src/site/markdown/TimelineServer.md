@@ -190,7 +190,7 @@ Assuming all the aforementioned configurations are set properly, admins can star
 
 Or users can start the Timeline server / history service as a daemon:
 
-      $ yarn --daemon start timelineserver
+      $ $HADOOP_YARN_HOME/sbin/yarn-daemon.sh start timelineserver
 
 Accessing generic-data via command-line
 ---------------------------------------
