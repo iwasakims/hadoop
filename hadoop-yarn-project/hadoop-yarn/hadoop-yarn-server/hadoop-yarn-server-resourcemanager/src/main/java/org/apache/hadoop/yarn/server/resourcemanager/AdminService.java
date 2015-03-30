@@ -40,6 +40,11 @@ import org.apache.hadoop.ipc.ProtobufRpcEngine;
 import org.apache.hadoop.ipc.RPC;
 import org.apache.hadoop.ipc.RPC.Server;
 import org.apache.hadoop.ipc.StandbyException;
+import org.apache.hadoop.tracing.SpanReceiverInfo;
+import org.apache.hadoop.tracing.TraceAdminProtocol;
+import org.apache.hadoop.tracing.TraceAdminProtocolPB;
+import org.apache.hadoop.tracing.TraceAdminProtocolServerSideTranslatorPB;
+import org.apache.hadoop.tracing.TraceAdminPB.TraceAdminService;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.security.Groups;
 import org.apache.hadoop.security.UserGroupInformation;
@@ -89,8 +94,9 @@ import org.apache.hadoop.yarn.server.resourcemanager.security.authorize.RMPolicy
 import com.google.common.annotations.VisibleForTesting;
 import com.google.protobuf.BlockingService;
 
-public class AdminService extends CompositeService implements
-    HAServiceProtocol, ResourceManagerAdministrationProtocol {
+public class AdminService extends CompositeService
+  implements HAServiceProtocol, ResourceManagerAdministrationProtocol,
+      TraceAdminProtocol {
 
   private static final Log LOG = LogFactory.getLog(AdminService.class);
 
@@ -186,6 +192,15 @@ public class AdminService extends CompositeService implements
       server.addProtocol(RPC.RpcKind.RPC_PROTOCOL_BUFFER,
           HAServiceProtocol.class, haPbService);
     }
+
+    TraceAdminProtocolServerSideTranslatorPB traceAdminXlator =
+        new TraceAdminProtocolServerSideTranslatorPB(this);
+    BlockingService traceAdminService = TraceAdminService
+        .newReflectiveBlockingService(traceAdminXlator);
+    RPC.setProtocolEngine(conf, TraceAdminProtocolPB.class,
+        ProtobufRpcEngine.class);
+    server.addProtocol(RPC.RpcKind.RPC_PROTOCOL_BUFFER,
+        TraceAdminProtocolPB.class, traceAdminService);
 
     this.server.start();
     conf.updateConnectAddr(YarnConfiguration.RM_BIND_HOST,
@@ -703,5 +718,23 @@ public class AdminService extends CompositeService implements
     RMAuditLogger.logFailure(user, argName, "", 
         "AdminService", "Exception " + msg);
     return RPCUtil.getRemoteException(exception);
+  }
+
+  @Override // TraceAdminProtocol
+  public SpanReceiverInfo[] listSpanReceivers() throws IOException {
+    checkAccess("listSpanReceivers");
+    return rm.spanReceiverHost.listSpanReceivers();
+  }
+
+  @Override // TraceAdminProtocol
+  public long addSpanReceiver(SpanReceiverInfo info) throws IOException {
+    checkAccess("addSpanReceiver");
+    return rm.spanReceiverHost.addSpanReceiver(info);
+  }
+
+  @Override // TraceAdminProtocol
+  public void removeSpanReceiver(long id) throws IOException {
+    checkAccess("removeSpanReceiver");
+    rm.spanReceiverHost.removeSpanReceiver(id);
   }
 }
