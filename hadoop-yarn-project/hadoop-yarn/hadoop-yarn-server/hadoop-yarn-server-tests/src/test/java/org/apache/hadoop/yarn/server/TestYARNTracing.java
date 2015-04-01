@@ -19,14 +19,11 @@
 package org.apache.hadoop.yarn.server;
 
 import java.io.IOException;
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.tracing.SetSpanReceiver;
 import org.apache.hadoop.tracing.SpanReceiverHost;
 import org.apache.hadoop.tracing.TraceAdmin;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.hadoop.yarn.server.resourcemanager.ResourceManager;
 import org.apache.htrace.Sampler;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
@@ -36,16 +33,15 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestYARNTracing {
-  private static final Log LOG = LogFactory.getLog(TestYARNTracing.class);
   private static MiniYARNCluster cluster;
 
   @BeforeClass
   public static void setup() throws IOException {
     Configuration conf = new YarnConfiguration();
     conf.set(SpanReceiverHost.SPAN_RECEIVERS_CONF_KEY,
-        SetSpanReceiver.class.getName());
+             SetSpanReceiver.class.getName());
     cluster = new MiniYARNCluster(TestYARNTracing.class.getSimpleName(),
-        1, 1, 1);
+                                  1, 1, 1);
     cluster.init(conf);
     cluster.start();
   }
@@ -62,11 +58,11 @@ public class TestYARNTracing {
   public void testRMTracing() throws Exception {
     TraceScope ts = null;
     try {
-      ResourceManager rm = cluster.getResourceManager();
-      String hostPort = "127.0.0.1:" +
-          rm.getRMContext().getRMAdminService().getServer().getPort();
+      Configuration conf = cluster.getConfig();
+      String hostPort = conf.get(YarnConfiguration.RM_ADMIN_ADDRESS,
+                                 YarnConfiguration.DEFAULT_RM_ADMIN_ADDRESS);
       TraceAdmin traceAdmin = new TraceAdmin();
-      traceAdmin.setConf(cluster.getConfig());
+      traceAdmin.setConf(conf);
       ts = Trace.startSpan("testRMTracing", Sampler.ALWAYS);
       Assert.assertEquals(0, 
           runTraceCommand(traceAdmin, "-list", "-host", hostPort));
