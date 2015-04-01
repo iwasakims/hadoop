@@ -42,6 +42,7 @@ import org.apache.hadoop.util.NodeHealthScriptRunner;
 import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.ShutdownHookManager;
 import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.tracing.SpanReceiverHost;
 import org.apache.hadoop.yarn.YarnUncaughtExceptionHandler;
 import org.apache.hadoop.yarn.api.ContainerManagementProtocol;
 import org.apache.hadoop.yarn.api.records.ApplicationId;
@@ -89,6 +90,7 @@ public class NodeManager extends CompositeService
   private NodeStatusUpdater nodeStatusUpdater;
   private static CompositeServiceShutdownHook nodeManagerShutdownHook; 
   private NMStateStoreService nmStore = null;
+  private SpanReceiverHost spanReceiverHost;
   
   private AtomicBoolean isStopping = new AtomicBoolean(false);
   private boolean rmWorkPreservingRestartEnabled;
@@ -295,6 +297,8 @@ public class NodeManager extends CompositeService
     
     DefaultMetricsSystem.initialize("NodeManager");
 
+    this.spanReceiverHost = SpanReceiverHost.getInstance(conf);
+
     // StatusUpdater should be added last so that it get started last 
     // so that we make sure everything is up before registering with RM. 
     addService(nodeStatusUpdater);
@@ -321,6 +325,9 @@ public class NodeManager extends CompositeService
     super.serviceStop();
     stopRecoveryStore();
     DefaultMetricsSystem.shutdown();
+    if (this.spanReceiverHost != null) {
+      spanReceiverHost.closeReceivers();
+    }
   }
 
   public String getName() {
