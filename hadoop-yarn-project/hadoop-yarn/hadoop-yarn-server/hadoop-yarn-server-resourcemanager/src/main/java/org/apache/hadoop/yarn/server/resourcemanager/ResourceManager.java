@@ -256,7 +256,7 @@ public class ResourceManager extends CompositeService implements Recoverable {
                       YarnConfiguration.RM_BIND_HOST,
                       WebAppUtils.getRMWebAppURLWithoutScheme(this.conf));
 
-    this.spanReceiverHost = SpanReceiverHost.getInstance(getConfig());
+    this.spanReceiverHost = SpanReceiverHost.getInstance(this.conf);
 
     super.serviceInit(this.conf);
   }
