@@ -29,10 +29,12 @@ import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.htrace.HTraceConfiguration;
 import org.apache.htrace.Span;
 import org.apache.htrace.SpanReceiver;
+import org.junit.Before;
 
 /**
  * Span receiver that puts all spans into a single set.
  * This is useful for testing.
+ * Please make sure to call clear() method before each test.
  * <p/>
  * We're not using HTrace's POJOReceiver here so as that doesn't
  * push all the metrics to a static place, and would make testing
@@ -48,6 +50,10 @@ public class SetSpanReceiver implements SpanReceiver {
   }
 
   public void close() {
+  }
+
+  public static void clear() {
+    SetHolder.spans.clear();
   }
 
   public static class SetHolder {
@@ -78,7 +84,7 @@ public class SetSpanReceiver implements SpanReceiver {
       GenericTestUtils.waitFor(new Supplier<Boolean>() {
         @Override
         public Boolean get() {
-          Map<String, List<Span>> map = SetSpanReceiver.SetHolder.getMap();
+          Map<String, List<Span>> map = SetHolder.getMap();
           for (String spanName : expectedSpanNames) {
             if (!map.containsKey(spanName)) {
               return false;

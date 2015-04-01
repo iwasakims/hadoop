@@ -30,12 +30,14 @@ import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.net.unix.DomainSocket;
 import org.apache.hadoop.net.unix.TemporarySocketDirectory;
 import org.apache.hadoop.util.NativeCodeLoader;
+import org.apache.hadoop.tracing.SetSpanReceiver;
 import org.apache.htrace.Sampler;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import java.io.IOException;
@@ -60,12 +62,17 @@ public class TestTracingShortCircuitLocalRead {
     sockDir.close();
   }
 
+  @Before
+  public void clearSpans() {
+    SetSpanReceiver.clear();
+  }
+
   @Test
   public void testShortCircuitTraceHooks() throws IOException {
     assumeTrue(NativeCodeLoader.isNativeCodeLoaded() && !Path.WINDOWS);
     conf = new Configuration();
     conf.set(SpanReceiverHost.SPAN_RECEIVERS_CONF_KEY,
-        TestTracing.SetSpanReceiver.class.getName());
+        SetSpanReceiver.class.getName());
     conf.setLong("dfs.blocksize", 100 * 1024);
     conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_KEY, true);
     conf.setBoolean(DFSConfigKeys.DFS_CLIENT_READ_SHORTCIRCUIT_SKIP_CHECKSUM_KEY, false);
@@ -92,7 +99,7 @@ public class TestTracingShortCircuitLocalRead {
         "OpRequestShortCircuitAccessProto",
         "ShortCircuitShmRequestProto"
       };
-      TestTracing.assertSpanNamesFound(expectedSpanNames);
+      SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
     } finally {
       dfs.close();
       cluster.shutdown();

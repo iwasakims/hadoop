@@ -24,11 +24,9 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
-import org.apache.hadoop.test.GenericTestUtils;
-import org.apache.htrace.HTraceConfiguration;
+import org.apache.hadoop.tracing.SetSpanReceiver;
 import org.apache.htrace.Sampler;
 import org.apache.htrace.Span;
-import org.apache.htrace.SpanReceiver;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
 import org.junit.AfterClass;
@@ -39,14 +37,8 @@ import org.junit.Test;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeoutException;
-
-import com.google.common.base.Supplier;
 
 public class TestTracing {
 
@@ -96,7 +88,7 @@ public class TestTracing {
       "org.apache.hadoop.hdfs.protocol.ClientProtocol.addBlock",
       "ClientNamenodeProtocol#addBlock"
     };
-    assertSpanNamesFound(expectedSpanNames);
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
 
     // The trace should last about the same amount of time as the test
     Map<String, List<Span>> map = SetSpanReceiver.SetHolder.getMap();
@@ -181,7 +173,7 @@ public class TestTracing {
       "ClientNamenodeProtocol#getBlockLocations",
       "OpReadBlockProto"
     };
-    assertSpanNamesFound(expectedSpanNames);
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
 
     // The trace should last about the same amount of time as the test
     Map<String, List<Span>> map = SetSpanReceiver.SetHolder.getMap();
@@ -232,8 +224,8 @@ public class TestTracing {
   }
 
   @Before
-  public void cleanSet() {
-    SetSpanReceiver.SetHolder.spans.clear();
+  public void clearSpans() {
+    SetSpanReceiver.clear();
   }
 
   @BeforeClass
@@ -255,70 +247,5 @@ public class TestTracing {
   @AfterClass
   public static void shutDown() throws IOException {
     cluster.shutdown();
-  }
-
-  public static void assertSpanNamesFound(final String[] expectedSpanNames) {
-    try {
-      GenericTestUtils.waitFor(new Supplier<Boolean>() {
-        @Override
-        public Boolean get() {
-          Map<String, List<Span>> map = SetSpanReceiver.SetHolder.getMap();
-          for (String spanName : expectedSpanNames) {
-            if (!map.containsKey(spanName)) {
-              return false;
-            }
-          }
-          return true;
-        }
-      }, 100, 1000);
-    } catch (TimeoutException e) {
-      Assert.fail("timed out to get expected spans: " + e.getMessage());
-    } catch (InterruptedException e) {
-      Assert.fail("interrupted while waiting spans: " + e.getMessage());
-    }
-  }
-
-  /**
-   * Span receiver that puts all spans into a single set.
-   * This is useful for testing.
-   * <p/>
-   * We're not using HTrace's POJOReceiver here so as that doesn't
-   * push all the metrics to a static place, and would make testing
-   * SpanReceiverHost harder.
-   */
-  public static class SetSpanReceiver implements SpanReceiver {
-
-    public SetSpanReceiver(HTraceConfiguration conf) {
-    }
-
-    public void receiveSpan(Span span) {
-      SetHolder.spans.put(span.getSpanId(), span);
-    }
-
-    public void close() {
-    }
-
-    public static class SetHolder {
-      public static ConcurrentHashMap<Long, Span> spans = 
-          new ConcurrentHashMap<Long, Span>();
-          
-      public static int size() {
-        return spans.size();
-      }
-
-      public static Map<String, List<Span>> getMap() {
-        Map<String, List<Span>> map = new HashMap<String, List<Span>>();
-
-        for (Span s : spans.values()) {
-          List<Span> l = map.get(s.getDescription());
-          if (l == null) {
-            l = new LinkedList<Span>();
-            map.put(s.getDescription(), l);
-          }
-          l.add(s);
-        }
-        return map;
-      }
-    }
   }
 }

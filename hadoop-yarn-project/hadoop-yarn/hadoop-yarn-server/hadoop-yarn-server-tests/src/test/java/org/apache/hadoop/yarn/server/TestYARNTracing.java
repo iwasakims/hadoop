@@ -29,6 +29,7 @@ import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
 import org.junit.AfterClass;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -52,6 +53,11 @@ public class TestYARNTracing {
       cluster.stop();
       cluster = null;
     }
+  }
+
+  @Before
+  public void clearSpans() {
+    SetSpanReceiver.clear();
   }
 
   @Test
