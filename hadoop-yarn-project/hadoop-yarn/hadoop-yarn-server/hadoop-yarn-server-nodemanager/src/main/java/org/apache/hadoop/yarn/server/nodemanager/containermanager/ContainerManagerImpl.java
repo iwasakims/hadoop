@@ -44,9 +44,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.CommonConfigurationKeysPublic;
 import org.apache.hadoop.io.DataInputByteBuffer;
 import org.apache.hadoop.io.DataOutputBuffer;
-import org.apache.hadoop.ipc.RPC;
-import org.apache.hadoop.ipc.RPC.Server;
-import org.apache.hadoop.ipc.ProtobufRpcEngine;
+import org.apache.hadoop.ipc.Server;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.SaslRpcServer;
@@ -58,12 +56,6 @@ import org.apache.hadoop.security.token.TokenIdentifier;
 import org.apache.hadoop.service.CompositeService;
 import org.apache.hadoop.service.Service;
 import org.apache.hadoop.service.ServiceStateChangeListener;
-import org.apache.hadoop.tracing.SpanReceiverHost;
-import org.apache.hadoop.tracing.SpanReceiverInfo;
-import org.apache.hadoop.tracing.TraceAdminProtocol;
-import org.apache.hadoop.tracing.TraceAdminProtocolPB;
-import org.apache.hadoop.tracing.TraceAdminProtocolServerSideTranslatorPB;
-import org.apache.hadoop.tracing.TraceAdminPB.TraceAdminService;
 import org.apache.hadoop.util.StringUtils;
 import org.apache.hadoop.yarn.api.ContainerManagementProtocol;
 import org.apache.hadoop.yarn.api.protocolrecords.GetContainerStatusesRequest;
@@ -146,11 +138,10 @@ import org.apache.hadoop.yarn.server.security.ApplicationACLsManager;
 import org.apache.hadoop.yarn.server.utils.BuilderUtils;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.protobuf.BlockingService;
 import com.google.protobuf.ByteString;
 
 public class ContainerManagerImpl extends CompositeService implements
-    ServiceStateChangeListener, ContainerManagementProtocol, TraceAdminProtocol,
+    ServiceStateChangeListener, ContainerManagementProtocol,
     EventHandler<ContainerManagerEvent> {
 
   /**
@@ -167,7 +158,6 @@ public class ContainerManagerImpl extends CompositeService implements
   private final ContainersLauncher containersLauncher;
   private final AuxServices auxiliaryServices;
   private final NodeManagerMetrics metrics;
-  private SpanReceiverHost spanReceiverHost;
 
   private final NodeStatusUpdater nodeStatusUpdater;
 
@@ -251,8 +241,6 @@ public class ContainerManagerImpl extends CompositeService implements
         conf.getLong(YarnConfiguration.NM_PROCESS_KILL_WAIT_MS,
             YarnConfiguration.DEFAULT_NM_PROCESS_KILL_WAIT_MS) +
         SHUTDOWN_CLEANUP_SLOP_MS;
-
-    this.spanReceiverHost = SpanReceiverHost.getInstance(getConfig());
 
     super.serviceInit(conf);
     recover();
@@ -429,20 +417,11 @@ public class ContainerManagerImpl extends CompositeService implements
     
     YarnRPC rpc = YarnRPC.create(conf);
 
-    server = (Server) rpc.getServer(
-        ContainerManagementProtocol.class, this, initialAddress, 
+    server =
+        rpc.getServer(ContainerManagementProtocol.class, this, initialAddress, 
             serverConf, this.context.getNMTokenSecretManager(),
             conf.getInt(YarnConfiguration.NM_CONTAINER_MGR_THREAD_COUNT, 
                 YarnConfiguration.DEFAULT_NM_CONTAINER_MGR_THREAD_COUNT));
-
-    TraceAdminProtocolServerSideTranslatorPB traceAdminXlator =
-        new TraceAdminProtocolServerSideTranslatorPB(this);
-    BlockingService traceAdminService = TraceAdminService
-        .newReflectiveBlockingService(traceAdminXlator);
-    RPC.setProtocolEngine(conf, TraceAdminProtocolPB.class,
-        ProtobufRpcEngine.class);
-    server.addProtocol(RPC.RpcKind.RPC_PROTOCOL_BUFFER,
-        TraceAdminProtocolPB.class, traceAdminService);
     
     // Enable service authorization?
     if (conf.getBoolean(
@@ -533,9 +512,6 @@ public class ContainerManagerImpl extends CompositeService implements
     }
     if (server != null) {
       server.stop();
-    }
-    if (this.spanReceiverHost != null) {
-      this.spanReceiverHost.closeReceivers();
     }
     super.serviceStop();
   }
@@ -1185,20 +1161,5 @@ public class ContainerManagerImpl extends CompositeService implements
 
   public Map<String, ByteBuffer> getAuxServiceMetaData() {
     return this.auxiliaryServices.getMetaData();
-  }
-
-  @Override // TraceAdminProtocol
-  public SpanReceiverInfo[] listSpanReceivers() throws IOException {
-    return spanReceiverHost.listSpanReceivers();
-  }
-
-  @Override // TraceAdminProtocol
-  public long addSpanReceiver(SpanReceiverInfo info) throws IOException {
-    return spanReceiverHost.addSpanReceiver(info);
-  }
-
-  @Override // TraceAdminProtocol
-  public void removeSpanReceiver(long id) throws IOException {
-    spanReceiverHost.removeSpanReceiver(id);
   }
 }
