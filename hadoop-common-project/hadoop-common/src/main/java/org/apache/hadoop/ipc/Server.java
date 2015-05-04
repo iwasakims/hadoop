@@ -2156,6 +2156,7 @@ public abstract class Server {
           CurCall.set(call);
           if (call.traceSpan != null) {
             traceScope = Trace.continueSpan(call.traceSpan);
+            traceScope.getSpan().addTimelineAnnotation("called");
           }
 
           try {
