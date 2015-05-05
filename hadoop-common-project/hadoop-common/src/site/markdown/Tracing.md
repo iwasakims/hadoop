@@ -41,9 +41,8 @@ Setting up tracing is quite simple, however it requires some very minor changes 
 
 The tracing system works by collecting information in structs called 'Spans'.
 It is up to you to choose how you want to receive this information
-by implementing the SpanReceiver interface, which defines one method:
-
-    public void receiveSpan(Span span);
+by using implementation of [SpanReceiver](http://htrace.incubator.apache.org/#Span_Receivers)
+interface bundled with HTrace or implementing it by yourself.
 
 #### Setting up SpanReceivers for HDFS servers
 
@@ -212,8 +211,8 @@ You can compile and execute this code as shown below.
 
 ### Starting tracing spans by configuration for HDFS client
 
-You can start tracing spans by setting configuration for HDFS client.
-This is useful for tracing programs where you don't have access to the source code.
+The DFSClient can enable tracing internally. This allows you to use HTrace with
+your client without modifying the client source code. 
 
 Configure the span receivers and samplers in `hdfs-site.xml`
 by properties `dfs.client.htrace.sampler` and `dfs.client.htrace.sampler`.
@@ -222,6 +221,9 @@ The value of `dfs.client.htrace.sampler` can be NeverSampler, AlwaysSampler or P
 * NeverSampler: HTrace is OFF for all requests to namenodes and datanodes;
 * AlwaysSampler: HTrace is ON for all requests to namenodes and datanodes;
 * ProbabilitySampler: HTrace is ON for some percentage% of  requests to namenodes and datanodes
+
+You do not need to enable this if your client program has been modified
+to use HTrace.
 
 ```xml
       <property>

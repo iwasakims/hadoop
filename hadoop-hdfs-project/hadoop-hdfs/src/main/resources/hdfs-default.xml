@@ -2329,11 +2329,7 @@
   <name>dfs.htrace.spanreceiver.classes</name>
   <value></value>
   <description>
-    A comma separated list of the fully-qualified class name of classes 
-    implementing SpanReceiver. The tracing system works by collecting 
-    information in structs called 'Spans'. It is up to you to choose 
-    how you want to receive this information by implementing the 
-    SpanReceiver interface.
+    The class name of the HTrace SpanReceiver for the NameNode and DataNode.
   </description>
 </property>
 
@@ -2341,9 +2337,8 @@
   <name>dfs.client.htrace.spanreceiver.classes</name>
   <value></value>
   <description>
-    A comma separated list of the fully-qualified class name of classes 
-    implementing SpanReceiver. This property is used by DFSClient
-    for tracing started internally.
+    The class name of the HTrace SpanReceiver for the HDFS client. You do not
+    need to enable this if your client program has been modified to use HTrace.
   </description>
 </property>
 
