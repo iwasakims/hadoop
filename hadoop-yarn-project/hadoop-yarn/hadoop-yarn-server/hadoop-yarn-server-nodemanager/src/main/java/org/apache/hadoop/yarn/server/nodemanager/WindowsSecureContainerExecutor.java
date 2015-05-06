@@ -697,6 +697,7 @@ public class WindowsSecureContainerExecutor extends DefaultContainerExecutor {
      if (javaLibPath != null) {
        command.add("-Djava.library.path=" + javaLibPath);
      }
+     command.addAll(ContainerLocalizer.getJavaOpts(getConf()));
      
      ContainerLocalizer.buildMainArgs(command, user, appId, locId, nmAddr, 
          localDirs);
