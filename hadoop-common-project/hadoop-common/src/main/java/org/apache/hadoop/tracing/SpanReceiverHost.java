@@ -44,6 +44,7 @@ import org.apache.hadoop.util.ShutdownHookManager;
 import org.apache.htrace.SpanReceiver;
 import org.apache.htrace.SpanReceiverBuilder;
 import org.apache.htrace.Trace;
+import org.apache.htrace.impl.LocalFileSpanReceiver;
 
 /**
  * This class provides functions for reading the names of SpanReceivers from
@@ -88,33 +89,6 @@ public class SpanReceiverHost implements TraceAdminProtocol {
 
   private static List<ConfigurationPair> EMPTY = Collections.emptyList();
 
-  private static String getUniqueLocalTraceFileName() {
-    String tmp = System.getProperty("java.io.tmpdir", "/tmp");
-    String nonce = null;
-    BufferedReader reader = null;
-    try {
-      // On Linux we can get a unique local file name by reading the process id
-      // out of /proc/self/stat.  (There isn't any portable way to get the
-      // process ID from Java.)
-      reader = new BufferedReader(
-          new InputStreamReader(new FileInputStream("/proc/self/stat"),
-                                Charsets.UTF_8));
-      String line = reader.readLine();
-      if (line == null) {
-        throw new EOFException();
-      }
-      nonce = line.split(" ")[0];
-    } catch (IOException e) {
-    } finally {
-      IOUtils.cleanup(LOG, reader);
-    }
-    if (nonce == null) {
-      // If we can't use the process ID, use a random nonce.
-      nonce = UUID.randomUUID().toString();
-    }
-    return new File(tmp, nonce).getAbsolutePath();
-  }
-
   private SpanReceiverHost(String confPrefix) {
     this.confPrefix = confPrefix;
   }
@@ -143,7 +117,7 @@ public class SpanReceiverHost implements TraceAdminProtocol {
     // testing.
     String pathKey = confPrefix + LOCAL_FILE_SPAN_RECEIVER_PATH_SUFFIX;
     if (config.get(pathKey) == null) {
-      String uniqueFile = getUniqueLocalTraceFileName();
+      String uniqueFile = LocalFileSpanReceiver.getUniqueLocalTraceFileName();
       config.set(pathKey, uniqueFile);
       if (LOG.isTraceEnabled()) {
         LOG.trace("Set " + pathKey + " to " + uniqueFile);
