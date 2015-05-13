@@ -55,8 +55,14 @@ public class TraceUtils {
         String prefixedKey = prefix + key;
         if (extraMap.containsKey(prefixedKey)) {
           return extraMap.get(prefixedKey);
+        } else if (extraMap.containsKey(key)) {
+          // allow users to omit prefix for extra configuration properties to
+          // reduce typing. The prefix here is obvious from the target of
+          // "hadoop trace" command.
+          return extraMap.get(key);
+        } else {
+          return conf.get(prefixedKey, defaultValue);
         }
-        return conf.get(prefixedKey, defaultValue);
       }
     };
   }
