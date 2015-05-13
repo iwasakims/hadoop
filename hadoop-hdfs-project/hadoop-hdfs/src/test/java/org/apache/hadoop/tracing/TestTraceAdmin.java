@@ -85,11 +85,14 @@ public class TestTraceAdmin {
               getHostPortForNN(cluster)));
       Assert.assertEquals("ret:0, [no span receivers found]" + NEWLINE,
           runTraceCommand(trace, "-list", "-host", getHostPortForNN(cluster)));
+
+      // HADOOP-11967 made config prefix omittable
       Assert.assertEquals("ret:0, Added trace span receiver 2 with " +
-          "configuration dfs.htrace.local-file-span-receiver.path = " + tracePath + NEWLINE,
+          "configuration local-file-span-receiver.path = " + tracePath + NEWLINE,
           runTraceCommand(trace, "-add", "-host", getHostPortForNN(cluster),
               "-class", "LocalFileSpanReceiver",
-              "-Cdfs.htrace.local-file-span-receiver.path=" + tracePath));
+              "-Clocal-file-span-receiver.path=" + tracePath));
+
       Assert.assertEquals("ret:0, Removed trace span receiver 2" + NEWLINE,
           runTraceCommand(trace, "-remove", "2", "-host",
               getHostPortForNN(cluster)));

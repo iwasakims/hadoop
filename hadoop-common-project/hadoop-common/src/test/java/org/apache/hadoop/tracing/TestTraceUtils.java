@@ -47,7 +47,23 @@ public class TestTraceUtils {
     LinkedList<ConfigurationPair> extraConfig =
         new LinkedList<ConfigurationPair>();
     extraConfig.add(new ConfigurationPair(TEST_PREFIX + key, newValue));
-    HTraceConfiguration wrapped = TraceUtils.wrapHadoopConf(TEST_PREFIX, conf, extraConfig);
+    HTraceConfiguration wrapped =
+        TraceUtils.wrapHadoopConf(TEST_PREFIX, conf, extraConfig);
+    assertEquals(newValue, wrapped.get(key));
+  }
+
+  @Test
+  public void testExtraConfigWithoutPrefix() {
+    String key = "test.extra.config";
+    String oldValue = "old value";
+    String newValue = "new value";
+    Configuration conf = new Configuration();
+    conf.set(TEST_PREFIX + key, oldValue);
+    LinkedList<ConfigurationPair> extraConfig =
+        new LinkedList<ConfigurationPair>();
+    extraConfig.add(new ConfigurationPair(key, newValue));
+    HTraceConfiguration wrapped =
+        TraceUtils.wrapHadoopConf(TEST_PREFIX, conf, extraConfig);
     assertEquals(newValue, wrapped.get(key));
   }
 }
