@@ -17,29 +17,18 @@
  */
 package org.apache.hadoop.tracing;
 
-import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.EOFException;
-import java.io.File;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import java.util.UUID;
 
-import org.apache.commons.io.Charsets;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
-import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.tracing.SpanReceiverInfo.ConfigurationPair;
-import org.apache.hadoop.tracing.TraceUtils;
-import org.apache.hadoop.util.ReflectionUtils;
 import org.apache.hadoop.util.ShutdownHookManager;
 import org.apache.htrace.SpanReceiver;
 import org.apache.htrace.SpanReceiverBuilder;
@@ -55,7 +44,7 @@ import org.apache.htrace.impl.LocalFileSpanReceiver;
 @InterfaceAudience.Private
 public class SpanReceiverHost implements TraceAdminProtocol {
   public static final String SPAN_RECEIVERS_CONF_SUFFIX =
-    "spanreceiver.classes";
+      "spanreceiver.classes";
   private static final Log LOG = LogFactory.getLog(SpanReceiverHost.class);
   private static final HashMap<String, SpanReceiverHost> hosts =
       new HashMap<String, SpanReceiverHost>(1);
@@ -165,7 +154,7 @@ public class SpanReceiverHost implements TraceAdminProtocol {
 
   public synchronized SpanReceiverInfo[] listSpanReceivers()
       throws IOException {
-    SpanReceiverInfo info[] = new SpanReceiverInfo[receivers.size()];
+    SpanReceiverInfo[] info = new SpanReceiverInfo[receivers.size()];
     int i = 0;
 
     for(Map.Entry<Long, SpanReceiver> entry : receivers.entrySet()) {

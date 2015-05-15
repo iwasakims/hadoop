@@ -37,7 +37,6 @@ import java.net.Socket;
 import java.net.SocketAddress;
 import java.net.URI;
 import java.net.UnknownHostException;
-import java.nio.charset.Charset;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
