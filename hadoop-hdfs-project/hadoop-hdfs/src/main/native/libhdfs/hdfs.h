@@ -671,7 +671,7 @@ extern  "C" {
      * @param path The path of the directory. 
      * @param numEntries Set to the number of files/directories in path.
      * @return Returns a dynamically-allocated array of hdfsFileInfo
-     * objects; NULL on error.
+     * objects; NULL on error or empty directory (i.e. numEntries == 0).
      */
     LIBHDFS_EXTERNAL
     hdfsFileInfo *hdfsListDirectory(hdfsFS fs, const char* path,
