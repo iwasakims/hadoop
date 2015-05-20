@@ -154,7 +154,8 @@ static int doTestHdfsOperations(struct tlhThreadInfo *ti, hdfsFS fs,
     EXPECT_ZERO(doTestGetDefaultBlockSize(fs, paths->prefix));
 
     /* There should be no entry in the directory. */
-    EXPECT_NULL(hdfsListDirectory(fs, paths->prefix, &numEntries));
+    errno = EACCES; // see if errno is set to 0 on success
+    EXPECT_NULL_WITH_ERRNO(hdfsListDirectory(fs, paths->prefix, &numEntries), 0);
     if (numEntries != 0) {
         fprintf(stderr, "hdfsListDirectory set numEntries to "
                 "%d on empty directory.", numEntries);
