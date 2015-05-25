@@ -18,6 +18,8 @@
 package org.apache.hadoop.hdfs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 import java.io.File;
@@ -111,4 +113,23 @@ public class TestDFSInputStream {
     }
   }
 
+  @Test(timeout=60000)
+  public void testSeekToNewSource() throws IOException {
+    Configuration conf = new Configuration();
+    MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).build();
+    DistributedFileSystem fs = cluster.getFileSystem();
+    Path path = new Path("/testfile");
+    DFSTestUtil.createFile(fs, path, 1024, (short) 1, 0);
+    DFSInputStream fin = fs.dfs.open("/testfile");
+    try {
+      fin.seekToNewSource(16);
+      fail("expecting IOException");
+    } catch (IOException ioe) {
+      assertTrue("Not throwing the intended exception message",
+          ioe.getMessage().contains("Could not be called before current node"));
+    } finally {
+      fin.close();
+      cluster.shutdown();
+    }
+  }
 }
