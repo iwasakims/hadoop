@@ -67,7 +67,9 @@ Most of the failover functionality is tunable using various configuration proper
 | `yarn.resourcemanager.zk-address` | Address of the ZK-quorum. Used both for the state-store and embedded leader-election. |
 | `yarn.resourcemanager.ha.enabled` | Enable RM HA. |
 | `yarn.resourcemanager.ha.rm-ids` | List of logical IDs for the RMs. e.g., "rm1,rm2". |
-| `yarn.resourcemanager.hostname.*rm-id*` | For each *rm-id*, specify the hostname the RM corresponds to. Alternately, one could set each of the RM's service addresses. |
+| `yarn.resourcemanager.hostname.`*rm-id* | For each *rm-id*, specify the hostname the RM corresponds to. Alternately, one could set each of the RM's service addresses. |
+| `yarn.resourcemanager.webapp.address.`*rm-id* | For each *rm-id*, specify http address of the RM web application corresponds to. |
+| `yarn.resourcemanager.webapp.https.address.`*rm-id* | For each *rm-id*, specify https address of the RM web application corresponds to. |
 | `yarn.resourcemanager.ha.id` | Identifies the RM in the ensemble. This is optional; however, if set, admins have to ensure that all the RMs have their own IDs in the config. |
 | `yarn.resourcemanager.ha.automatic-failover.enabled` | Enable automatic failover; By default, it is enabled only when HA is enabled. |
 | `yarn.resourcemanager.ha.automatic-failover.embedded` | Use embedded leader-elector to pick the Active RM, when automatic failover is enabled. By default, it is enabled only when HA is enabled. |
@@ -103,6 +105,14 @@ Here is the sample of minimal setup for RM failover.
 <property>
   <name>yarn.resourcemanager.hostname.rm2</name>
   <value>master2</value>
+</property>
+<property>
+  <name>yarn.resourcemanager.webapp.address.rm1</name>
+  <value>master1:8088</value>
+</property>
+<property>
+  <name>yarn.resourcemanager.webapp.address.rm2</name>
+  <value>master2:8088</value>
 </property>
 <property>
   <name>yarn.resourcemanager.zk-address</name>
