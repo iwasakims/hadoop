@@ -78,7 +78,7 @@ To use Kerberos SPNEGO as the authentication mechanism, the authentication filte
 
         <filter>
             <filter-name>kerberosFilter</filter-name>
-            <filter-class>org.apache.hadoop.security.auth.server.AuthenticationFilter</filter-class>
+            <filter-class>org.apache.hadoop.security.authentication.server.AuthenticationFilter</filter-class>
             <init-param>
                 <param-name>type</param-name>
                 <param-value>kerberos</param-value>
@@ -130,7 +130,7 @@ To use Pseudo/Simple as the authentication mechanism (trusting the value of the 
 
         <filter>
             <filter-name>simpleFilter</filter-name>
-            <filter-class>org.apache.hadoop.security.auth.server.AuthenticationFilter</filter-class>
+            <filter-class>org.apache.hadoop.security.authentication.server.AuthenticationFilter</filter-class>
             <init-param>
                 <param-name>type</param-name>
                 <param-value>simple</param-value>
@@ -180,7 +180,7 @@ The AltKerberos authentication mechanism is a partially implemented derivative o
 
         <filter>
             <filter-name>kerberosFilter</filter-name>
-            <filter-class>org.apache.hadoop.security.auth.server.AuthenticationFilter</filter-class>
+            <filter-class>org.apache.hadoop.security.authentication.server.AuthenticationFilter</filter-class>
             <init-param>
                 <param-name>type</param-name>
                 <param-value>org.my.subclass.of.AltKerberosAuthenticationHandler</param-value>
