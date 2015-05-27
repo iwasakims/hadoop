@@ -73,20 +73,24 @@ public class RMHAUtils {
       final YarnConfiguration conf) {
     Collection<String> rmIds =
         conf.getStringCollection(YarnConfiguration.RM_HA_IDS);
-    List<String> addrs = new ArrayList<String>();
+    String prefix;
+    String port;
     if (YarnConfiguration.useHttps(conf)) {
-      for (String id : rmIds) {
-        String addr = conf.get(
-            YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS + "." + id);
-        if (addr != null) {
-          addrs.add(addr);
-        }
-      }
+      prefix = YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS + ".";
+      port = ":" + YarnConfiguration.DEFAULT_RM_WEBAPP_HTTPS_PORT;
     } else {
-      for (String id : rmIds) {
-        String addr = conf.get(YarnConfiguration.RM_WEBAPP_ADDRESS + "." + id);
-        if (addr != null) {
-          addrs.add(addr);
+      prefix = YarnConfiguration.RM_WEBAPP_ADDRESS + ".";
+      port = ":" + YarnConfiguration.DEFAULT_RM_WEBAPP_PORT;
+    }
+    List<String> addrs = new ArrayList<String>();
+    for (String id : rmIds) {
+      String addr = conf.get(prefix + id);
+      if (addr != null) {
+        addrs.add(addr);
+      } else {
+        String host = conf.get(YarnConfiguration.RM_HOSTNAME + "." + id);
+        if (host != null) {
+          addrs.add(host + port);
         }
       }
     }
