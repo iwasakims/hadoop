@@ -168,7 +168,7 @@ which start tracing span before invoking HDFS shell command.
         shell.setConf(conf);
         SpanReceiverHost.get(conf, DFSConfigKeys.DFS_SERVER_HTRACE_PREFIX);
         int res = 0;
-        try (TraceScope ts = (TraceScope)Trace.startSpan("FsShell", Sampler.ALWAYS)) {
+        try (TraceScope ts = Trace.startSpan("FsShell", Sampler.ALWAYS)) {
           res = ToolRunner.run(shell, argv);
         } finally {
           shell.close();
