@@ -1534,8 +1534,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
   @Override
   public synchronized boolean seekToNewSource(long targetPos) throws IOException {
     if (currentNode == null) {
-      throw new IOException("Could not be called before current node is set "
-          + "by any read attempt.");
+      return seekToBlockSource(targetPos);
     }
     boolean markedDead = deadNodes.containsKey(currentNode);
     addToDeadNodes(currentNode);

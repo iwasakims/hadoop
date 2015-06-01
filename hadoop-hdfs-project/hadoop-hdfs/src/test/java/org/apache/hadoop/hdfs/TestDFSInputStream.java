@@ -18,8 +18,8 @@
 package org.apache.hadoop.hdfs;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 import java.io.File;
@@ -30,6 +30,7 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
+import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.net.unix.DomainSocket;
 import org.apache.hadoop.net.unix.TemporarySocketDirectory;
 import org.junit.Assume;
@@ -116,17 +117,20 @@ public class TestDFSInputStream {
   @Test(timeout=60000)
   public void testSeekToNewSource() throws IOException {
     Configuration conf = new Configuration();
-    MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf).build();
+    MiniDFSCluster cluster =
+        new MiniDFSCluster.Builder(conf).numDataNodes(3).build();
     DistributedFileSystem fs = cluster.getFileSystem();
     Path path = new Path("/testfile");
-    DFSTestUtil.createFile(fs, path, 1024, (short) 1, 0);
+    DFSTestUtil.createFile(fs, path, 1024, (short) 3, 0);
     DFSInputStream fin = fs.dfs.open("/testfile");
     try {
-      fin.seekToNewSource(16);
-      fail("expecting IOException");
-    } catch (IOException ioe) {
-      assertTrue("Not throwing the intended exception message",
-          ioe.getMessage().contains("Could not be called before current node"));
+      fin.seekToNewSource(100);
+      assertEquals(100, fin.getPos());
+      DatanodeInfo firstNode = fin.getCurrentDatanode();
+      assertNotNull(firstNode);
+      fin.seekToNewSource(100);
+      assertEquals(100, fin.getPos());
+      assertFalse(firstNode.equals(fin.getCurrentDatanode()));
     } finally {
       fin.close();
       cluster.shutdown();
