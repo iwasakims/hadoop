@@ -1299,6 +1299,7 @@ public class TestIPC {
   public void testClientGetTimeout() throws IOException {
     Configuration config = new Configuration();
     assertEquals(Client.getTimeout(config), -1);
+    assertEquals(Client.getRpcTimeout(config), 0);
   }
 
   private void assertRetriesOnSocketTimeouts(Configuration conf,
