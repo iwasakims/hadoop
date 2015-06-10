@@ -52,6 +52,10 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
   public static final String  IPC_CLIENT_PING_KEY = "ipc.client.ping";
   /** Default value of IPC_CLIENT_PING_KEY */
   public static final boolean IPC_CLIENT_PING_DEFAULT = true;
+  /** The time after which a RPC will timeout. */
+  public static final String  IPC_CLIENT_RPC_TIMEOUT_KEY = "ipc.client.rpc.timeout";
+  /** Default value of IPC_CLIENT_RPC_TIMEOUT_KEY */
+  public static final int IPC_CLIENT_RPC_TIMEOUT_DEFAULT = 0;
   /** Responses larger than this will be logged */
   public static final String  IPC_SERVER_RPC_MAX_RESPONSE_SIZE_KEY =
     "ipc.server.max.response.size";

@@ -348,7 +348,7 @@ public class RPC {
                              InetSocketAddress addr, Configuration conf,
                              long connTimeout) throws IOException { 
     return waitForProtocolProxy(protocol, clientVersion, addr, conf, 
-        Client.getPingInterval(conf), null, connTimeout);
+        Client.getRpcTimeout(conf), null, connTimeout);
   }
   
   /**
@@ -494,7 +494,7 @@ public class RPC {
                                 SocketFactory factory) throws IOException {
     return getProtocolProxy(
         protocol, clientVersion, addr, ticket, conf, factory,
-        Client.getPingInterval(conf), null);
+        Client.getRpcTimeout(conf), null);
   }
   
   /**

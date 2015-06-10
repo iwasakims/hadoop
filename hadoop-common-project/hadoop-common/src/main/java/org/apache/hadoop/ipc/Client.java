@@ -246,6 +246,25 @@ public class Client {
     }
     return -1;
   }
+  
+  /**
+   * Get the default timeout for RPC proxy.
+   * If ping is not enabled (via ipc.client.ping),
+   * the timeout value has no effect.
+   * 
+   * @param conf Configuration
+   * @return the timeout period in milliseconds.
+   */
+  final static int getRpcTimeout(Configuration conf) {
+    if (conf.getBoolean(CommonConfigurationKeys.IPC_CLIENT_PING_KEY,
+        CommonConfigurationKeys.IPC_CLIENT_PING_DEFAULT)) {
+      return conf.getInt(CommonConfigurationKeys.IPC_CLIENT_RPC_TIMEOUT_KEY,
+          CommonConfigurationKeys.IPC_CLIENT_RPC_TIMEOUT_DEFAULT);
+    } else {
+      return 0;
+    }
+  }
+
   /**
    * set the connection timeout value in configuration
    * 
