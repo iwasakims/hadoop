@@ -187,6 +187,40 @@ public class TestRMFailover extends ClientBaseWithFixes {
   }
 
   @Test
+  public void testForceManualTransition()
+      throws YarnException, InterruptedException, IOException {
+    conf.set(YarnConfiguration.RM_CLUSTER_ID, "yarn-test-cluster");
+    conf.set(YarnConfiguration.RM_ZK_ADDRESS, hostPort);
+    conf.setInt(YarnConfiguration.RM_ZK_TIMEOUT_MS, 2000);
+    cluster.init(conf);
+    cluster.start();
+    assertFalse("RM never turned active", -1 == cluster.getActiveRMIndex());
+    verifyConnections();
+
+    // Make the current Active handle an "-transitionToStandby --forcemanual",
+    // so it transitions to standby.
+    ResourceManager rm = cluster.getResourceManager(
+        cluster.getActiveRMIndex());
+    rm.getRMContext().getRMAdminService().transitionToStandby(
+        new HAServiceProtocol.StateChangeRequestInfo(
+            HAServiceProtocol.RequestSource.REQUEST_BY_USER_FORCED));
+    int maxWaitingAttempts = 2000;
+    while (maxWaitingAttempts-- > 0 ) {
+      if (rm.getRMContext().getHAServiceState() == HAServiceState.STANDBY) {
+        break;
+      }
+      Thread.sleep(1);
+    }
+    Assert.assertFalse("RM didn't transition to Standby ",
+        maxWaitingAttempts == 0);
+    verifyConnections();
+
+    // Make sure automatic failover still works after force manual transition
+    failover();
+    verifyConnections();
+  }
+  
+  @Test
   public void testWebAppProxyInStandAloneMode() throws YarnException,
       InterruptedException, IOException {
     conf.setBoolean(YarnConfiguration.AUTO_FAILOVER_ENABLED, false);

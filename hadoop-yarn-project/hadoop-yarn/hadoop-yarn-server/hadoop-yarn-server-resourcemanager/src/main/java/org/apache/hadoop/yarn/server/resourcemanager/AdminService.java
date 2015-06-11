@@ -336,7 +336,7 @@ public class AdminService extends CompositeService implements
     UserGroupInformation user = checkAccess("transitionToStandby");
     checkHaStateChange(reqInfo);
     try {
-      rm.transitionToStandby(true);
+      rm.handleTransitionToStandBy();
       RMAuditLogger.logSuccess(user.getShortUserName(),
           "transitionToStandby", "RMHAProtocolService");
     } catch (Exception e) {
