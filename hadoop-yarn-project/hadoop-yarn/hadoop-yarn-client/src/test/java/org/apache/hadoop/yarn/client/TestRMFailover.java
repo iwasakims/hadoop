@@ -219,7 +219,7 @@ public class TestRMFailover extends ClientBaseWithFixes {
     failover();
     verifyConnections();
   }
-  
+
   @Test
   public void testWebAppProxyInStandAloneMode() throws YarnException,
       InterruptedException, IOException {
