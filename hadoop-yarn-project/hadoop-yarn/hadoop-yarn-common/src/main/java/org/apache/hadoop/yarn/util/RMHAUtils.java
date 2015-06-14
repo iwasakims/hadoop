@@ -30,7 +30,6 @@ import org.apache.hadoop.ha.HAServiceTarget;
 import org.apache.hadoop.yarn.client.RMHAServiceTarget;
 import org.apache.hadoop.yarn.conf.HAUtil;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
-import org.apache.hadoop.yarn.exceptions.YarnRuntimeException;
 
 @Private
 @Unstable
@@ -73,14 +72,6 @@ public class RMHAUtils {
 
   public static List<String> getRMHAWebappAddresses(
       final YarnConfiguration conf) {
-    try {
-      // trying to set webapp.[https.]address.{rm-id}
-      // based on yarn.resourcemanager.hostname.{rm-id}
-      HAUtil.verifyAndSetRMHAIdsList(conf);
-    } catch (YarnRuntimeException e) {
-      // ignore exception here because configuration for AM may have
-      // not complete properties for RM but only webapp.[https.]address.
-    }
     Collection<String> rmIds =
         conf.getStringCollection(YarnConfiguration.RM_HA_IDS);
     String prefix = YarnConfiguration.useHttps(conf) ?
@@ -91,6 +82,17 @@ public class RMHAUtils {
       String addr = conf.get(HAUtil.addSuffix(prefix, id));
       if (addr != null) {
         addrs.add(addr);
+      }
+    }
+    if (addrs.size() == 0) {
+      // trying to set webapp.[https.]address.{rm-id}
+      // based on yarn.resourcemanager.hostname.{rm-id}
+      HAUtil.verifyAndSetRMHAIdsList(conf);
+      for (String id : rmIds) {
+        String addr = conf.get(HAUtil.addSuffix(prefix, id));
+        if (addr != null) {
+          addrs.add(addr);
+        }
       }
     }
     return addrs;
