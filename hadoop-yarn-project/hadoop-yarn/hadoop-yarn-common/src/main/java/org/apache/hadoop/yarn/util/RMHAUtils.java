@@ -72,27 +72,29 @@ public class RMHAUtils {
 
   public static List<String> getRMHAWebappAddresses(
       final YarnConfiguration conf) {
+    String prefix;
+    String defaultPort;
+    if (YarnConfiguration.useHttps(conf)) {
+      prefix = YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS;
+      defaultPort = ":" + YarnConfiguration.DEFAULT_RM_WEBAPP_HTTPS_PORT;
+    } else {
+      prefix =YarnConfiguration.RM_WEBAPP_ADDRESS;
+      defaultPort = ":" + YarnConfiguration.DEFAULT_RM_WEBAPP_PORT;
+    }
     Collection<String> rmIds =
         conf.getStringCollection(YarnConfiguration.RM_HA_IDS);
-    String prefix = YarnConfiguration.useHttps(conf) ?
-        YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS :
-        YarnConfiguration.RM_WEBAPP_ADDRESS;
     List<String> addrs = new ArrayList<String>();
     for (String id : rmIds) {
       String addr = conf.get(HAUtil.addSuffix(prefix, id));
+      if (addr == null) {
+        String hostname =
+            conf.get(HAUtil.addSuffix(YarnConfiguration.RM_HOSTNAME, id));
+        if (hostname != null) {
+          addr = hostname + defaultPort;
+        }
+      }
       if (addr != null) {
         addrs.add(addr);
-      }
-    }
-    if (addrs.size() == 0) {
-      // trying to set webapp.[https.]address.{rm-id}
-      // based on yarn.resourcemanager.hostname.{rm-id}
-      HAUtil.verifyAndSetRMHAIdsList(conf);
-      for (String id : rmIds) {
-        String addr = conf.get(HAUtil.addSuffix(prefix, id));
-        if (addr != null) {
-          addrs.add(addr);
-        }
       }
     }
     return addrs;

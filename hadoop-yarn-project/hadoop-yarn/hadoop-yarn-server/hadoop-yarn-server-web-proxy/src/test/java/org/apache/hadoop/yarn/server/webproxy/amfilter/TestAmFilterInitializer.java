@@ -143,7 +143,7 @@ public class TestAmFilterInitializer extends TestCase {
     proxyHosts = WebAppUtils.getProxyHostsAndPortsForAmFilter(conf);
     assertEquals(1, proxyHosts.size());
     assertEquals("host1:8088", proxyHosts.get(0));
-    
+
     // Check PROXY_ADDRESS has priority
     conf = new Configuration(false);
     conf.set(YarnConfiguration.PROXY_ADDRESS, "host1:1000");

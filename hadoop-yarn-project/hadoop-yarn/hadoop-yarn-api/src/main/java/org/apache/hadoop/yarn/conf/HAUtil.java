@@ -87,7 +87,7 @@ public class HAUtil {
    * and RPC addresses are specified for each RM-id.
    * Then set the RM-ids.
    */
-  public static void verifyAndSetRMHAIdsList(Configuration conf) {
+  private static void verifyAndSetRMHAIdsList(Configuration conf) {
     Collection<String> ids =
       conf.getTrimmedStringCollection(YarnConfiguration.RM_HA_IDS);
     if (ids.size() < 2) {
