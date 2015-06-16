@@ -18,10 +18,13 @@
 package org.apache.hadoop.hdfs;
 
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertFalse;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
@@ -33,63 +36,24 @@ import org.junit.Test;
  * properly in case of errors. Including deadNodes list manager function.
  */
 public class TestDFSClientDeadNodes {
-  Configuration conf = new Configuration();
-  MiniDFSCluster cluster;
-  final KillDatanodeAsync killDatanodeAsync = new KillDatanodeAsync();
-
   @Test
   public void testDeadNodes() throws IOException {
-    cluster = new MiniDFSCluster.Builder(conf).numDataNodes(3).build();
+    Configuration conf = new Configuration();
+    MiniDFSCluster cluster =
+        new MiniDFSCluster.Builder(conf).numDataNodes(3).build();
+    try {
     DistributedFileSystem fs = cluster.getFileSystem();
     DFSClient client = fs.getClient();
-    String testfile = "/testfile";
-    DFSTestUtil.createFile(fs, new Path(testfile), 1024, (short) 3, 0);
-    DFSInputStream in = client.open(testfile);
-    in.seekToNewSource(0);
+    String filename = "/testfile";
+    Path filepath = new Path(filename);
+    DFSTestUtil.createFile(fs, filepath, 1024, (short) 3, 0);
+    DFSInputStream in = client.open(filename);
+    assertTrue(in.seekToNewSource(1));
     DatanodeInfo dn = in.getCurrentDatanode();
-    System.out.println("##### " + dn);
     in.addToDeadNodes(dn);
-    in.read();
-
-    List<LocatedBlock> blocks = in.getAllBlocks();
-    for (LocatedBlock block : blocks) {
-      System.out.println("##### " + block);
-    }
-
-    /*
-    this.killDatanodeAsync.start();
-
-    for (int x = 0; x<7000; x++)  {
-      InputStream in = fs.open(filePath);
-      byte[] b = new byte[1024];
-      in.read(b, 0, 1024);
-      try {
-        in.close();
-      } catch (Exception e) {
-        fail("DataNode failure should not result in a block abort: \n" + e.getMessage());
-      }
-    }
-
-    try {
-      Thread.sleep(5000);
-      if(client.getDeadNodeCount() > 0)
-        fail ("Datanode deadlist should be empty " + client.getDeadNodeCount());
-    } catch (InterruptedException e) {
-    }
-    */
-  }
-
-  private class KillDatanodeAsync extends Thread {
-    public void run() {
-      try {
-        /* wait for reading to start */
-        Thread.sleep(1000);
-        try {
-          cluster.restartDataNode(0, true);  // simulate absence of datanode
-        } catch (IOException e) {
-        }
-      } catch (InterruptedException e) {
-      }
+    assertTrue(client.getClientContext().getDeadNodes().containsKey(dn));
+    } finally {
+      cluster.shutdown();
     }
   }
 }

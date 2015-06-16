@@ -23,6 +23,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.hdfs.DFSInputStream.DeadNodes;
 import org.apache.hadoop.hdfs.client.impl.DfsClientConf;
 import org.apache.hadoop.hdfs.client.impl.DfsClientConf.ShortCircuitConf;
 import org.apache.hadoop.hdfs.shortcircuit.DomainSocketFactory;
@@ -93,6 +94,11 @@ public class ClientContext {
   /** Creating byte[] for {@link DFSOutputStream}. */
   private final ByteArrayManager byteArrayManager;  
 
+  /** List of dead datanodes shared by DFSInputStreams.
+   *
+   */
+  private final DeadNodes deadNodes;
+
   /**
    * Whether or not we complained about a DFSClient fetching a CacheContext that
    * didn't match its config values yet.
@@ -114,6 +120,7 @@ public class ClientContext {
 
     this.byteArrayManager = ByteArrayManager.newInstance(
         conf.getWriteByteArrayManagerConf());
+    this.deadNodes = new DeadNodes();
   }
 
   public static ClientContext get(String name, DfsClientConf conf) {
@@ -190,5 +197,9 @@ public class ClientContext {
 
   public ByteArrayManager getByteArrayManager() {
     return byteArrayManager;
+  }
+
+  public DeadNodes getDeadNodes() {
+    return deadNodes;
   }
 }

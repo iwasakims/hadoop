@@ -241,7 +241,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
    */
   private int failures = 0;
 
-  private final DeadNodes deadNodes = new DeadNodes();
+  private final DeadNodes deadNodes;
 
   private byte[] oneByteBuf; // used for 'int read()'
 
@@ -254,6 +254,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
     this.dfsClient = dfsClient;
     this.verifyChecksum = verifyChecksum;
     this.src = src;
+    this.deadNodes = dfsClient.getClientContext().getDeadNodes();
     synchronized (infoLock) {
       this.cachingStrategy = dfsClient.getDefaultReadCachingStrategy();
     }
