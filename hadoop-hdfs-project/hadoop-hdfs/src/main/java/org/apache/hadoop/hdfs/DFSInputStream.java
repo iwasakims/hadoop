@@ -21,7 +21,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -77,6 +76,7 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.token.SecretManager.InvalidToken;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.util.IdentityHashStore;
+import org.apache.hadoop.util.Time;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
@@ -241,15 +241,12 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
    */
   private int failures = 0;
 
-  /* XXX Use of CocurrentHashMap is temp fix. Need to fix 
-   * parallel accesses to DFSInputStream (through ptreads) properly */
-  private final ConcurrentHashMap<DatanodeInfo, DatanodeInfo> deadNodes =
-             new ConcurrentHashMap<DatanodeInfo, DatanodeInfo>();
+  private final DeadNodes deadNodes = new DeadNodes();
 
   private byte[] oneByteBuf; // used for 'int read()'
 
   void addToDeadNodes(DatanodeInfo dnInfo) {
-    deadNodes.put(dnInfo, dnInfo);
+    deadNodes.put(dnInfo, Time.monotonicNow());
   }
   
   DFSInputStream(DFSClient dfsClient, String src, boolean verifyChecksum
@@ -948,7 +945,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
         return result;
       } else {
         String errMsg = getBestNodeDNAddrPairErrorString(block.getLocations(),
-          deadNodes, ignoredNodes);
+            deadNodes.getDeadNodes(), ignoredNodes);
         String blockInfo = block.getBlock() + " file=" + src;
         if (failures >= dfsClient.getConf().getMaxBlockAcquireFailures()) {
           String description = "Could not obtain block: " + blockInfo;
@@ -1034,8 +1031,9 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
   }
 
   private static String getBestNodeDNAddrPairErrorString(
-      DatanodeInfo nodes[], AbstractMap<DatanodeInfo,
-      DatanodeInfo> deadNodes, Collection<DatanodeInfo> ignoredNodes) {
+      DatanodeInfo nodes[],
+      Collection<DatanodeInfo> deadNodes,
+      Collection<DatanodeInfo> ignoredNodes) {
     StringBuilder errMsgr = new StringBuilder(
         " No live nodes contain current block ");
     errMsgr.append("Block locations:");
@@ -1044,7 +1042,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
       errMsgr.append(datanode.toString());
     }
     errMsgr.append(" Dead nodes: ");
-    for (DatanodeInfo datanode : deadNodes.keySet()) {
+    for (DatanodeInfo datanode : deadNodes) {
       errMsgr.append(" ");
       errMsgr.append(datanode.toString());
     }
@@ -1816,5 +1814,35 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
   @Override
   public synchronized void unbuffer() {
     closeCurrentBlockReader();
+  }
+
+  static class DeadNodes {
+    private final Map<DatanodeInfo, Long> deadNodes;
+
+    /* XXX Use of CocurrentHashMap is temp fix. Need to fix 
+     * parallel accesses to DFSInputStream (through ptreads) properly */
+    DeadNodes() {
+      deadNodes = new ConcurrentHashMap<DatanodeInfo, Long>();
+    }
+
+    Set<DatanodeInfo> getDeadNodes() {
+      return deadNodes.keySet();
+    }
+
+    Long put(DatanodeInfo dnInfo, Long time) {
+      return deadNodes.put(dnInfo, time);
+    }
+
+    void clear() {
+      deadNodes.clear();
+    }
+
+    boolean containsKey(DatanodeInfo dnInfo) {
+      return deadNodes.containsKey(dnInfo);
+    }
+
+    Long remove(DatanodeInfo dnInfo) {
+      return deadNodes.remove(dnInfo);
+    }
   }
 }
