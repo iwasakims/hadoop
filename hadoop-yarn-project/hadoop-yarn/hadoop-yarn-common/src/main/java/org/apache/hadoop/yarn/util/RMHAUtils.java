@@ -72,15 +72,11 @@ public class RMHAUtils {
 
   public static List<String> getRMHAWebappAddresses(
       final YarnConfiguration conf) {
-    String prefix;
-    String defaultPort;
-    if (YarnConfiguration.useHttps(conf)) {
-      prefix = YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS;
-      defaultPort = ":" + YarnConfiguration.DEFAULT_RM_WEBAPP_HTTPS_PORT;
-    } else {
-      prefix =YarnConfiguration.RM_WEBAPP_ADDRESS;
-      defaultPort = ":" + YarnConfiguration.DEFAULT_RM_WEBAPP_PORT;
-    }
+    String prefix = YarnConfiguration.useHttps(conf) ?
+        YarnConfiguration.RM_WEBAPP_HTTPS_ADDRESS :
+        YarnConfiguration.RM_WEBAPP_ADDRESS;
+    String defaultPort = ":" +
+        YarnConfiguration.getRMDefaultPortNumber(prefix, conf);
     Collection<String> rmIds =
         conf.getStringCollection(YarnConfiguration.RM_HA_IDS);
     List<String> addrs = new ArrayList<String>();
