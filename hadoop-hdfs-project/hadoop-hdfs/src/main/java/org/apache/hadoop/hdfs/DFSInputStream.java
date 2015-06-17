@@ -1821,7 +1821,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
   static class DeadNodes {
     private final LoadingCache<DatanodeInfo, DatanodeInfo> deadNodes;
 
-    /* XXX Use of concurrent map is temp fix. Need to fix 
+    /* XXX Use of concurrent map is temp fix. Need to fix
      * parallel accesses to DFSInputStream (through ptreads) properly */
     DeadNodes(long deadNodesCacheExpiry) {
       deadNodes = CacheBuilder.newBuilder()

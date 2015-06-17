@@ -2077,6 +2077,15 @@
 </property>
 
 <property>
+  <name>dfs.client.read.dead.nodes.cache.expiry.interval.millis</name>
+  <value>600000</value>
+  <description>The maximum period to keep a DN in the dead nodes list
+  at a client. After this period, in milliseconds, the previously dead node(s)
+  will be removed automatically from the cache and will be considered good for
+  block source again. Defaults to 10 minutes.</description>
+</property>
+
+<property>
   <name>dfs.client.read.shortcircuit</name>
   <value>false</value>
   <description>
