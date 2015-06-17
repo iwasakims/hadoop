@@ -130,6 +130,8 @@ public interface HdfsClientConfigKeys {
     String PREFIX = HdfsClientConfigKeys.PREFIX + "read.";
     
     String  PREFETCH_SIZE_KEY = PREFIX + "prefetch.size"; 
+    String  DEAD_NODES_CACHE_EXPIRY_INTERVAL_KEY = PREFIX + "dead.nodes.cache.expiry.interval.millis";
+    long    DEAD_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT = 10*MINUTE;
 
     interface ShortCircuit {
       String PREFIX = Read.PREFIX + "shortcircuit.";

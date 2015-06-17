@@ -96,6 +96,7 @@ public class DfsClientConf {
   private final long datanodeRestartTimeout;
   private final long slowIoWarningThresholdMs;
 
+  private final long deadNodesCacheExpiry;  
   private final ShortCircuitConf shortCircuitConf;
   
   private final long hedgedReadThresholdMillis;
@@ -207,6 +208,10 @@ public class DfsClientConf {
         DFSConfigKeys.DFS_CLIENT_SLOW_IO_WARNING_THRESHOLD_KEY,
         DFSConfigKeys.DFS_CLIENT_SLOW_IO_WARNING_THRESHOLD_DEFAULT);
     
+    deadNodesCacheExpiry = conf.getLong(
+        HdfsClientConfigKeys.Read.DEAD_NODES_CACHE_EXPIRY_INTERVAL_KEY,
+        HdfsClientConfigKeys.Read.DEAD_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT);
+
     shortCircuitConf = new ShortCircuitConf(conf);
 
     hedgedReadThresholdMillis = conf.getLong(
@@ -475,6 +480,13 @@ public class DfsClientConf {
    */
   public long getSlowIoWarningThresholdMs() {
     return slowIoWarningThresholdMs;
+  }
+
+  /**
+   * @return the deadNodesCacheExpiry
+   */
+  public long getDeadNodesCacheExpiry() {
+    return deadNodesCacheExpiry;
   }
 
   /**

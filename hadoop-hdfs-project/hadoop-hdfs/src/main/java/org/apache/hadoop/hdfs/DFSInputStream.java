@@ -35,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
@@ -76,12 +75,14 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.hadoop.security.token.SecretManager.InvalidToken;
 import org.apache.hadoop.security.token.Token;
 import org.apache.hadoop.util.IdentityHashStore;
-import org.apache.hadoop.util.Time;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 
 /****************************************************************
  * DFSInputStream provides bytes from a named file.  It handles 
@@ -246,7 +247,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
   private byte[] oneByteBuf; // used for 'int read()'
 
   void addToDeadNodes(DatanodeInfo dnInfo) {
-    deadNodes.put(dnInfo, Time.monotonicNow());
+    deadNodes.put(dnInfo);
   }
   
   DFSInputStream(DFSClient dfsClient, String src, boolean verifyChecksum
@@ -1004,7 +1005,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
     StorageType storageType = null;
     if (nodes != null) {
       for (int i = 0; i < nodes.length; i++) {
-        if (!deadNodes.containsKey(nodes[i])
+        if (!deadNodes.contains(nodes[i])
             && (ignoredNodes == null || !ignoredNodes.contains(nodes[i]))) {
           chosenNode = nodes[i];
           // Storage types are ordered to correspond with nodes, so use the same
@@ -1535,7 +1536,7 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
     if (currentNode == null) {
       return seekToBlockSource(targetPos);
     }
-    boolean markedDead = deadNodes.containsKey(currentNode);
+    boolean markedDead = deadNodes.contains(currentNode);
     addToDeadNodes(currentNode);
     DatanodeInfo oldNode = currentNode;
     DatanodeInfo newNode = blockSeekTo(targetPos);
@@ -1818,32 +1819,39 @@ implements ByteBufferReadable, CanSetDropBehind, CanSetReadahead,
   }
 
   static class DeadNodes {
-    private final Map<DatanodeInfo, Long> deadNodes;
+    private final LoadingCache<DatanodeInfo, DatanodeInfo> deadNodes;
 
-    /* XXX Use of CocurrentHashMap is temp fix. Need to fix 
+    /* XXX Use of concurrent map is temp fix. Need to fix 
      * parallel accesses to DFSInputStream (through ptreads) properly */
-    DeadNodes() {
-      deadNodes = new ConcurrentHashMap<DatanodeInfo, Long>();
+    DeadNodes(long deadNodesCacheExpiry) {
+      deadNodes = CacheBuilder.newBuilder()
+          .expireAfterWrite(deadNodesCacheExpiry, TimeUnit.MILLISECONDS)
+          .build(new CacheLoader<DatanodeInfo, DatanodeInfo>() {
+              @Override
+              public DatanodeInfo load(DatanodeInfo key) throws Exception {
+                return key;
+              }
+            });
     }
 
     Set<DatanodeInfo> getDeadNodes() {
-      return deadNodes.keySet();
+      return deadNodes.getAllPresent(deadNodes.asMap().keySet()).keySet();
     }
 
-    Long put(DatanodeInfo dnInfo, Long time) {
-      return deadNodes.put(dnInfo, time);
+    void put(DatanodeInfo dnInfo) {
+      deadNodes.put(dnInfo, dnInfo);
     }
 
     void clear() {
-      deadNodes.clear();
+      deadNodes.invalidateAll();
     }
 
-    boolean containsKey(DatanodeInfo dnInfo) {
-      return deadNodes.containsKey(dnInfo);
+    boolean contains(DatanodeInfo dnInfo) {
+      return (deadNodes.getIfPresent(dnInfo) != null);
     }
 
-    Long remove(DatanodeInfo dnInfo) {
-      return deadNodes.remove(dnInfo);
+    void remove(DatanodeInfo dnInfo) {
+      deadNodes.invalidate(dnInfo);
     }
   }
 }

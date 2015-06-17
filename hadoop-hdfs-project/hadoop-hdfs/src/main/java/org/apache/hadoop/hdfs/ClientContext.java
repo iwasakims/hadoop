@@ -120,7 +120,7 @@ public class ClientContext {
 
     this.byteArrayManager = ByteArrayManager.newInstance(
         conf.getWriteByteArrayManagerConf());
-    this.deadNodes = new DeadNodes();
+    this.deadNodes = new DeadNodes(conf.getDeadNodesCacheExpiry());
   }
 
   public static ClientContext get(String name, DfsClientConf conf) {
