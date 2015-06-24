@@ -337,9 +337,7 @@ public class AdminService extends CompositeService implements
     checkHaStateChange(reqInfo);
     try {
       rm.transitionToStandby(true);
-      if (autoFailoverEnabled) {
-        resetLeaderElection();
-      }
+      resetLeaderElection();
       RMAuditLogger.logSuccess(user.getShortUserName(),
           "transitionToStandby", "RMHAProtocolService");
     } catch (Exception e) {
