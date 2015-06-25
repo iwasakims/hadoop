@@ -865,15 +865,19 @@
       <comparators>
         <comparator>
           <type>RegexpComparator</type>
-          <expected-output>^-tail \[-f\] &lt;file&gt; :\s*</expected-output>
+          <expected-output>^-tail \[-f \| -c bytes\] &lt;file&gt; :\s*</expected-output>
         </comparator>
         <comparator>
           <type>RegexpComparator</type>
-          <expected-output>^\s*Show the last 1KB of the file.( )*</expected-output>
+          <expected-output>^\s*Show the last 1KB \(by default\) of the file.( )*</expected-output>
         </comparator>
         <comparator>
           <type>RegexpComparator</type>
           <expected-output>^( |\t)*-f\s+Shows appended data as the file grows.( )*</expected-output>
+        </comparator>
+        <comparator>
+          <type>RegexpComparator</type>
+          <expected-output>^( |\t)*-c K\s+output the last K bytes( )*</expected-output>
         </comparator>
       </comparators>
     </test>

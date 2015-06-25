@@ -38,12 +38,19 @@ class Tail extends FsCommand {
   public static void registerCommands(CommandFactory factory) {
     factory.addClass(Tail.class, "-tail");
   }
-  
+
+  private static final String OPTION_FOLLOW = "f";
+  private static final String OPTION_BYTES = "c";
+
   public static final String NAME = "tail";
-  public static final String USAGE = "[-f] <file>";
+  public static final String USAGE =
+      "[-" + OPTION_FOLLOW + " | -" + OPTION_BYTES + " bytes] <file>";
   public static final String DESCRIPTION =
-    "Show the last 1KB of the file.\n" +
-    "-f: Shows appended data as the file grows.\n";
+    "Show the last 1KB (by default) of the file.\n" +
+    "-" + OPTION_FOLLOW + ": Shows appended data as the file grows.\n" +
+    "-" + OPTION_BYTES + " K: output the last K bytes \n" +
+    "      or use -" + OPTION_BYTES +
+    " +K to output bytes starting with the Kth of each file.\n";
 
   private long startingOffset = -1024;
   private boolean follow = false;
@@ -51,9 +58,19 @@ class Tail extends FsCommand {
   
   @Override
   protected void processOptions(LinkedList<String> args) throws IOException {
-    CommandFormat cf = new CommandFormat(1, 1, "f");
+    CommandFormat cf = new CommandFormat(1, 1, OPTION_FOLLOW);
+    cf.addOptionWithValue(OPTION_BYTES);
     cf.parse(args);
-    follow = cf.getOpt("f");
+    follow = cf.getOpt(OPTION_FOLLOW);
+    String bytes = cf.getOptValue(OPTION_BYTES);
+    if (bytes.equals("")) {
+      throw new IllegalArgumentException("-" +  OPTION_BYTES +
+          " needs number of bytes to show as an argument.");
+    }
+    startingOffset = Long.parseLong(bytes);
+    if (!bytes.startsWith("+")) {
+      startingOffset = -startingOffset;
+    }
   }
 
   // TODO: HADOOP-7234 will add glob support; for now, be backwards compat
