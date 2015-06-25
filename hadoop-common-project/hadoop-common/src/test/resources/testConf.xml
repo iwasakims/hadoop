@@ -865,7 +865,7 @@
       <comparators>
         <comparator>
           <type>RegexpComparator</type>
-          <expected-output>^-tail \[-f \| -c bytes\] &lt;file&gt; :\s*</expected-output>
+          <expected-output>^-tail \[-f\] \[-c bytes\] &lt;file&gt; :\s*</expected-output>
         </comparator>
         <comparator>
           <type>RegexpComparator</type>

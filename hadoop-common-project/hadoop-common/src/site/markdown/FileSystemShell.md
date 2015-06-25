@@ -632,13 +632,14 @@ Exit Code: Returns 0 on success and -1 on error.
 tail
 ----
 
-Usage: `hadoop fs -tail [-f] URI`
+Usage: `hadoop fs -tail [-f] [-c bytes] URI`
 
-Displays last kilobyte of the file to stdout.
+Displays last kilobyte (by default) of the file to stdout.
 
 Options:
 
 * The -f option will output appended data as the file grows, as in Unix.
+* The -c option changes the number of bytes to show , as in Unix. "-c K" output the last K bytes and "-c +K" output bytes starting with the Kth.
 
 Example:
 

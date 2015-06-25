@@ -44,7 +44,7 @@ class Tail extends FsCommand {
 
   public static final String NAME = "tail";
   public static final String USAGE =
-      "[-" + OPTION_FOLLOW + " | -" + OPTION_BYTES + " bytes] <file>";
+      "[-" + OPTION_FOLLOW + "] [-" + OPTION_BYTES + " bytes] <file>";
   public static final String DESCRIPTION =
       "Show the last 1KB (by default) of the file.\n" +
       "-" + OPTION_FOLLOW + ": Shows appended data as the file grows.\n" +
