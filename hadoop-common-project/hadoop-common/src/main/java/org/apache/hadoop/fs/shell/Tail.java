@@ -67,8 +67,8 @@ class Tail extends FsCommand {
       try {
         startingOffset = Long.parseLong(bytes);
       } catch (NumberFormatException e) {
-        throw new IllegalArgumentException("'" + bytes + "'" +
-            " is invalid argument for -c option.");
+        throw new IllegalArgumentException(
+            "'" + bytes + "' is invalid for -" + OPTION_BYTES + " option.");
       }
       if (!bytes.startsWith("+")) {
         startingOffset = -startingOffset;
