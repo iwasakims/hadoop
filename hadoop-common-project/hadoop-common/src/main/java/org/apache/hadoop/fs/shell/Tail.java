@@ -46,11 +46,11 @@ class Tail extends FsCommand {
   public static final String USAGE =
       "[-" + OPTION_FOLLOW + " | -" + OPTION_BYTES + " bytes] <file>";
   public static final String DESCRIPTION =
-    "Show the last 1KB (by default) of the file.\n" +
-    "-" + OPTION_FOLLOW + ": Shows appended data as the file grows.\n" +
-    "-" + OPTION_BYTES + " K: output the last K bytes \n" +
-    "      or use -" + OPTION_BYTES +
-    " +K to output bytes starting with the Kth of each file.\n";
+      "Show the last 1KB (by default) of the file.\n" +
+      "-" + OPTION_FOLLOW + ": Shows appended data as the file grows.\n" +
+      "-" + OPTION_BYTES + " K: output the last K bytes \n" +
+      "      or use -" + OPTION_BYTES +
+      " +K to output bytes starting with the Kth of each file.\n";
 
   private long startingOffset = -1024;
   private boolean follow = false;
@@ -63,13 +63,16 @@ class Tail extends FsCommand {
     cf.parse(args);
     follow = cf.getOpt(OPTION_FOLLOW);
     String bytes = cf.getOptValue(OPTION_BYTES);
-    if (bytes.equals("")) {
-      throw new IllegalArgumentException("-" +  OPTION_BYTES +
-          " needs number of bytes to show as an argument.");
-    }
-    startingOffset = Long.parseLong(bytes);
-    if (!bytes.startsWith("+")) {
-      startingOffset = -startingOffset;
+    if (bytes != null) {
+      try {
+        startingOffset = Long.parseLong(bytes);
+      } catch (NumberFormatException e) {
+        throw new IllegalArgumentException("'" + bytes + "'" +
+            " is invalid argument for -c option.");
+      }
+      if (!bytes.startsWith("+")) {
+        startingOffset = -startingOffset;
+      }
     }
   }
 
