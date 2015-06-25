@@ -7309,7 +7309,71 @@
         </comparator>
       </comparators>
     </test>
- 
+
+    <test> <!--TESTED-->
+      <description>tail: last 10 bytes</description>
+      <test-commands>
+        <command>-fs NAMENODE -put CLITEST_DATA/data120bytes /data120bytes</command>
+        <command>-fs NAMENODE -tail -c 10 /data120bytes</command>
+      </test-commands>
+      <cleanup-commands>
+        <command>-fs NAMENODE -rm /data120bytes</command>
+      </cleanup-commands>
+      <comparators>
+        <comparator>
+          <type>TokenComparator</type>
+          <expected-output>678901234</expected-output>
+        </comparator>
+      </comparators>
+    </test>
+
+    <test> <!--TESTED-->
+      <description>tail: bytes starting with 105th bytes</description>
+      <test-commands>
+        <command>-fs NAMENODE -put CLITEST_DATA/data120bytes /data120bytes</command>
+        <command>-fs NAMENODE -tail -c +105 /data120bytes</command>
+      </test-commands>
+      <cleanup-commands>
+        <command>-fs NAMENODE -rm /data120bytes</command>
+      </cleanup-commands>
+      <comparators>
+        <comparator>
+          <type>TokenComparator</type>
+          <expected-output>12345678901234</expected-output>
+        </comparator>
+      </comparators>
+    </test>
+
+    <test> <!--TESTED-->
+      <description>tail: argument for -c option is invalid</description>
+      <test-commands>
+        <command>-fs NAMENODE -tail -c xxx data120bytes</command>
+      </test-commands>
+      <cleanup-commands>
+      </cleanup-commands>
+      <comparators>
+        <comparator>
+          <type>RegexpComparator</type>
+          <expected-output>^-tail: 'xxx' is invalid for -c option.</expected-output>
+        </comparator>
+      </comparators>
+    </test>
+
+    <test> <!--TESTED-->
+      <description>tail: argument for -c option is missed</description>
+      <test-commands>
+        <command>-fs NAMENODE -tail -c data120bytes</command>
+      </test-commands>
+      <cleanup-commands>
+      </cleanup-commands>
+      <comparators>
+        <comparator>
+          <type>RegexpComparator</type>
+          <expected-output>^-tail: '' is invalid for -c option.</expected-output>
+        </comparator>
+      </comparators>
+    </test>
+
     <!-- Tests for count -->
     <test> <!-- TESTED -->
       <description>count: file using absolute path</description>
