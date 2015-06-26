@@ -199,8 +199,7 @@ public class TestRMFailover extends ClientBaseWithFixes {
 
     // Make the current Active handle an "-transitionToStandby --forcemanual",
     // so it transitions to standby.
-    ResourceManager rm = cluster.getResourceManager(
-        cluster.getActiveRMIndex());
+    ResourceManager rm = cluster.getResourceManager(cluster.getActiveRMIndex());
     rm.getRMContext().getRMAdminService().transitionToStandby(
         new HAServiceProtocol.StateChangeRequestInfo(
             HAServiceProtocol.RequestSource.REQUEST_BY_USER_FORCED));
@@ -213,6 +212,8 @@ public class TestRMFailover extends ClientBaseWithFixes {
     }
     Assert.assertFalse("RM didn't transition to Standby ",
         maxWaitingAttempts == 0);
+
+    // Make sure previous standby became active
     verifyConnections();
 
     // Make sure automatic failover still works after force manual transition
