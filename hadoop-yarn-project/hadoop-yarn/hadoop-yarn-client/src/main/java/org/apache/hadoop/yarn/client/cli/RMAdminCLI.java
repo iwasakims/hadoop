@@ -797,6 +797,14 @@ public class RMAdminCLI extends HAAdmin {
           "Could not connect to RM HA Admin for node " + rmId);
     }
   }
+
+  /**
+   * returns the list of all resourcemanager ids for the given configuration
+   */
+  @Override
+  protected Collection<String> getTargetIds(String namenodeToActivate) {
+    return HAUtil.getRMHAIds(getConf());
+  }
   
   @Override
   protected String getUsageString() {
