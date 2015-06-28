@@ -799,13 +799,13 @@ public class RMAdminCLI extends HAAdmin {
   }
 
   /**
-   * returns the list of all resourcemanager ids for the given configuration
+   * returns the list of all resourcemanager ids for the given configuration.
    */
   @Override
   protected Collection<String> getTargetIds(String targetNodeToActivate) {
     return HAUtil.getRMHAIds(getConf());
   }
-  
+
   @Override
   protected String getUsageString() {
     return "Usage: rmadmin";
