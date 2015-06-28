@@ -802,7 +802,7 @@ public class RMAdminCLI extends HAAdmin {
    * returns the list of all resourcemanager ids for the given configuration
    */
   @Override
-  protected Collection<String> getTargetIds(String namenodeToActivate) {
+  protected Collection<String> getTargetIds(String targetNodeToActivate) {
     return HAUtil.getRMHAIds(getConf());
   }
   
