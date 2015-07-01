@@ -64,7 +64,7 @@ public class TestDFSClientDeadNodes {
           public Boolean get() {
             return !deadNodes.contains(dn);
           }
-        }, 500, expiry + 500);
+        }, 100, expiry * 2);
       } catch (TimeoutException e) {
         fail("timed out while waiting cache expiry: " + e.getMessage());
       } catch (InterruptedException e) {
