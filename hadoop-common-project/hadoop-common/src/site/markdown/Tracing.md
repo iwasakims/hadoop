@@ -21,7 +21,7 @@ Enabling Dapper-like Tracing in Hadoop
         * [SpanReceivers](#SpanReceivers)
         * [Dynamic update of tracing configuration](#Dynamic_update_of_tracing_configuration)
         * [Starting tracing spans by HTrace API](#Starting_tracing_spans_by_HTrace_API)
-        * [Sample code for tracing](#Sample_code_for_tracing)
+        * [Starting tracing spans by FileSystem Shell](#Starting_tracing_spans_by_FileSystem_Shell)
         * [Starting tracing spans by configuration for HDFS client](#Starting_tracing_spans_by_configuration_for_HDFS_client)
 
 
@@ -124,7 +124,6 @@ the tracing information is propagated to servers along with RPC requests.
 In addition, you need to initialize `SpanReceiverHost` once per process.
 
 ```java
-    import org.apache.hadoop.hdfs.HdfsConfiguration;
     import org.apache.hadoop.tracing.SpanReceiverHost;
     import org.apache.htrace.Sampler;
     import org.apache.htrace.Trace;
@@ -132,56 +131,45 @@ In addition, you need to initialize `SpanReceiverHost` once per process.
 
     ...
 
-        SpanReceiverHost.getInstance(new HdfsConfiguration());
+        SpanReceiverHost.get(conf, HTRACE_CONF_PREFIX);
 
     ...
 
-        TraceScope ts = Trace.startSpan("Gets", Sampler.ALWAYS);
-        try {
+        try (TraceScope ts = Trace.startSpan("Gets", Sampler.ALWAYS)) {
           ... // traced logic
-        } finally {
-          if (ts != null) ts.close();
         }
 ```
 
-### Sample code for tracing by HTrace API
 
-The `TracingFsShell.java` shown below is the wrapper of FsShell
-which start tracing span before invoking HDFS shell command.
+### Starting tracing spans by FileSystem Shell
 
-```java
-    import org.apache.hadoop.conf.Configuration;
-    import org.apache.hadoop.fs.FsShell;
-    import org.apache.hadoop.hdfs.DFSConfigKeys;
-    import org.apache.hadoop.hdfs.HdfsConfiguration;
-    import org.apache.hadoop.tracing.SpanReceiverHost;
-    import org.apache.hadoop.util.ToolRunner;
-    import org.apache.htrace.Sampler;
-    import org.apache.htrace.Trace;
-    import org.apache.htrace.TraceScope;
+FileSystem Shell can enable tracing internally by properties
+`dfs.shell.htrace.spanreceiver.classes` and `dfs.shell.htrace.sampler`.
 
-    public class TracingFsShell {
-      public static void main(String argv[]) throws Exception {
-        Configuration conf = new HdfsConfiguration();
-        FsShell shell = new FsShell();
-        conf.setQuietMode(false);
-        shell.setConf(conf);
-        SpanReceiverHost.get(conf, DFSConfigKeys.DFS_SERVER_HTRACE_PREFIX);
-        int res = 0;
-        try (TraceScope ts = Trace.startSpan("FsShell", Sampler.ALWAYS)) {
-          res = ToolRunner.run(shell, argv);
-        } finally {
-          shell.close();
-        }
-        System.exit(res);
-      }
-    }
+```
+  $ hdfs dfs \
+      -Ddfs.shell.htrace.spanreceiver.classes=HTracedRESTReceiver \
+      -Ddfs.shell.htrace.sampler=AlwaysSampler \
+      -put README.txt /tmp/
 ```
 
-You can compile and execute this code as shown below.
+You can also set properties in configuration file.
 
-    $ javac -cp `hadoop classpath` TracingFsShell.java
-    $ java -cp .:`hadoop classpath` TracingFsShell -ls /
+```xml
+      <property>
+        <name>dfs.shell.htrace.spanreceiver.classes</name>
+        <value>HTracedRESTReceiver</value>
+      </property>
+      <property>
+        <name>dfs.shell.htrace.sampler</name>
+        <value>ProbabilitySampler</value>
+      </property>
+      <property>
+        <name>dfs.shell.htrace.sampler.fraction</name>
+        <value>0.5</value>
+      </property>
+```
+
 
 ### Starting tracing spans by configuration for HDFS client
 
@@ -189,7 +177,7 @@ The DFSClient can enable tracing internally. This allows you to use HTrace with
 your client without modifying the client source code.
 
 Configure the span receivers and samplers in `hdfs-site.xml`
-by properties `dfs.client.htrace.sampler` and `dfs.client.htrace.sampler`.
+by properties `dfs.client.htrace.spanreceiver.classes` and `dfs.client.htrace.sampler`.
 The value of `dfs.client.htrace.sampler` can be NeverSampler, AlwaysSampler or ProbabilitySampler.
 
 * NeverSampler: HTrace is OFF for all requests to namenodes and datanodes;
