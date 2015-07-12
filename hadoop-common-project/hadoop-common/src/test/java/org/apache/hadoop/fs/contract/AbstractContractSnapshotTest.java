@@ -19,6 +19,8 @@
 package org.apache.hadoop.fs.contract;
 
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.fs.FileSystem;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,13 +29,17 @@ import org.slf4j.LoggerFactory;
  * Test Snapshot operations
  */
 public abstract class AbstractContractSnapshotTest extends AbstractFSContractTestBase {
-  private static final Logger LOG =
-      LoggerFactory.getLogger(AbstractContractSnapshotTest.class);
+
+  private Path snapshotPath;
+  private final String snapshotName1 = "snapshotName1";
+  private final String snapshotName2 = "snapshotName2";
 
   @Override
   public void setup() throws Exception {
     super.setup();
     skipIfUnsupported(SUPPORTS_SNAPSHOT);
+    snapshotPath = path("testSnapshot");
+    getFileSystem().mkdirs(snapshotPath);
   }
 
   @Override
@@ -46,4 +52,15 @@ public abstract class AbstractContractSnapshotTest extends AbstractFSContractTes
   public void teardown() throws Exception {
     super.teardown();
   }
+
+  @Test
+  public void testSnapshot() throws Exception {
+    FileSystem fs = getFileSystem();
+    fs.createSnapshot(snapshotPath, snapshotName1);
+  }
+
+  public Path getSnapshotPath() {
+    return snapshotPath;
+  }
+
 }
