@@ -55,7 +55,7 @@ public class TestHDFSContractSnapshot extends AbstractContractSnapshotTest {
     super.setup();
     MiniDFSCluster cluster = HDFSContract.getCluster();
     Configuration conf = cluster.getConfiguration(0);
-    Path path = getSnapshotPath();
+    Path path = getTargetPath();
     ToolRunner.run(new DFSAdmin(conf),
         new String[]{"-allowSnapshot", path.toString()});
   }
