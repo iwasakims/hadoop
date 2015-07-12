@@ -81,4 +81,9 @@
     <value>false</value>
   </property>
 
+  <property>
+    <name>fs.contract.supports-snapshot</name>
+    <value>false</value>
+  </property>
+
 </configuration>

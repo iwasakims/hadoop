@@ -123,6 +123,12 @@ public interface ContractOptions {
   String SUPPORTS_SEEK = "supports-seek";
 
   /**
+   * Is snapshot supported at all?
+   * @{value}
+   */
+  String SUPPORTS_SNAPSHOT = "supports-snapshot";
+
+  /**
    * Is seeking past the EOF allowed?
    * @{value}
    */
