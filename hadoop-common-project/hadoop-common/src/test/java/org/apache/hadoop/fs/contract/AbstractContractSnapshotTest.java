@@ -30,7 +30,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractContractSnapshotTest extends AbstractFSContractTestBase {
 
-  private Path snapshotPath;
+  private Path targetPath;
   private final String snapshotName1 = "snapshotName1";
   private final String snapshotName2 = "snapshotName2";
 
@@ -38,8 +38,8 @@ public abstract class AbstractContractSnapshotTest extends AbstractFSContractTes
   public void setup() throws Exception {
     super.setup();
     skipIfUnsupported(SUPPORTS_SNAPSHOT);
-    snapshotPath = path("testSnapshot");
-    getFileSystem().mkdirs(snapshotPath);
+    targetPath = path("testSnapshot");
+    getFileSystem().mkdirs(targetPath);
   }
 
   @Override
@@ -54,13 +54,25 @@ public abstract class AbstractContractSnapshotTest extends AbstractFSContractTes
   }
 
   @Test
-  public void testSnapshot() throws Exception {
+  public void testCreateAndRenameSnapshot() throws Exception {
     FileSystem fs = getFileSystem();
-    fs.createSnapshot(snapshotPath, snapshotName1);
+    Path snapshotPath = fs.createSnapshot(targetPath, snapshotName1);
+    assertTrue(fs.exists(snapshotPath));
+    fs.renameSnapshot(targetPath, snapshotName1, snapshotName2);
+    assertFalse(fs.exists(snapshotPath));
   }
 
-  public Path getSnapshotPath() {
-    return snapshotPath;
+  @Test
+  public void testCreateAndDeleteSnapshot() throws Exception {
+    FileSystem fs = getFileSystem();
+    Path snapshotPath = fs.createSnapshot(targetPath, snapshotName1);
+    assertTrue(fs.exists(snapshotPath));
+    fs.deleteSnapshot(targetPath, snapshotName1);
+    assertFalse(fs.exists(snapshotPath));
+  }
+
+  public Path getTargetPath() {
+    return targetPath;
   }
 
 }

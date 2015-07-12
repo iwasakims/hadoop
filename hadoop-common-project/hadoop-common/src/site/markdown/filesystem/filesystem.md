@@ -882,6 +882,13 @@ Implementations MAY throw `UnsupportedOperationException`.
 
     if not exists(FS, path) : raise FileNotFoundException
 
+#### Postconditions
+
+    result = p where exists(FS, p)
+
+HDFS: The target path must be a directory enabled snapshot by admin operation.
+Snapshot name is generated using a timestamp.
+
 
 ### `Path createSnapshot(Path path, String snapshotName)`
 
@@ -895,8 +902,10 @@ Implementations MAY throw `UnsupportedOperationException`.
 
 #### Postconditions
 
-    result = p where valid-path(FS, p)
+    result = p where exists(FS, p)
 
+HDFS: The target path must be a directory enabled snapshot by admin operation.
+The `result` is defined as `path/.snapshot/snapshotName`.
 
 
 ### `void renameSnapshot(Path path, String snapshotOldName, String snapshotNewName)`
@@ -909,6 +918,10 @@ Implementations MAY throw `UnsupportedOperationException`.
 
     if not exists(FS, path) : raise FileNotFoundException
 
+#### Postconditions
+
+    result = p where not exists(FS, p)
+
 
 ### `void deleteSnapshot(Path path, String snapshotName)`
 
@@ -919,3 +932,7 @@ Implementations MAY throw `UnsupportedOperationException`.
 #### Preconditions
 
     if not exists(FS, path) : raise FileNotFoundException
+
+#### Postconditions
+
+    result = p where not exists(FS, p)
