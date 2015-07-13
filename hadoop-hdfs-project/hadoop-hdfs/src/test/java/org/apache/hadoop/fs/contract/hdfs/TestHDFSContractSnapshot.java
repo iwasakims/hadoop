@@ -14,17 +14,12 @@
 
 package org.apache.hadoop.fs.contract.hdfs;
 
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.Path;
 import org.apache.hadoop.fs.contract.AbstractContractSnapshotTest;
 import org.apache.hadoop.fs.contract.AbstractFSContract;
-import org.apache.hadoop.fs.contract.ContractTestUtils;
-import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
-import org.apache.hadoop.hdfs.tools.DFSAdmin;
-import org.apache.hadoop.util.ToolRunner;
 import org.junit.AfterClass;
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -53,11 +48,7 @@ public class TestHDFSContractSnapshot extends AbstractContractSnapshotTest {
   @Override 
   public void setup() throws Exception {
     super.setup();
-    MiniDFSCluster cluster = HDFSContract.getCluster();
-    Configuration conf = cluster.getConfiguration(0);
-    Path path = getTargetPath();
-    ToolRunner.run(new DFSAdmin(conf),
-        new String[]{"-allowSnapshot", path.toString()});
+    HDFSContract.getCluster().getFileSystem().allowSnapshot(getTargetPath());
   }
 
   @Test
