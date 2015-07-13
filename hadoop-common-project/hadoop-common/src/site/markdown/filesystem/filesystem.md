@@ -239,7 +239,7 @@ these inconsistent views are only likely when listing a directory with many chil
 Other filesystems may have stronger consistency guarantees, or return inconsistent
 data more readily.
 
-### `FileStatus[] getFileBlockLocations(FileStatus f, int s, int l)`
+### `BlockLocation[] getFileBlockLocations(FileStatus f, int s, int l)`
 
 #### Preconditions
 
@@ -286,7 +286,7 @@ of elements as the cluster topology MUST be provided, hence Filesystems SHOULD
 return that `"/default/localhost"` path
 
 
-###  `FileStatus[] getFileBlockLocations(Path P, int S, int L)`
+###  `BlockLocation[] getFileBlockLocations(Path P, int S, int L)`
 
 #### Preconditions
 
