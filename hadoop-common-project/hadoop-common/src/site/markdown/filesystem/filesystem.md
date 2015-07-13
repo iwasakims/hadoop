@@ -920,8 +920,10 @@ Implementations MAY throw `UnsupportedOperationException`.
 
 #### Postconditions
 
-    result = p where not exists(FS, p)
+    FS' where:
+        not exists(FS, p)
 
+`p` is the Path returned by `createSnapshot`.
 
 ### `void deleteSnapshot(Path path, String snapshotName)`
 
@@ -935,4 +937,7 @@ Implementations MAY throw `UnsupportedOperationException`.
 
 #### Postconditions
 
-    result = p where not exists(FS, p)
+    FS' where:
+        not exists(FS, p)
+
+`p` is the Path returned by `createSnapshot`.
