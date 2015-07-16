@@ -66,11 +66,9 @@ Get the status of a path
 
 #### Preconditions
 
-
     if not exists(FS, p) : raise FileNotFoundException
 
 #### Postconditions
-
 
     result = stat: FileStatus where:
         if isFile(FS, p) :
@@ -87,6 +85,24 @@ Get the status of a path
             stat.isEncrypted = True
         else
             stat.isEncrypted = False
+
+where
+
+    def inEncryptionZone(FS, path) : true if path is in encryption zone, otherwise false
+
+All files and directories under a directory in an encryption zone are also in an
+encryption zone
+
+    forall d in directories(FS): inEncyptionZone(FS, d) implies
+      forall c in children(FS, d) where (isFile(FS, c) or isDir(FS, c)) :
+        inEncyptionZone(FS, c)
+
+For all files in an encrypted zone, the data is encrypted, but the encryption
+type and specification are not defined.
+
+      forall f in files(FS) where  inEncyptionZone(FS, c):
+        isEncrypted(data(f))
+
 
 ### `Path getHomeDirectory()`
 
