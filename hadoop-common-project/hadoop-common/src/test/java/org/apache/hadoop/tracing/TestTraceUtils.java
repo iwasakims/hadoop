@@ -64,6 +64,8 @@ public class TestTraceUtils {
     extraConfig.add(new ConfigurationPair(key, newValue));
     HTraceConfiguration wrapped =
         TraceUtils.wrapHadoopConf(TEST_PREFIX, conf, extraConfig);
+    // wrapped configuration falls back to get(TEST_PREFIX + key)
+    // if get(key) has not matched entry.
     assertEquals(newValue, wrapped.get(key));
   }
 }

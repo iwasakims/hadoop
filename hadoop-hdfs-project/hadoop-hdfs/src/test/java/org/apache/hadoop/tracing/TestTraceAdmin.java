@@ -86,7 +86,7 @@ public class TestTraceAdmin {
       Assert.assertEquals("ret:0, [no span receivers found]" + NEWLINE,
           runTraceCommand(trace, "-list", "-host", getHostPortForNN(cluster)));
 
-      // HADOOP-11967 made config prefix omittable
+      // HADOOP-11967 made prefix of extra configuration properties omittable.
       Assert.assertEquals("ret:0, Added trace span receiver 2 with " +
           "configuration local-file-span-receiver.path = " + tracePath + NEWLINE,
           runTraceCommand(trace, "-add", "-host", getHostPortForNN(cluster),
