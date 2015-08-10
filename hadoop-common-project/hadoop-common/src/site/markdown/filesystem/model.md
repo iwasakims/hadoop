@@ -218,6 +218,24 @@ This implies that only files may have data.
 This condition is invariant and is an implicit postcondition of all
 operations that manipulate the state of a FileSystem `FS`.
 
+
+#### Snapshot
+
+Snapshot is point-in-time copy of the filesystem.
+
+Snapshot can be taken on specified path.
+Each snapshot is managed by the name determined on snapshot creation.
+
+    def Snapshot : (Path, SnapshotName)
+
+Snapshot name is non-empty string.
+
+    def SnapshotName : String
+
+For HDFS, snapshot name must be valid path element because the contents of
+snapshot are accessed by the path containing its name.
+
+
 ### Notes
 
 Not covered: hard links in a FileSystem. If a FileSystem supports multiple
