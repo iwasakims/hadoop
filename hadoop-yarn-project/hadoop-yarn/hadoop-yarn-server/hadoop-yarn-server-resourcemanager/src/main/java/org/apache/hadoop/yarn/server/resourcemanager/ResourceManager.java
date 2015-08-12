@@ -38,6 +38,7 @@ import org.apache.hadoop.service.AbstractService;
 import org.apache.hadoop.service.CompositeService;
 import org.apache.hadoop.service.Service;
 import org.apache.hadoop.tracing.SpanReceiverHost;
+import org.apache.hadoop.tracing.SpanReceiverInfo;
 import org.apache.hadoop.util.ExitUtil;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.JvmPauseMonitor;
@@ -1077,9 +1078,6 @@ public class ResourceManager extends CompositeService implements Recoverable {
 
   @Override
   protected void serviceStop() throws Exception {
-    if (spanReceiverHost != null) {
-      spanReceiverHost.closeReceivers();
-    }
     if (webApp != null) {
       webApp.stop();
     }
@@ -1092,6 +1090,9 @@ public class ResourceManager extends CompositeService implements Recoverable {
     super.serviceStop();
     transitionToStandby(false);
     rmContext.setHAServiceState(HAServiceState.STOPPING);
+    if (spanReceiverHost != null) {
+      spanReceiverHost.closeReceivers();
+    }
   }
   
   protected ResourceTrackerService createResourceTrackerService() {
@@ -1283,6 +1284,18 @@ public class ResourceManager extends CompositeService implements Recoverable {
     } finally {
       rmStore.stop();
     }
+  }
+
+  SpanReceiverInfo[] listSpanReceivers() throws IOException {
+    return spanReceiverHost.listSpanReceivers();
+  }
+
+  long addSpanReceiver(SpanReceiverInfo info) throws IOException {
+    return spanReceiverHost.addSpanReceiver(info);
+  }
+
+  void removeSpanReceiver(long id) throws IOException {
+    spanReceiverHost.removeSpanReceiver(id);
   }
 
   private static void printUsage(PrintStream out) {

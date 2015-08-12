@@ -45,7 +45,7 @@ public class TestYARNTracing {
         SpanReceiverHost.SPAN_RECEIVERS_CONF_SUFFIX,
         SetSpanReceiver.class.getName());
     cluster = new MiniYARNCluster(TestYARNTracing.class.getSimpleName(),
-        0, 1, 1);
+        1, 1, 1);
     cluster.init(conf);
     cluster.start();
   }
@@ -70,18 +70,44 @@ public class TestYARNTracing {
     client.start();
 
     try (TraceScope ts = Trace.startSpan("testRMTracing", Sampler.ALWAYS)) {
-      Thread.sleep(5000);
       client.getApplications();
-      String[] expectedSpanNames = {
-        "testRMTracing",
-      };
-      SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
-      for (String description : SetSpanReceiver.getMap().keySet()) {
-        System.out.println("##### " + description);
-      }
-    } finally {
-      client.stop();
     }
+
+    client.stop();
+    String[] expectedSpanNames = {
+      "testRMTracing",
+      "ApplicationClientProtocolPB#getApplications",
+      "ApplicationClientProtocolService#getApplications"
+    };
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
+  }
+
+  @Test
+  public void testRMTraceAdmin() throws Exception {
+    Configuration conf = cluster.getConfig();
+    String hostPort = conf.get(YarnConfiguration.RM_ADMIN_ADDRESS,
+        YarnConfiguration.DEFAULT_RM_ADMIN_ADDRESS);
+    TraceAdmin traceAdmin = new TraceAdmin();
+    traceAdmin.setConf(conf);
+
+    Assert.assertEquals(0,
+        runTraceCommand(traceAdmin, "-list", "-host", hostPort));
+    Assert.assertEquals(0,
+        runTraceCommand(traceAdmin, "-remove", "1","-host", hostPort));
+    Assert.assertEquals(0,
+        runTraceCommand(traceAdmin,
+            "-add", "-class", SetSpanReceiver.class.getName(),
+            "-host", hostPort));
+
+    try (TraceScope ts = Trace.startSpan("traceAdmin", Sampler.ALWAYS)) {
+      runTraceCommand(traceAdmin, "-list", "-host", hostPort);
+    }
+
+    String[] expectedSpanNames = {
+      "traceAdmin",
+      "TraceAdminService#listSpanReceivers",
+    };
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
   }
 
   private static int runTraceCommand(TraceAdmin trace, String... cmd)
