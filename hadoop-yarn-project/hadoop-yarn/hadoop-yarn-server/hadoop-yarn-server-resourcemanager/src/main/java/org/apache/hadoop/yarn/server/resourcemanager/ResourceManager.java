@@ -37,6 +37,7 @@ import org.apache.hadoop.security.authorize.ProxyUsers;
 import org.apache.hadoop.service.AbstractService;
 import org.apache.hadoop.service.CompositeService;
 import org.apache.hadoop.service.Service;
+import org.apache.hadoop.tracing.SpanReceiverHost;
 import org.apache.hadoop.util.ExitUtil;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.JvmPauseMonitor;
@@ -159,6 +160,7 @@ public class ResourceManager extends CompositeService implements Recoverable {
   private AppReportFetcher fetcher = null;
   protected ResourceTrackerService resourceTracker;
   private JvmPauseMonitor pauseMonitor;
+  private SpanReceiverHost spanReceiverHost;
 
   @VisibleForTesting
   protected String webAppAddress;
@@ -258,6 +260,9 @@ public class ResourceManager extends CompositeService implements Recoverable {
     webAppAddress = WebAppUtils.getWebAppBindURL(this.conf,
                       YarnConfiguration.RM_BIND_HOST,
                       WebAppUtils.getRMWebAppURLWithoutScheme(this.conf));
+
+    this.spanReceiverHost =
+        SpanReceiverHost.get(conf, YarnConfiguration.YARN_SERVER_HTRACE_PREFIX);
 
     RMApplicationHistoryWriter rmApplicationHistoryWriter =
         createRMApplicationHistoryWriter();
@@ -1072,6 +1077,9 @@ public class ResourceManager extends CompositeService implements Recoverable {
 
   @Override
   protected void serviceStop() throws Exception {
+    if (spanReceiverHost != null) {
+      spanReceiverHost.closeReceivers();
+    }
     if (webApp != null) {
       webApp.stop();
     }
