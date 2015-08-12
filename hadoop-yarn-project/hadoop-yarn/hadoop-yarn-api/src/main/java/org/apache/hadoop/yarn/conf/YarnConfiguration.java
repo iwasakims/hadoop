@@ -1913,6 +1913,11 @@ public class YarnConfiguration extends Configuration {
   public static final String YARN_HTTP_POLICY_KEY = YARN_PREFIX + "http.policy";
   public static final String YARN_HTTP_POLICY_DEFAULT = HttpConfig.Policy.HTTP_ONLY
       .name();
+
+  /**
+   * Tracing configurations
+   */
+  public static final String YARN_SERVER_HTRACE_PREFIX = YARN_PREFIX + "htrace.";
   
   /**
    * Node-labels configurations
