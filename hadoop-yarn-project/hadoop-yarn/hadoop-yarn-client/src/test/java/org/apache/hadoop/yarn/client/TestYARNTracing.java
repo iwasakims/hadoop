@@ -23,7 +23,14 @@ import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.tracing.SetSpanReceiver;
 import org.apache.hadoop.tracing.SpanReceiverHost;
 import org.apache.hadoop.tracing.TraceAdmin;
+import org.apache.hadoop.yarn.api.records.ContainerId;
+import org.apache.hadoop.yarn.api.records.NodeId;
+import org.apache.hadoop.yarn.client.api.AMRMClient;
+import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
+import org.apache.hadoop.yarn.client.api.NMClient;
+import org.apache.hadoop.yarn.client.api.NMTokenCache;
 import org.apache.hadoop.yarn.client.api.YarnClient;
+import org.apache.hadoop.yarn.client.api.impl.NMClientImpl;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 import org.apache.htrace.Sampler;
@@ -61,6 +68,27 @@ public class TestYARNTracing {
   @Before
   public void clearSpans() {
     SetSpanReceiver.clear();
+  }
+
+  @Test
+  public void testNMTracing() throws Exception {
+    Configuration conf = cluster.getConfig();
+    NMTokenCache nmTokenCache = new NMTokenCache();
+
+    AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
+    rmClient.setNMTokenCache(nmTokenCache);
+    rmClient.init(conf);
+    rmClient.start();
+
+    NMClientImpl nmClient = (NMClientImpl) NMClient.createNMClient();
+    nmClient.setNMTokenCache(rmClient.getNMTokenCache());
+    nmClient.init(conf);
+    nmClient.start();
+
+    ContainerId containerId =
+        ContainerId.fromString("container_1427562100000_0001_01_000001");
+    NodeId nodeId = cluster.getNodeManager(0).getNMContext().getNodeId();
+    nmClient.getContainerStatus(containerId, nodeId);
   }
 
   @Test
