@@ -57,7 +57,6 @@ import org.apache.htrace.Sampler;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
-import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -99,6 +98,52 @@ public class TestYARNTracing {
   @Before
   public void clearSpans() {
     SetSpanReceiver.clear();
+  }
+
+  @Test
+  public void testRMTracing() throws Exception {
+    try (TraceScope ts = Trace.startSpan("testRMTracing", Sampler.ALWAYS)) {
+      yarnClient.getApplications();
+    }
+    String[] expectedSpanNames = {
+      "testRMTracing",
+      "ApplicationClientProtocolPB#getApplications",
+      "ApplicationClientProtocolService#getApplications"
+    };
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
+  }
+
+  @Test
+  public void testRMTraceAdmin() throws Exception {
+    Configuration conf = cluster.getConfig();
+    String hostPort = conf.get(YarnConfiguration.RM_ADMIN_ADDRESS,
+        YarnConfiguration.DEFAULT_RM_ADMIN_ADDRESS);
+    TraceAdmin traceAdmin = new TraceAdmin();
+    traceAdmin.setConf(conf);
+
+    Assert.assertEquals(0,
+        runTraceCommand(traceAdmin, "-list", "-host", hostPort));
+    Assert.assertEquals(0,
+        runTraceCommand(traceAdmin, "-remove", "1","-host", hostPort));
+    Assert.assertEquals(0,
+        runTraceCommand(traceAdmin,
+            "-add", "-class", SetSpanReceiver.class.getName(),
+            "-host", hostPort));
+
+    try (TraceScope ts = Trace.startSpan("traceAdmin", Sampler.ALWAYS)) {
+      runTraceCommand(traceAdmin, "-list", "-host", hostPort);
+    }
+
+    String[] expectedSpanNames = {
+      "traceAdmin",
+      "TraceAdminService#listSpanReceivers",
+    };
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
+  }
+
+  private static int runTraceCommand(TraceAdmin trace, String... cmd)
+      throws Exception {
+    return trace.run(cmd);
   }
 
   @Test
@@ -199,51 +244,5 @@ public class TestYARNTracing {
       "ContainerManagementProtocolService#getContainerStatuses"
     };
     SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
-  }
-
-  @Test
-  public void testRMTracing() throws Exception {
-    try (TraceScope ts = Trace.startSpan("testRMTracing", Sampler.ALWAYS)) {
-      yarnClient.getApplications();
-    }
-    String[] expectedSpanNames = {
-      "testRMTracing",
-      "ApplicationClientProtocolPB#getApplications",
-      "ApplicationClientProtocolService#getApplications"
-    };
-    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
-  }
-
-  @Test
-  public void testRMTraceAdmin() throws Exception {
-    Configuration conf = cluster.getConfig();
-    String hostPort = conf.get(YarnConfiguration.RM_ADMIN_ADDRESS,
-        YarnConfiguration.DEFAULT_RM_ADMIN_ADDRESS);
-    TraceAdmin traceAdmin = new TraceAdmin();
-    traceAdmin.setConf(conf);
-
-    Assert.assertEquals(0,
-        runTraceCommand(traceAdmin, "-list", "-host", hostPort));
-    Assert.assertEquals(0,
-        runTraceCommand(traceAdmin, "-remove", "1","-host", hostPort));
-    Assert.assertEquals(0,
-        runTraceCommand(traceAdmin,
-            "-add", "-class", SetSpanReceiver.class.getName(),
-            "-host", hostPort));
-
-    try (TraceScope ts = Trace.startSpan("traceAdmin", Sampler.ALWAYS)) {
-      runTraceCommand(traceAdmin, "-list", "-host", hostPort);
-    }
-
-    String[] expectedSpanNames = {
-      "traceAdmin",
-      "TraceAdminService#listSpanReceivers",
-    };
-    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
-  }
-
-  private static int runTraceCommand(TraceAdmin trace, String... cmd)
-      throws Exception {
-    return trace.run(cmd);
   }
 }
