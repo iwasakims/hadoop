@@ -47,8 +47,6 @@ import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.client.api.NMClient;
 import org.apache.hadoop.yarn.client.api.NMTokenCache;
 import org.apache.hadoop.yarn.client.api.YarnClient;
-import org.apache.hadoop.yarn.client.api.impl.NMClientImpl;
-import org.apache.hadoop.yarn.client.api.impl.YarnClientImpl;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
@@ -59,6 +57,7 @@ import org.apache.htrace.Sampler;
 import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
+import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
@@ -68,6 +67,7 @@ import org.junit.Test;
 public class TestYARNTracing {
   static final Log LOG = LogFactory.getLog(TestYARNTracing.class);
   private static MiniYARNCluster cluster;
+  private static YarnClient yarnClient;
 
   @BeforeClass
   public static void setup() throws IOException {
@@ -79,10 +79,17 @@ public class TestYARNTracing {
         1, 1, 1);
     cluster.init(conf);
     cluster.start();
+    yarnClient = YarnClient.createYarnClient();
+    yarnClient.init(cluster.getConfig());
+    yarnClient.start();
   }
 
   @AfterClass
   public static void teardown() {
+    if (yarnClient != null) {
+      yarnClient.stop();
+      yarnClient = null;
+    }
     if (cluster != null) {
       cluster.stop();
       cluster = null;
@@ -96,15 +103,8 @@ public class TestYARNTracing {
 
   @Test
   public void testNMTracing() throws Exception {
-    final Configuration conf = cluster.getConfig();
-
-    final YarnClientImpl yarnClient =
-        (YarnClientImpl) YarnClient.createYarnClient();
-    yarnClient.init(conf);
-    yarnClient.start();
-    final ApplicationSubmissionContext appContext = 
+    ApplicationSubmissionContext appContext = 
         yarnClient.createApplication().getApplicationSubmissionContext();
-    final ApplicationId appId = appContext.getApplicationId();
     appContext.setApplicationName("TestNMTracing");
     appContext.setPriority(Priority.newInstance(0));
     appContext.setQueue("default");
@@ -114,6 +114,8 @@ public class TestYARNTracing {
     yarnClient.submitApplication(appContext);
 
     // wait for app to start
+    final YarnClient yarnClient = TestYARNTracing.yarnClient;
+    final ApplicationId appId = appContext.getApplicationId();
     GenericTestUtils.waitFor(new Supplier<Boolean>() {
       @Override
       public Boolean get() {
@@ -135,24 +137,6 @@ public class TestYARNTracing {
       }
     }, 1000, 30000);
 
-    RMAppAttempt appAttempt =
-        cluster.getResourceManager()
-            .getRMContext().getRMApps().get(appId).getCurrentAppAttempt();
-    UserGroupInformation.setLoginUser(
-        UserGroupInformation.createRemoteUser(
-            UserGroupInformation.getCurrentUser().getUserName()));
-    UserGroupInformation.getCurrentUser().addToken(appAttempt.getAMRMToken());
-    AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
-    rmClient.setNMTokenCache(new NMTokenCache());
-    rmClient.init(conf);
-    rmClient.start();
-
-    NMClientImpl nmClient = (NMClientImpl) NMClient.createNMClient();
-    nmClient.setNMTokenCache(rmClient.getNMTokenCache());
-    nmClient.init(conf);
-    nmClient.start();
-    rmClient.registerApplicationMaster("TestNMTracing", 10000, "");
-
     List<NodeReport> nodeReports = yarnClient.getNodeReports(NodeState.RUNNING);
     String node = nodeReports.get(0).getNodeId().getHost();
     String rack = nodeReports.get(0).getRackName();
@@ -161,21 +145,43 @@ public class TestYARNTracing {
     Resource capability = Resource.newInstance(1024, 0);
     Priority priority = Priority.newInstance(0);
 
-    rmClient.addContainerRequest(
-        new ContainerRequest(capability, nodes, racks, priority));
+    RMAppAttempt appAttempt =
+        cluster.getResourceManager()
+            .getRMContext().getRMApps().get(appId).getCurrentAppAttempt();
+    UserGroupInformation.setLoginUser(
+        UserGroupInformation.createRemoteUser(
+            UserGroupInformation.getCurrentUser().getUserName()));
+    UserGroupInformation.getCurrentUser().addToken(appAttempt.getAMRMToken());
+
+    NMTokenCache nmTokenCache = new NMTokenCache();
+    AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
+    rmClient.setNMTokenCache(nmTokenCache);
+    rmClient.init(cluster.getConfig());
+    rmClient.start();
     Container container = null;
-    for (int i = 5; i > 0; i--) {
-      AllocateResponse allocResponse = rmClient.allocate(0.1f);
-      if (allocResponse.getAllocatedContainers().size() > 0) {
-        container = allocResponse.getAllocatedContainers().get(0);
-        break;
+    try {
+      rmClient.registerApplicationMaster("TestNMTracing", 10000, "");
+      rmClient.addContainerRequest(
+          new ContainerRequest(capability, nodes, racks, priority));
+      for (int i = 5; i > 0; i--) {
+        AllocateResponse allocResponse = rmClient.allocate(0.1f);
+        if (allocResponse.getAllocatedContainers().size() > 0) {
+          container = allocResponse.getAllocatedContainers().get(0);
+          break;
+        }
+        Thread.sleep(1000);
       }
-      Thread.sleep(1000);
+    } finally {
+      rmClient.stop();
     }
     if (container == null) {
       Assert.fail("Failed to allocate containers.");
     }
 
+    NMClient nmClient = NMClient.createNMClient();
+    nmClient.setNMTokenCache(nmTokenCache);
+    nmClient.init(cluster.getConfig());
+    nmClient.start();
     try (TraceScope ts = Trace.startSpan("testNMTracing", Sampler.ALWAYS)) {
       nmClient.getContainerStatus(container.getId(), container.getNodeId());
       // getContainerStatus called before startContainer is expected
@@ -184,6 +190,8 @@ public class TestYARNTracing {
       Assert.fail("Exception is expected");
     } catch (YarnException e) {
       LOG.info(StringUtils.stringifyException(e));
+    } finally {
+      nmClient.close();
     }
     String[] expectedSpanNames = {
       "testNMTracing",
@@ -195,15 +203,9 @@ public class TestYARNTracing {
 
   @Test
   public void testRMTracing() throws Exception {
-    YarnClient client = YarnClient.createYarnClient();
-    client.init(cluster.getConfig());
-    client.start();
-
     try (TraceScope ts = Trace.startSpan("testRMTracing", Sampler.ALWAYS)) {
-      client.getApplications();
+      yarnClient.getApplications();
     }
-
-    client.stop();
     String[] expectedSpanNames = {
       "testRMTracing",
       "ApplicationClientProtocolPB#getApplications",
