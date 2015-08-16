@@ -38,6 +38,7 @@ import org.apache.hadoop.metrics2.lib.DefaultMetricsSystem;
 import org.apache.hadoop.security.Credentials;
 import org.apache.hadoop.security.SecurityUtil;
 import org.apache.hadoop.service.CompositeService;
+import org.apache.hadoop.tracing.SpanReceiverHost;
 import org.apache.hadoop.util.ExitUtil;
 import org.apache.hadoop.util.GenericOptionsParser;
 import org.apache.hadoop.util.JvmPauseMonitor;
@@ -95,6 +96,7 @@ public class NodeManager extends CompositeService
   private NodeStatusUpdater nodeStatusUpdater;
   private static CompositeServiceShutdownHook nodeManagerShutdownHook; 
   private NMStateStoreService nmStore = null;
+  private SpanReceiverHost spanReceiverHost;
   
   private AtomicBoolean isStopping = new AtomicBoolean(false);
   private boolean rmWorkPreservingRestartEnabled;
@@ -313,6 +315,9 @@ public class NodeManager extends CompositeService
     pauseMonitor = new JvmPauseMonitor(conf);
     metrics.getJvmMetrics().setPauseMonitor(pauseMonitor);
 
+    this.spanReceiverHost =
+        SpanReceiverHost.get(conf, YarnConfiguration.YARN_SERVER_HTRACE_PREFIX);
+
     DefaultMetricsSystem.initialize("NodeManager");
 
     // StatusUpdater should be added last so that it get started last 
@@ -344,6 +349,9 @@ public class NodeManager extends CompositeService
       DefaultMetricsSystem.shutdown();
       if (pauseMonitor != null) {
         pauseMonitor.stop();
+      }
+      if (spanReceiverHost != null) {
+        spanReceiverHost.closeReceivers();
       }
     } finally {
       // YARN-3641: NM's services stop get failed shouldn't block the
