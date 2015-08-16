@@ -18,22 +18,45 @@
 
 package org.apache.hadoop.yarn.client;
 
+import com.google.common.base.Supplier;
 import java.io.IOException;
+import java.util.List;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.security.UserGroupInformation;
+import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.tracing.SetSpanReceiver;
 import org.apache.hadoop.tracing.SpanReceiverHost;
 import org.apache.hadoop.tracing.TraceAdmin;
-import org.apache.hadoop.yarn.api.records.ContainerId;
+import org.apache.hadoop.util.StringUtils;
+import org.apache.hadoop.yarn.api.protocolrecords.AllocateResponse;
+import org.apache.hadoop.yarn.api.records.ApplicationId;
+import org.apache.hadoop.yarn.api.records.ApplicationReport;
+import org.apache.hadoop.yarn.api.records.ApplicationSubmissionContext;
+import org.apache.hadoop.yarn.api.records.Container;
+import org.apache.hadoop.yarn.api.records.ContainerLaunchContext;
 import org.apache.hadoop.yarn.api.records.NodeId;
+import org.apache.hadoop.yarn.api.records.NodeReport;
+import org.apache.hadoop.yarn.api.records.NodeState;
+import org.apache.hadoop.yarn.api.records.Priority;
+import org.apache.hadoop.yarn.api.records.Resource;
+import org.apache.hadoop.yarn.api.records.YarnApplicationState;
 import org.apache.hadoop.yarn.client.api.AMRMClient;
 import org.apache.hadoop.yarn.client.api.AMRMClient.ContainerRequest;
 import org.apache.hadoop.yarn.client.api.NMClient;
 import org.apache.hadoop.yarn.client.api.NMTokenCache;
 import org.apache.hadoop.yarn.client.api.YarnClient;
 import org.apache.hadoop.yarn.client.api.impl.NMClientImpl;
+import org.apache.hadoop.yarn.client.api.impl.YarnClientImpl;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
+import org.apache.hadoop.yarn.exceptions.YarnException;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
+import org.apache.hadoop.yarn.server.resourcemanager.rmapp.attempt.RMAppAttempt;
+import org.apache.hadoop.yarn.server.resourcemanager.rmapp.attempt.RMAppAttemptState;
+import org.apache.hadoop.yarn.util.Records;
 import org.apache.htrace.Sampler;
+import org.apache.htrace.Span;
 import org.apache.htrace.Trace;
 import org.apache.htrace.TraceScope;
 import org.junit.AfterClass;
@@ -43,6 +66,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 
 public class TestYARNTracing {
+  static final Log LOG = LogFactory.getLog(TestYARNTracing.class);
   private static MiniYARNCluster cluster;
 
   @BeforeClass
@@ -72,11 +96,54 @@ public class TestYARNTracing {
 
   @Test
   public void testNMTracing() throws Exception {
-    Configuration conf = cluster.getConfig();
-    NMTokenCache nmTokenCache = new NMTokenCache();
+    final Configuration conf = cluster.getConfig();
 
+    final YarnClientImpl yarnClient =
+        (YarnClientImpl) YarnClient.createYarnClient();
+    yarnClient.init(conf);
+    yarnClient.start();
+    final ApplicationSubmissionContext appContext = 
+        yarnClient.createApplication().getApplicationSubmissionContext();
+    final ApplicationId appId = appContext.getApplicationId();
+    appContext.setApplicationName("TestNMTracing");
+    appContext.setPriority(Priority.newInstance(0));
+    appContext.setQueue("default");
+    appContext.setAMContainerSpec(
+        Records.newRecord(ContainerLaunchContext.class));
+    appContext.setUnmanagedAM(true);
+    yarnClient.submitApplication(appContext);
+
+    // wait for app to start
+    GenericTestUtils.waitFor(new Supplier<Boolean>() {
+      @Override
+      public Boolean get() {
+        try {
+          ApplicationReport report = yarnClient.getApplicationReport(appId);
+          if (report.getYarnApplicationState() == YarnApplicationState.ACCEPTED) {
+            RMAppAttempt appAttempt =
+                cluster.getResourceManager()
+                  .getRMContext().getRMApps().get(appId).getCurrentAppAttempt();
+            if (appAttempt.getAppAttemptState() == RMAppAttemptState.LAUNCHED) {
+              return true;
+            }
+          }
+        } catch (Exception e) {
+          LOG.info(StringUtils.stringifyException(e));
+          Assert.fail("Exception while getting application state.");
+        }
+        return false;
+      }
+    }, 1000, 30000);
+
+    RMAppAttempt appAttempt =
+        cluster.getResourceManager()
+            .getRMContext().getRMApps().get(appId).getCurrentAppAttempt();
+    UserGroupInformation.setLoginUser(
+        UserGroupInformation.createRemoteUser(
+            UserGroupInformation.getCurrentUser().getUserName()));
+    UserGroupInformation.getCurrentUser().addToken(appAttempt.getAMRMToken());
     AMRMClient<ContainerRequest> rmClient = AMRMClient.createAMRMClient();
-    rmClient.setNMTokenCache(nmTokenCache);
+    rmClient.setNMTokenCache(new NMTokenCache());
     rmClient.init(conf);
     rmClient.start();
 
@@ -84,11 +151,46 @@ public class TestYARNTracing {
     nmClient.setNMTokenCache(rmClient.getNMTokenCache());
     nmClient.init(conf);
     nmClient.start();
+    rmClient.registerApplicationMaster("TestNMTracing", 10000, "");
 
-    ContainerId containerId =
-        ContainerId.fromString("container_1427562100000_0001_01_000001");
-    NodeId nodeId = cluster.getNodeManager(0).getNMContext().getNodeId();
-    nmClient.getContainerStatus(containerId, nodeId);
+    List<NodeReport> nodeReports = yarnClient.getNodeReports(NodeState.RUNNING);
+    String node = nodeReports.get(0).getNodeId().getHost();
+    String rack = nodeReports.get(0).getRackName();
+    String[] nodes = new String[] {node};
+    String[] racks = new String[] {rack};
+    Resource capability = Resource.newInstance(1024, 0);
+    Priority priority = Priority.newInstance(0);
+
+    rmClient.addContainerRequest(
+        new ContainerRequest(capability, nodes, racks, priority));
+    Container container = null;
+    for (int i = 5; i > 0; i--) {
+      AllocateResponse allocResponse = rmClient.allocate(0.1f);
+      if (allocResponse.getAllocatedContainers().size() > 0) {
+        container = allocResponse.getAllocatedContainers().get(0);
+        break;
+      }
+      Thread.sleep(1000);
+    }
+    if (container == null) {
+      Assert.fail("Failed to allocate containers.");
+    }
+
+    try (TraceScope ts = Trace.startSpan("testNMTracing", Sampler.ALWAYS)) {
+      nmClient.getContainerStatus(container.getId(), container.getNodeId());
+      // getContainerStatus called before startContainer is expected
+      // to throw exception. It is not problem here because this test
+      // just checks whether server side tracing span is get or not.
+      Assert.fail("Exception is expected");
+    } catch (YarnException e) {
+      LOG.info(StringUtils.stringifyException(e));
+    }
+    String[] expectedSpanNames = {
+      "testNMTracing",
+      "ContainerManagementProtocolPB#getContainerStatuses",
+      "ContainerManagementProtocolService#getContainerStatuses"
+    };
+    SetSpanReceiver.assertSpanNamesFound(expectedSpanNames);
   }
 
   @Test
