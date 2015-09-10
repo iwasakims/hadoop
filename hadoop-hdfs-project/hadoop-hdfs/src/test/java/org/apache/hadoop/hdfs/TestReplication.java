@@ -17,6 +17,8 @@
  */
 package org.apache.hadoop.hdfs;
 
+import static org.apache.hadoop.test.MetricsAsserts.assertCounter;
+import static org.apache.hadoop.test.MetricsAsserts.getMetrics;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
@@ -40,6 +42,7 @@ import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.BlockLocation;
+import org.apache.hadoop.fs.FSDataInputStream;
 import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
@@ -51,8 +54,16 @@ import org.apache.hadoop.hdfs.protocol.HdfsConstants.DatanodeReportType;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
+import org.apache.hadoop.hdfs.server.blockmanagement.BlockManagerTestUtil;
+import org.apache.hadoop.hdfs.server.datanode.DataNode;
+import org.apache.hadoop.hdfs.server.datanode.DataNodeTestUtils;
 import org.apache.hadoop.hdfs.server.datanode.SimulatedFSDataset;
+import org.apache.hadoop.io.IOUtils;
+import org.apache.hadoop.metrics2.MetricsRecordBuilder;
+import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.util.Time;
+import org.apache.log4j.Level;
 import org.junit.Test;
 
 /**
@@ -68,7 +79,10 @@ public class TestReplication {
   private static final int numDatanodes = racks.length;
   private static final Log LOG = LogFactory.getLog(
                                        "org.apache.hadoop.hdfs.TestReplication");
-  
+  static {
+    GenericTestUtils.setLogLevel(BlockManager.LOG, Level.ALL);
+    GenericTestUtils.setLogLevel(BlockManager.blockLog, Level.ALL);
+  }
   /* check if there are at least two nodes are on the same rack */
   private void checkFile(FileSystem fileSys, Path name, int repl)
     throws IOException {
@@ -278,8 +292,16 @@ public class TestReplication {
                                        ClientProtocol namenode,
                                        int expected, long maxWaitSec) 
                                        throws IOException {
+    waitForBlockReplication(filename, namenode, expected, maxWaitSec, false, false);
+  }
+
+  private void waitForBlockReplication(String filename,
+      ClientProtocol namenode,
+      int expected, long maxWaitSec,
+      boolean isUnderConstruction, boolean noOverReplication)
+      throws IOException {
     long start = Time.monotonicNow();
-    
+
     //wait for all the blocks to be replicated;
     LOG.info("Checking for block replication for " + filename);
     while (true) {
@@ -290,7 +312,13 @@ public class TestReplication {
       for (Iterator<LocatedBlock> iter = blocks.getLocatedBlocks().iterator();
            iter.hasNext();) {
         LocatedBlock block = iter.next();
+        if (isUnderConstruction && !iter.hasNext()) {
+          break; // do not check the last block
+        }
         int actual = block.getLocations().length;
+        if (noOverReplication) {
+          assertTrue(actual <= expected);
+        }
         if ( actual < expected ) {
           LOG.info("Not enough replicas for " + block.getBlock()
               + " yet. Expecting " + expected + ", got " + actual + ".");
@@ -558,6 +586,150 @@ public class TestReplication {
       if (cluster != null) {
         cluster.shutdown();
       }
+    }
+  }
+
+
+  /**
+   * This test makes sure that, when a file is closed before all
+   * of the datanodes in the pipeline have reported their replicas,
+   * the NameNode doesn't consider the block under-replicated too
+   * aggressively. It is a regression test for HDFS-1172.
+   */
+  @Test(timeout=60000)
+  public void testNoExtraReplicationWhenBlockReceivedIsLate()
+      throws Exception {
+    LOG.info("Test block replication when blockReceived is late" );
+    MiniDFSCluster cluster = null;
+    final short numDataNodes = 6;
+    final short replication = 3;
+    String testFile = "/replication-test-file";
+    Path testPath = new Path(testFile);
+
+    try {
+      Configuration conf = new Configuration();
+      conf.setInt(DFSConfigKeys.DFS_BLOCK_SIZE_KEY, 1024);
+      cluster = new MiniDFSCluster.Builder(conf).numDataNodes(numDataNodes).build();
+      cluster.waitActive();
+
+      // Artificially delay blockReceived() calls coming from the DataNodes.
+      // This ensures that the client's completeFile() RPC will get to the
+      // NN before some of the replicas are reported.
+      for (DataNode dn : cluster.getDataNodes()) {
+        DataNodeTestUtils.setBlockReceivedDelayForTests(dn, 10000);
+      }
+
+      FileSystem fs = cluster.getFileSystem();
+      // Create and close a small file with two blocks
+      DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
+      // Initially, should have some pending replication since the close()
+      // should happen faster than the blockReceived calls
+//      assertTrue(pendingReplicationCount(cluster) > 0);
+
+      // Wait until there is nothing pending
+      waitForNoPendingReplication(cluster);
+
+      // Check that none of the datanodes have serviced a replication request.
+      // i.e. that the NameNode didn't schedule any spurious replication.
+      assertNoReplicationWasPerformed(cluster);
+    } finally {
+      if (cluster != null) {
+        cluster.shutdown();
+      }
+    }
+  }
+
+  /**
+   * This test makes sure that, if a file is under construction, blocks
+   * in the middle of that file are properly re-replicated if they
+   * become corrupt.
+   */
+  @Test(timeout=60000)
+  public void testReplicationWhileUnderConstruction()
+      throws Exception {
+    LOG.info("Test block replication in under construction" );
+    MiniDFSCluster cluster = null;
+    final short numDataNodes = 6;
+    final short replication = 3;
+    String testFile = "/replication-test-file";
+    Path testPath = new Path(testFile);
+    FSDataOutputStream stm = null;
+    try {
+      Configuration conf = new Configuration();
+      cluster = new MiniDFSCluster.Builder(conf).numDataNodes(numDataNodes).build();
+      cluster.waitActive();
+
+      FileSystem fs = cluster.getFileSystem();
+
+      stm = AppendTestUtil.createFile(fs, testPath, replication);
+
+      // Write a full block
+      byte[] buffer = AppendTestUtil.initBuffer(AppendTestUtil.BLOCK_SIZE);
+      stm.write(buffer); // block 1
+      stm.write(buffer); // block 2
+      stm.write(buffer, 0, 1); // start block 3
+      stm.hflush(); // make sure blocks are persisted, etc
+
+      // Everything should be fully replicated
+      waitForBlockReplication(testFile, cluster.getNameNodeRpc(), replication, 30000, true, true);
+
+      // Check that none of the datanodes have serviced a replication request.
+      // i.e. that the NameNode didn't schedule any spurious replication.
+      assertNoReplicationWasPerformed(cluster);
+
+      // Mark one the blocks corrupt
+      List<LocatedBlock> blocks;
+      FSDataInputStream in = fs.open(testPath);
+      try {
+        blocks = DFSTestUtil.getAllBlocks(in);
+      } finally {
+        in.close();
+      }
+
+      LocatedBlock lb = blocks.get(0);
+      LocatedBlock lbOneReplica = new LocatedBlock(lb.getBlock(),
+          new DatanodeInfo[] { lb.getLocations()[0] });
+
+      cluster.getNameNodeRpc().reportBadBlocks(
+          new LocatedBlock[] { lbOneReplica });
+
+      // Everything should be fully replicated
+      waitForBlockReplication(testFile, cluster.getNameNodeRpc(), replication, 30000, true, true);
+    } finally {
+      if (stm != null) {
+        IOUtils.closeStream(stm);
+      }
+      if (cluster != null) {
+        cluster.shutdown();
+      }
+    }
+  }
+
+
+  private long pendingReplicationCount(MiniDFSCluster cluster) {
+    BlockManager bm = cluster.getNameNode().getNamesystem().getBlockManager();
+    BlockManagerTestUtil.updateState(bm);
+
+    return bm.getPendingReplicationBlocksCount();
+  }
+
+  private void waitForNoPendingReplication(MiniDFSCluster cluster)
+      throws InterruptedException {
+    while (true) {
+      long pending = pendingReplicationCount(cluster);
+      if (pending == 0) return;
+
+      Thread.sleep(1000);
+      LOG.info("Waiting for " + pending + " pending replications to complete.");
+    }
+  }
+
+  private void assertNoReplicationWasPerformed(MiniDFSCluster cluster) {
+    for (DataNode dn : cluster.getDataNodes()) {
+      MetricsRecordBuilder rb = getMetrics(dn.getMetrics().name());
+      // Expect 2 packets, 1 for the 1 byte read, 1 for the empty packet
+      // signaling the end of the block
+      assertCounter("BlocksReplicated", 0L, rb);
     }
   }
 }
