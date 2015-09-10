@@ -35,6 +35,7 @@ import com.google.common.base.Joiner;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.ha.HAServiceProtocol.HAServiceState;
+import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.client.BlockReportOptions;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
@@ -117,6 +118,12 @@ class BPServiceActor implements Runnable {
   private DatanodeRegistration bpRegistration;
   final LinkedList<BPServiceActorAction> bpThreadQueue 
       = new LinkedList<BPServiceActorAction>();
+
+  /**
+   * Testing hook that allows tests to delay the sending of blockReceived
+   * RPCs to the namenode. This can help find bugs in append.
+   */
+  int blockReceivedDelayForTests = 0;
 
   BPServiceActor(InetSocketAddress nnAddr, BPOfferService bpos) {
     this.bpos = bpos;
@@ -262,6 +269,7 @@ class BPServiceActor implements Runnable {
     boolean success = false;
     final long startTime = monotonicNow();
     try {
+      delayBeforeBlockReceivedForTests();
       bpNamenode.blockReceivedAndDeleted(bpRegistration,
           bpos.getBlockPoolId(),
           reports.toArray(new StorageReceivedDeletedBlocks[reports.size()]));
@@ -398,6 +406,31 @@ class BPServiceActor implements Runnable {
         }
       }
     }
+  }
+
+  /**
+   * Triggered by test code: sleeps for a random amount of time
+   * before sending blockReceived. This simulates a condition
+   * seen on real clusters where some datanodes report their
+   * new blocks more slowly than others.
+   */
+  private void delayBeforeBlockReceivedForTests() {
+    if (blockReceivedDelayForTests > 0) {
+      try {
+        long sleepFor = (long) DFSUtil.getSecureRandom().nextInt(
+            blockReceivedDelayForTests);
+        LOG.info("BPOfferService " + this + " sleeping for " +
+            "artificial delay: " + sleepFor + " ms");
+        Thread.sleep(sleepFor);
+      } catch (InterruptedException ie) {
+        Thread.currentThread().interrupt();
+      }
+    }
+  }
+
+  @VisibleForTesting
+  public void setBlockReceivedDelayForTests(int delay) {
+    blockReceivedDelayForTests = delay;
   }
 
   @VisibleForTesting
