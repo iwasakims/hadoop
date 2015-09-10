@@ -27,6 +27,8 @@ HDFS Rolling Upgrade
         * [Upgrading Non-HA Clusters](#Upgrading_Non-HA_Clusters)
 * [Downgrade and Rollback](#Downgrade_and_Rollback)
 * [Downgrade](#Downgrade)
+    * [Downgrade without Downtime](#Downgrade_without_Downtime)
+    * [Downgrade with Downtime](#Downgrade_with_Downtime)
 * [Rollback](#Rollback)
 * [Commands and Startup Options for Rolling Upgrade](#Commands_and_Startup_Options_for_Rolling_Upgrade)
     * [DFSAdmin Commands](#DFSAdmin_Commands)
@@ -175,11 +177,14 @@ A newer release is downgradable to the pre-upgrade release
 only if both the namenode layout version and the datenode layout version
 are not changed between these two releases.
 
+
+### Downgrade without Downtime
+
 In a HA cluster,
 when a rolling upgrade from an old software release to a new software release is in progress,
 it is possible to downgrade, in a rolling fashion, the upgraded machines back to the old software release.
 Same as before, suppose *NN1* and *NN2* are respectively in active and standby states.
-Below are the steps for rolling downgrade without downtime:
+Below are the steps for rolling downgrade:
 
 1. Downgrade *DNs*
     1. Choose a small subset of datanodes (e.g. all datanodes under a particular rack).
@@ -192,11 +197,13 @@ Below are the steps for rolling downgrade without downtime:
     1. Repeat the above steps until all upgraded datanodes in the cluster are downgraded.
 1. Downgrade Active and Standby *NNs*
     1. Shutdown and downgrade *NN2*.
-    1. Start *NN2* as standby normally.
+    1. Start *NN2* as standby normally. (Note that it is incorrect to use the
+       "[`-rollingUpgrade downgrade`](#namenode_-rollingUpgrade)" option here.)
     1. Failover from *NN1* to *NN2*
        so that *NN2* becomes active and *NN1* becomes standby.
     1. Shutdown and upgrade *NN1*.
-    1. Start *NN1* as standby normally.
+    1. Start *NN1* as standby normally. (Note that it is incorrect to use the
+       "[`-rollingUpgrade downgrade`](#namenode_-rollingUpgrade)" option here.)
 1. Finalize Rolling Downgrade
     1. Run "[`hdfs dfsadmin -rollingUpgrade finalize`](#dfsadmin_-rollingUpgrade)"
        to finalize the rolling downgrade.
@@ -204,6 +211,19 @@ Below are the steps for rolling downgrade without downtime:
 Note that the datanodes must be downgraded before downgrading the namenodes
 since protocols may be changed in a backward compatible manner but not forward compatible,
 i.e. old datanodes can talk to the new namenodes but not vice versa.
+
+
+### Downgrade with Downtime
+
+Administrator may choose to first shutdown the cluster and then downgrade it.
+The following are the steps:
+
+1. Shutdown all *NNs* and *DNs*.
+1. Restore the pre-upgrade release in all machines.
+1. Start *NNs* with the
+   "[`-rollingUpgrade downgrade`](#namenode_-rollingUpgrade)" option.
+1. Start *DNs* normally.
+
 
 
 Rollback
@@ -277,7 +297,7 @@ command can be used for checking if the datanode shutdown is completed.
 
 #### `namenode -rollingUpgrade`
 
-    hdfs namenode -rollingUpgrade <rollback|started>
+    hdfs namenode -rollingUpgrade <downgrade|rollback|started>
 
 When a rolling upgrade is in progress,
 the `-rollingUpgrade` namenode startup option is used to specify
@@ -286,8 +306,6 @@ various rolling upgrade options.
 * Options:
 
     | --- | --- |
+    | `downgrade` | Restores the namenode back to the pre-upgrade release and preserves the user data. |
     | `rollback` | Restores the namenode back to the pre-upgrade release but also reverts the user data back to the pre-upgrade state. |
     | `started` | Specifies a rolling upgrade already started so that the namenode should allow image directories with different layout versions during startup. |
-
-**WARN: downgrade options is obsolete.**
-It is not necessary to start namenode with downgrade options explicitly.
