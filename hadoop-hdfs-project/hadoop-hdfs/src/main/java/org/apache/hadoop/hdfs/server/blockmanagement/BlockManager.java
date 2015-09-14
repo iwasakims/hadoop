@@ -704,6 +704,22 @@ public class BlockManager implements BlockStatsMXBean {
           "Cannot complete block: block has not been COMMITTED by the client");
     }
 
+    DatanodeStorageInfo[] expectedStorages =
+        curBlock.getUnderConstructionFeature().getExpectedStorageLocations();
+    int pending = expectedStorages.length - curBlock.numNodes();
+    if (pending > 0) {
+      DatanodeDescriptor[] pendingDataNoodes = new DatanodeDescriptor[pending];
+      int i = 0;
+      for (DatanodeStorageInfo storage : expectedStorages) {
+        DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
+        if (curBlock.findStorageInfo(dnd) == null) {
+          assert i < pending : "block has unexpected storage locations.";
+          pendingDataNoodes[i++] = dnd;
+        }
+      }
+      pendingReplications.increment(curBlock, pendingDataNoodes);
+    }
+
     curBlock.convertToCompleteBlock();
     // Since safe-mode only counts complete blocks, and we now have
     // one more complete block, we need to adjust the total up, and

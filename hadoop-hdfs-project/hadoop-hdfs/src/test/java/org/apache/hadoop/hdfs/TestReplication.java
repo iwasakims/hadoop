@@ -624,7 +624,7 @@ public class TestReplication {
       DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
       // Initially, should have some pending replication since the close()
       // should happen faster than the blockReceived calls
-//      assertTrue(pendingReplicationCount(cluster) > 0);
+      assertTrue(pendingReplicationCount(cluster) > 0);
 
       // Wait until there is nothing pending
       waitForNoPendingReplication(cluster);
@@ -685,11 +685,9 @@ public class TestReplication {
       } finally {
         in.close();
       }
-
       LocatedBlock lb = blocks.get(0);
       LocatedBlock lbOneReplica = new LocatedBlock(lb.getBlock(),
           new DatanodeInfo[] { lb.getLocations()[0] });
-
       cluster.getNameNodeRpc().reportBadBlocks(
           new LocatedBlock[] { lbOneReplica });
 
@@ -708,6 +706,7 @@ public class TestReplication {
 
   private long pendingReplicationCount(MiniDFSCluster cluster) {
     BlockManager bm = cluster.getNameNode().getNamesystem().getBlockManager();
+    BlockManagerTestUtil.computeAllPendingWork(bm);
     BlockManagerTestUtil.updateState(bm);
 
     return bm.getPendingReplicationBlocksCount();
