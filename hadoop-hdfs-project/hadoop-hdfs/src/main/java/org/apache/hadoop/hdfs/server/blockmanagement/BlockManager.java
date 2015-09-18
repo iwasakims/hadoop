@@ -687,10 +687,9 @@ public class BlockManager implements BlockStatsMXBean {
       DatanodeDescriptor[] pendingDataNoodes = new DatanodeDescriptor[pending];
       int i = 0;
       for (DatanodeStorageInfo storage : expectedStorages) {
-        DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
-        if (curBlock.findStorageInfo(dnd) == null) {
+        if (curBlock.findStorageInfo(storage) == -1) {
           assert i < pending : "block has unexpected storage locations.";
-          pendingDataNoodes[i++] = dnd;
+          pendingDataNoodes[i++] = storage.getDatanodeDescriptor();
         }
       }
       pendingReplications.increment(curBlock, pendingDataNoodes);
