@@ -3781,8 +3781,9 @@ public class BlockManager implements BlockStatsMXBean {
     for (BlockInfo block : bc.getBlocks()) {
       short expected = getExpectedReplicaNum(block);
       final NumberReplicas n = countNodes(block);
-      if (isNeededReplication(block, n.liveReplicas())) {
-        neededReplications.add(block, n.liveReplicas(),
+      final int pending = pendingReplications.getNumReplicas(block);
+      if (!hasEnoughEffectiveReplicas(block, n, pending, expected)) {
+        neededReplications.add(block, n.liveReplicas() + pending,
             n.decommissionedAndDecommissioning(), expected);
       } else if (n.liveReplicas() > expected) {
         processOverReplicatedBlock(block, expected, null, null);
