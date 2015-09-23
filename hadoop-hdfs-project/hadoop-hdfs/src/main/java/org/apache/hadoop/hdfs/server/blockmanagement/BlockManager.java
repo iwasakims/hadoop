@@ -704,8 +704,8 @@ public class BlockManager implements BlockStatsMXBean {
           "Cannot complete block: block has not been COMMITTED by the client");
     }
 
-    DatanodeStorageInfo[] expectedStorages = curBlock.getUnderConstructionFeature()
-        .getExpectedStorageLocations();
+    DatanodeStorageInfo[] expectedStorages =
+        curBlock.getUnderConstructionFeature().getExpectedStorageLocations();
     if (curBlock.numNodes() < expectedStorages.length) {
       for (DatanodeStorageInfo storage : expectedStorages) {
         DatanodeDescriptor dnd = storage.getDatanodeDescriptor();

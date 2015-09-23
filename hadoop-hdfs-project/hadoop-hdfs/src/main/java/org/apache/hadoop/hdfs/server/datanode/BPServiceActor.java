@@ -122,7 +122,7 @@ class BPServiceActor implements Runnable {
    * Testing hook that allows tests to delay the sending of blockReceived
    * RPCs to the namenode. This can help find bugs in append.
    */
-  int blockReceivedDelayForTests = 0;
+  private volatile int blockReceivedDelayForTests = 0;
 
   BPServiceActor(InetSocketAddress nnAddr, BPOfferService bpos) {
     this.bpos = bpos;
@@ -426,7 +426,7 @@ class BPServiceActor implements Runnable {
   }
 
   @VisibleForTesting
-  public void setBlockReceivedDelayForTests(int delay) {
+  void setBlockReceivedDelayForTests(int delay) {
     blockReceivedDelayForTests = delay;
   }
 
