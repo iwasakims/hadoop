@@ -601,7 +601,7 @@ public class TestReplication {
       throws Exception {
     LOG.info("Test block replication when blockReceived is late" );
     MiniDFSCluster cluster = null;
-    final short numDataNodes = 6;
+    final short numDataNodes = 3;
     final short replication = 3;
     String testFile = "/replication-test-file";
     Path testPath = new Path(testFile);
@@ -612,18 +612,17 @@ public class TestReplication {
       cluster = new MiniDFSCluster.Builder(conf).numDataNodes(numDataNodes).build();
       cluster.waitActive();
 
-      // Artificially delay blockReceived() calls coming from the DataNodes.
-      // This ensures that the client's completeFile() RPC will get to the
+      // Artificially delay blockReceived() calls coming from 1 DataNode.
+      // this ensures that the client's completeFile() RPC will get to the
       // NN before some of the replicas are reported.
-      for (DataNode dn : cluster.getDataNodes()) {
-        DataNodeTestUtils.setBlockReceivedDelayForTests(dn, 10000);
-      }
+      DataNode dn = cluster.getDataNodes().get(0);
+      DataNodeTestUtils.setBlockReceivedDelayForTests(dn, 10000);
 
       FileSystem fs = cluster.getFileSystem();
       // Create and close a small file with two blocks
       DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
       // Initially, should have some pending replication since the close()
-      // should happen faster than the blockReceived calls
+      // should earlier than at lease one of the blockReceivedAndDeleted calls
       assertTrue(pendingReplicationCount(cluster) > 0);
 
       // Wait until there is nothing pending
