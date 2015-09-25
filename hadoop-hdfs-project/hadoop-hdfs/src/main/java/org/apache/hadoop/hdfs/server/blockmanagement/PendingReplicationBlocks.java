@@ -77,7 +77,7 @@ class PendingReplicationBlocks {
    * @param block The corresponding block
    * @param targets The DataNodes where replicas of the block should be placed
    */
-  void increment(BlockInfo block, DatanodeDescriptor[] targets) {
+  void increment(BlockInfo block, DatanodeDescriptor... targets) {
     synchronized (pendingReplications) {
       PendingBlockInfo found = pendingReplications.get(block);
       if (found == null) {
@@ -177,7 +177,7 @@ class PendingReplicationBlocks {
     private long timeStamp;
     private final List<DatanodeDescriptor> targets;
 
-    PendingBlockInfo(DatanodeDescriptor[] targets) {
+    PendingBlockInfo(DatanodeDescriptor... targets) {
       this.timeStamp = monotonicNow();
       this.targets = targets == null ? new ArrayList<DatanodeDescriptor>()
           : new ArrayList<>(Arrays.asList(targets));

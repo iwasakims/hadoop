@@ -35,7 +35,6 @@ import com.google.common.base.Joiner;
 import org.apache.commons.logging.Log;
 import org.apache.hadoop.classification.InterfaceAudience;
 import org.apache.hadoop.ha.HAServiceProtocol.HAServiceState;
-import org.apache.hadoop.hdfs.DFSUtil;
 import org.apache.hadoop.hdfs.client.BlockReportOptions;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
@@ -417,11 +416,9 @@ class BPServiceActor implements Runnable {
   private void delayBeforeBlockReceivedForTests() {
     if (blockReceivedDelayForTests > 0) {
       try {
-        long sleepFor = (long) DFSUtil.getSecureRandom().nextInt(
-            blockReceivedDelayForTests);
         LOG.info("BPOfferService " + this + " sleeping for " +
-            "artificial delay: " + sleepFor + " ms");
-        Thread.sleep(sleepFor);
+            "artificial delay: " + blockReceivedDelayForTests + " ms");
+        Thread.sleep(blockReceivedDelayForTests);
       } catch (InterruptedException ie) {
         Thread.currentThread().interrupt();
       }
