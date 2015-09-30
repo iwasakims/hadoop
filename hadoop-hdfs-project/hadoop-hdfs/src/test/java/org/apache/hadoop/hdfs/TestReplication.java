@@ -641,7 +641,7 @@ public class TestReplication {
           public Boolean get() {
             return pendingReplicationCount(bm) == 0;
           }
-        }, 1000, blockReceivedDelay * 5);
+        }, 1000, blockReceivedDelay * 10);
       } catch (TimeoutException e) {
         fail("timed out while waiting for no pending replication.");
       }

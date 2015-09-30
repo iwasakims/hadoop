@@ -677,10 +677,36 @@ public class BlockManager implements BlockStatsMXBean {
       return false; // already completed (e.g. by syncBlock)
     
     final boolean b = commitBlock(lastBlock, commitBlock);
-      if (hasMinStorage(lastBlock)) {
+    if (hasMinStorage(lastBlock)) {
+      addExpectedReplicasToPending(lastBlock);
       completeBlock(lastBlock, false);
     }
     return b;
+  }
+
+  /**
+   * If IBR is not sent from expected locations yet, add the datanodes to
+   * pendingReplications in order to keep ReplicationMonitor from scheduling
+   * the block.
+   */
+  private void addExpectedReplicasToPending(BlockInfo lastBlock) {
+    DatanodeStorageInfo[] expectedStorages =
+        lastBlock.getUnderConstructionFeature().getExpectedStorageLocations();
+    int pending = expectedStorages.length - lastBlock.numNodes();
+    if (pending > 0) {
+      DatanodeDescriptor[] pendingNodes = new DatanodeDescriptor[pending];
+      int i = 0;
+      for (DatanodeStorageInfo storage : expectedStorages) {
+        DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
+         if (lastBlock.findStorageInfo(dnd) == null) {
+           pendingNodes[i++] = dnd;
+         }
+         if (i >= pending) {
+           break;
+         }
+      }
+      pendingReplications.increment(lastBlock, pendingNodes);
+    }
   }
 
   /**
@@ -702,17 +728,6 @@ public class BlockManager implements BlockStatsMXBean {
     if (!force && curBlock.getBlockUCState() != BlockUCState.COMMITTED) {
       throw new IOException(
           "Cannot complete block: block has not been COMMITTED by the client");
-    }
-
-    DatanodeStorageInfo[] expectedStorages =
-        curBlock.getUnderConstructionFeature().getExpectedStorageLocations();
-    if (curBlock.numNodes() < expectedStorages.length) {
-      for (DatanodeStorageInfo storage : expectedStorages) {
-        DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
-        if (curBlock.findStorageInfo(dnd) == null) {
-          pendingReplications.increment(curBlock, dnd);
-        }
-      }
     }
 
     curBlock.convertToCompleteBlock();
