@@ -23,6 +23,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
+import com.google.common.base.Supplier;
 
 import java.io.File;
 import java.io.IOException;
@@ -600,33 +603,48 @@ public class TestReplication {
   public void testNoExtraReplicationWhenBlockReceivedIsLate()
       throws Exception {
     LOG.info("Test block replication when blockReceived is late" );
-    MiniDFSCluster cluster = null;
     final short numDataNodes = 3;
     final short replication = 3;
-    String testFile = "/replication-test-file";
-    Path testPath = new Path(testFile);
+    final Configuration conf = new Configuration();
+        conf.setInt(DFSConfigKeys.DFS_BLOCK_SIZE_KEY, 1024);
+    final MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf)
+        .numDataNodes(numDataNodes).build();
+    final String testFile = "/replication-test-file";
+    final Path testPath = new Path(testFile);
+    final BlockManager bm =
+        cluster.getNameNode().getNamesystem().getBlockManager();
 
     try {
-      Configuration conf = new Configuration();
-      conf.setInt(DFSConfigKeys.DFS_BLOCK_SIZE_KEY, 1024);
-      cluster = new MiniDFSCluster.Builder(conf).numDataNodes(numDataNodes).build();
       cluster.waitActive();
 
       // Artificially delay blockReceived() calls coming from 1 DataNode.
       // this ensures that the client's completeFile() RPC will get to the
       // NN before some of the replicas are reported.
       DataNode dn = cluster.getDataNodes().get(0);
-      DataNodeTestUtils.setBlockReceivedDelayForTests(dn, 10000);
+      int blockReceivedDelay = 3000;
+      DataNodeTestUtils.setBlockReceivedDelayForTests(dn, blockReceivedDelay);
 
       FileSystem fs = cluster.getFileSystem();
       // Create and close a small file with two blocks
       DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
       // Initially, should have some pending replication since the close()
       // should earlier than at lease one of the blockReceivedAndDeleted calls
-      assertTrue(pendingReplicationCount(cluster) > 0);
+
+      // schedule replication via BlockManager#computeReplicationWork
+      BlockManagerTestUtil.computeAllPendingWork(bm);
+      assertTrue(pendingReplicationCount(bm) > 0);
 
       // Wait until there is nothing pending
-      waitForNoPendingReplication(cluster);
+      try {
+        GenericTestUtils.waitFor(new Supplier<Boolean>() {
+          @Override
+          public Boolean get() {
+            return pendingReplicationCount(bm) == 0;
+          }
+        }, 1000, blockReceivedDelay * 5);
+      } catch (TimeoutException e) {
+        fail("timed out while waiting for no pending replication.");
+      }
 
       // Check that none of the datanodes have serviced a replication request.
       // i.e. that the NameNode didn't schedule any spurious replication.
@@ -702,24 +720,9 @@ public class TestReplication {
     }
   }
 
-
-  private long pendingReplicationCount(MiniDFSCluster cluster) {
-    BlockManager bm = cluster.getNameNode().getNamesystem().getBlockManager();
-    BlockManagerTestUtil.computeAllPendingWork(bm);
+  private long pendingReplicationCount(BlockManager bm) {
     BlockManagerTestUtil.updateState(bm);
-
     return bm.getPendingReplicationBlocksCount();
-  }
-
-  private void waitForNoPendingReplication(MiniDFSCluster cluster)
-      throws InterruptedException {
-    while (true) {
-      long pending = pendingReplicationCount(cluster);
-      if (pending == 0) return;
-
-      Thread.sleep(1000);
-      LOG.info("Waiting for " + pending + " pending replications to complete.");
-    }
   }
 
   private void assertNoReplicationWasPerformed(MiniDFSCluster cluster) {
