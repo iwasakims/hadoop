@@ -662,12 +662,13 @@ public class BlockManager implements BlockStatsMXBean {
    * 
    * @param bc block collection
    * @param commitBlock - contains client reported block length and generation
+   * @param updatePending should or not add expected replicas to pending queue
    * @return true if the last block is changed to committed state.
    * @throws IOException if the block does not have at least a minimal number
    * of replicas reported from data-nodes.
    */
   public boolean commitOrCompleteLastBlock(BlockCollection bc,
-      Block commitBlock, boolean completeFile) throws IOException {
+      Block commitBlock, boolean updatePending) throws IOException {
     if(commitBlock == null)
       return false; // not committing, this is a block allocation retry
     BlockInfo lastBlock = bc.getLastBlock();
@@ -678,7 +679,7 @@ public class BlockManager implements BlockStatsMXBean {
     
     final boolean b = commitBlock(lastBlock, commitBlock);
     if (hasMinStorage(lastBlock)) {
-      if (completeFile) {
+      if (updatePending) {
         addExpectedReplicasToPending(lastBlock);
       }
       completeBlock(lastBlock, false);
@@ -700,12 +701,12 @@ public class BlockManager implements BlockStatsMXBean {
       int i = 0;
       for (DatanodeStorageInfo storage : expectedStorages) {
         DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
-         if (lastBlock.findStorageInfo(dnd) == null) {
-           pendingNodes[i++] = dnd;
-         }
-         if (i >= pending) {
-           break;
-         }
+        if (lastBlock.findStorageInfo(dnd) == null) {
+          pendingNodes[i++] = dnd;
+        }
+        if (i >= pending) {
+          break;
+        }
       }
       pendingReplications.increment(lastBlock, pendingNodes);
     }

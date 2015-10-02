@@ -3173,9 +3173,8 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
       final Block commitBlock, final boolean completeFile) throws IOException {
     assert hasWriteLock();
     Preconditions.checkArgument(fileINode.isUnderConstruction());
-    if (!blockManager.commitOrCompleteLastBlock(fileINode,
-                                                commitBlock,
-                                                completeFile)) {
+    if (!blockManager.commitOrCompleteLastBlock(
+            fileINode, commitBlock, !fileINode.isStriped() && completeFile)) {
       return;
     }
 

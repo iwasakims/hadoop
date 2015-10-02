@@ -652,7 +652,7 @@ public class TestReplication {
       for (DataNode d : cluster.getDataNodes()) {
         DataNodeTestUtils.triggerHeartbeat(d);
       }
-      
+  
       // Wait until there is nothing pending
       try {
         GenericTestUtils.waitFor(new Supplier<Boolean>() {
