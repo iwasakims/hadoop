@@ -648,11 +648,11 @@ public class TestReplication {
       delayer.proceed();
       delayer.waitForResult();
 
-      // make sure DataNodes do replication work if exists 
+      // make sure DataNodes do replication work if exists
       for (DataNode d : cluster.getDataNodes()) {
         DataNodeTestUtils.triggerHeartbeat(d);
       }
-  
+
       // Wait until there is nothing pending
       try {
         GenericTestUtils.waitFor(new Supplier<Boolean>() {
