@@ -634,7 +634,7 @@ public class TestReplication {
 
       FileSystem fs = cluster.getFileSystem();
       // Create and close a small file with two blocks
-      DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
+      DFSTestUtil.createFile(fs, testPath, 1024, replication, 0);
 
       // schedule replication via BlockManager#computeReplicationWork
       BlockManagerTestUtil.computeAllPendingWork(bm);
@@ -647,6 +647,11 @@ public class TestReplication {
       delayer.waitForCall();
       delayer.proceed();
       delayer.waitForResult();
+
+      // make sure DataNodes do replication work if exists 
+      for (DataNode d : cluster.getDataNodes()) {
+        DataNodeTestUtils.triggerHeartbeat(d);
+      }
       
       // Wait until there is nothing pending
       try {
