@@ -678,7 +678,7 @@ public class BlockManager implements BlockStatsMXBean {
     
     final boolean b = commitBlock(lastBlock, commitBlock);
     if (hasMinStorage(lastBlock)) {
-      if (!bc.isStriped()) {
+      if (b && !bc.isStriped()) {
         addExpectedReplicasToPending(lastBlock);
       }
       completeBlock(lastBlock, false);
