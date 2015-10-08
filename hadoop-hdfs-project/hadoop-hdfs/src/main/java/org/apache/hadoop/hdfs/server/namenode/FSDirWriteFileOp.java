@@ -261,7 +261,7 @@ class FSDirWriteFileOp {
 
     // commit the last block and complete it if it has minimum replicas
     fsn.commitOrCompleteLastBlock(pendingFile, fileState.iip,
-                                  ExtendedBlock.getLocalBlock(previous));
+                                  ExtendedBlock.getLocalBlock(previous), false);
 
     // allocate new block, record block locations in INode.
     final boolean isStriped = pendingFile.isStriped();
@@ -776,7 +776,7 @@ class FSDirWriteFileOp {
     }
 
     // commit the last block and complete it if it has minimum replicas
-    fsn.commitOrCompleteLastBlock(pendingFile, iip, last);
+    fsn.commitOrCompleteLastBlock(pendingFile, iip, last, true);
 
     if (!fsn.checkFileProgress(src, pendingFile, true)) {
       return false;

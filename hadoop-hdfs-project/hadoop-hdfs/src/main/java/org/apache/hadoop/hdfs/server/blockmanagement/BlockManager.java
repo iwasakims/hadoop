@@ -667,7 +667,7 @@ public class BlockManager implements BlockStatsMXBean {
    * of replicas reported from data-nodes.
    */
   public boolean commitOrCompleteLastBlock(BlockCollection bc,
-      Block commitBlock) throws IOException {
+      Block commitBlock, boolean completeFile) throws IOException {
     if(commitBlock == null)
       return false; // not committing, this is a block allocation retry
     BlockInfo lastBlock = bc.getLastBlock();
@@ -678,7 +678,9 @@ public class BlockManager implements BlockStatsMXBean {
     
     final boolean b = commitBlock(lastBlock, commitBlock);
     if (hasMinStorage(lastBlock)) {
-      addExpectedReplicasToPending(lastBlock);
+      if (completeFile) {
+        addExpectedReplicasToPending(lastBlock);
+      }
       completeBlock(lastBlock, false);
     }
     return b;
