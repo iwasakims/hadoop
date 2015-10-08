@@ -71,10 +71,8 @@ import org.apache.hadoop.metrics2.MetricsRecordBuilder;
 import org.apache.hadoop.test.GenericTestUtils;
 import org.apache.hadoop.test.GenericTestUtils.DelayAnswer;
 import org.apache.hadoop.util.Time;
-import org.apache.log4j.Level;
 import org.junit.Test;
 import org.mockito.Mockito;
-
 
 /**
  * This class tests the replication of a DFS file.
@@ -89,10 +87,7 @@ public class TestReplication {
   private static final int numDatanodes = racks.length;
   private static final Log LOG = LogFactory.getLog(
                                        "org.apache.hadoop.hdfs.TestReplication");
-  static {
-    GenericTestUtils.setLogLevel(BlockManager.LOG, Level.ALL);
-    GenericTestUtils.setLogLevel(BlockManager.blockLog, Level.ALL);
-  }
+  
   /* check if there are at least two nodes are on the same rack */
   private void checkFile(FileSystem fileSys, Path name, int repl)
     throws IOException {
@@ -311,7 +306,7 @@ public class TestReplication {
       boolean isUnderConstruction, boolean noOverReplication)
       throws IOException {
     long start = Time.monotonicNow();
-
+    
     //wait for all the blocks to be replicated;
     LOG.info("Checking for block replication for " + filename);
     while (true) {
