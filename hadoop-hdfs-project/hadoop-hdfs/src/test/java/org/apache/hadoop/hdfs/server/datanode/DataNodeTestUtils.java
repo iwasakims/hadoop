@@ -84,14 +84,6 @@ public class DataNodeTestUtils {
     }
   }
 
-  public static void setBlockReceivedDelayForTests(DataNode dn, int delay) {
-    for (BPOfferService bpos : dn.getAllBpOs()) {
-      for(BPServiceActor bpActor : bpos.getBPServiceActors()){
-        bpActor.setBlockReceivedDelayForTests(delay);
-      }
-    }
-  }
-
   public static void triggerDeletionReport(DataNode dn) throws IOException {
     for (BPOfferService bpos : dn.getAllBpOs()) {
       bpos.triggerDeletionReportForTests();

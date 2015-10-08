@@ -50,24 +50,31 @@ import org.apache.hadoop.fs.FSDataOutputStream;
 import org.apache.hadoop.fs.FileStatus;
 import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.Path;
+import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
-import org.apache.hadoop.hdfs.protocol.HdfsConstants.DatanodeReportType;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
-import org.apache.hadoop.hdfs.protocol.Block;
+import org.apache.hadoop.hdfs.protocol.HdfsConstants.DatanodeReportType;
+import org.apache.hadoop.hdfs.protocolPB.DatanodeProtocolClientSideTranslatorPB;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManager;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManagerTestUtil;
 import org.apache.hadoop.hdfs.server.datanode.DataNode;
 import org.apache.hadoop.hdfs.server.datanode.DataNodeTestUtils;
 import org.apache.hadoop.hdfs.server.datanode.SimulatedFSDataset;
+import org.apache.hadoop.hdfs.server.namenode.NameNode;
+import org.apache.hadoop.hdfs.server.protocol.DatanodeRegistration;
+import org.apache.hadoop.hdfs.server.protocol.StorageReceivedDeletedBlocks;
 import org.apache.hadoop.io.IOUtils;
 import org.apache.hadoop.metrics2.MetricsRecordBuilder;
 import org.apache.hadoop.test.GenericTestUtils;
+import org.apache.hadoop.test.GenericTestUtils.DelayAnswer;
 import org.apache.hadoop.util.Time;
 import org.apache.log4j.Level;
 import org.junit.Test;
+import org.mockito.Mockito;
+
 
 /**
  * This class tests the replication of a DFS file.
@@ -617,23 +624,35 @@ public class TestReplication {
     try {
       cluster.waitActive();
 
-      // Artificially delay blockReceived() calls coming from 1 DataNode.
+      // Artificially delay IBR from 1 DataNode.
       // this ensures that the client's completeFile() RPC will get to the
       // NN before some of the replicas are reported.
+      NameNode nn = cluster.getNameNode();
       DataNode dn = cluster.getDataNodes().get(0);
-      int blockReceivedDelay = 3000;
-      DataNodeTestUtils.setBlockReceivedDelayForTests(dn, blockReceivedDelay);
+      DatanodeProtocolClientSideTranslatorPB spy =
+          DataNodeTestUtils.spyOnBposToNN(dn, nn);
+      DelayAnswer delayer = new GenericTestUtils.DelayAnswer(LOG);
+      Mockito.doAnswer(delayer).when(spy).blockReceivedAndDeleted(
+          Mockito.<DatanodeRegistration>anyObject(),
+          Mockito.anyString(),
+          Mockito.<StorageReceivedDeletedBlocks[]>anyObject());
 
       FileSystem fs = cluster.getFileSystem();
       // Create and close a small file with two blocks
       DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
-      // Initially, should have some pending replication since the close()
-      // should earlier than at lease one of the blockReceivedAndDeleted calls
 
       // schedule replication via BlockManager#computeReplicationWork
       BlockManagerTestUtil.computeAllPendingWork(bm);
+
+      // Initially, should have some pending replication since the close()
+      // is earlier than at lease one of the reportReceivedDeletedBlocks calls
       assertTrue(pendingReplicationCount(bm) > 0);
 
+      // release pending IBR.
+      delayer.waitForCall();
+      delayer.proceed();
+      delayer.waitForResult();
+      
       // Wait until there is nothing pending
       try {
         GenericTestUtils.waitFor(new Supplier<Boolean>() {
@@ -641,7 +660,7 @@ public class TestReplication {
           public Boolean get() {
             return pendingReplicationCount(bm) == 0;
           }
-        }, 1000, blockReceivedDelay * 10);
+        }, 100, 3000);
       } catch (TimeoutException e) {
         fail("timed out while waiting for no pending replication.");
       }

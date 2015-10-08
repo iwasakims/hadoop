@@ -118,12 +118,6 @@ class BPServiceActor implements Runnable {
   final LinkedList<BPServiceActorAction> bpThreadQueue 
       = new LinkedList<BPServiceActorAction>();
 
-  /**
-   * Testing hook that allows tests to delay the sending of blockReceived
-   * RPCs to the namenode. This can help find bugs in append.
-   */
-  private volatile int blockReceivedDelayForTests = 0;
-
   BPServiceActor(InetSocketAddress nnAddr, BPOfferService bpos) {
     this.bpos = bpos;
     this.dn = bpos.getDataNode();
@@ -268,7 +262,6 @@ class BPServiceActor implements Runnable {
     boolean success = false;
     final long startTime = monotonicNow();
     try {
-      delayBeforeBlockReceivedForTests();
       bpNamenode.blockReceivedAndDeleted(bpRegistration,
           bpos.getBlockPoolId(),
           reports.toArray(new StorageReceivedDeletedBlocks[reports.size()]));
@@ -405,29 +398,6 @@ class BPServiceActor implements Runnable {
         }
       }
     }
-  }
-
-  /**
-   * Triggered by test code: sleeps for a random amount of time
-   * before sending blockReceived. This simulates a condition
-   * seen on real clusters where some datanodes report their
-   * new blocks more slowly than others.
-   */
-  private void delayBeforeBlockReceivedForTests() {
-    if (blockReceivedDelayForTests > 0) {
-      try {
-        LOG.info("BPOfferService " + this + " sleeping for " +
-            "artificial delay: " + blockReceivedDelayForTests + " ms");
-        Thread.sleep(blockReceivedDelayForTests);
-      } catch (InterruptedException ie) {
-        Thread.currentThread().interrupt();
-      }
-    }
-  }
-
-  @VisibleForTesting
-  void setBlockReceivedDelayForTests(int delay) {
-    blockReceivedDelayForTests = delay;
   }
 
   @VisibleForTesting
