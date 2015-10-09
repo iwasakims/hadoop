@@ -634,7 +634,7 @@ public class TestReplication {
 
       FileSystem fs = cluster.getFileSystem();
       // Create and close a small file with two blocks
-      DFSTestUtil.createFile(fs, testPath, 1024, replication, 0);
+      DFSTestUtil.createFile(fs, testPath, 1500, replication, 0);
 
       // schedule replication via BlockManager#computeReplicationWork
       BlockManagerTestUtil.computeAllPendingWork(bm);

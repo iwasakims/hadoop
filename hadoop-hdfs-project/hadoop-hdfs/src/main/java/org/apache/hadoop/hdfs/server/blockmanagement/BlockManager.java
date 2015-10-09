@@ -662,13 +662,12 @@ public class BlockManager implements BlockStatsMXBean {
    * 
    * @param bc block collection
    * @param commitBlock - contains client reported block length and generation
-   * @param updatePending should or not add expected replicas to pending queue
    * @return true if the last block is changed to committed state.
    * @throws IOException if the block does not have at least a minimal number
    * of replicas reported from data-nodes.
    */
   public boolean commitOrCompleteLastBlock(BlockCollection bc,
-      Block commitBlock, boolean updatePending) throws IOException {
+      Block commitBlock) throws IOException {
     if(commitBlock == null)
       return false; // not committing, this is a block allocation retry
     BlockInfo lastBlock = bc.getLastBlock();
@@ -679,7 +678,7 @@ public class BlockManager implements BlockStatsMXBean {
     
     final boolean b = commitBlock(lastBlock, commitBlock);
     if (hasMinStorage(lastBlock)) {
-      if (updatePending) {
+      if (!bc.isStriped()) {
         addExpectedReplicasToPending(lastBlock);
       }
       completeBlock(lastBlock, false);
@@ -695,20 +694,16 @@ public class BlockManager implements BlockStatsMXBean {
   private void addExpectedReplicasToPending(BlockInfo lastBlock) {
     DatanodeStorageInfo[] expectedStorages =
         lastBlock.getUnderConstructionFeature().getExpectedStorageLocations();
-    int pending = expectedStorages.length - lastBlock.numNodes();
-    if (pending > 0) {
-      DatanodeDescriptor[] pendingNodes = new DatanodeDescriptor[pending];
-      int i = 0;
+    if (expectedStorages.length - lastBlock.numNodes() > 0) {
+      ArrayList<DatanodeDescriptor> pendingNodes = new ArrayList<DatanodeDescriptor>();
       for (DatanodeStorageInfo storage : expectedStorages) {
         DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
         if (lastBlock.findStorageInfo(dnd) == null) {
-          pendingNodes[i++] = dnd;
-        }
-        if (i >= pending) {
-          break;
+          pendingNodes.add(dnd);
         }
       }
-      pendingReplications.increment(lastBlock, pendingNodes);
+      pendingReplications.increment(lastBlock,
+          pendingNodes.toArray(new DatanodeDescriptor[pendingNodes.size()]));
     }
   }
 

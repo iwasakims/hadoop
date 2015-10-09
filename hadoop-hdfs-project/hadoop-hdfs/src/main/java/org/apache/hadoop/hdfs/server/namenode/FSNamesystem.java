@@ -3170,11 +3170,10 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
 
   void commitOrCompleteLastBlock(
       final INodeFile fileINode, final INodesInPath iip,
-      final Block commitBlock, final boolean completeFile) throws IOException {
+      final Block commitBlock) throws IOException {
     assert hasWriteLock();
     Preconditions.checkArgument(fileINode.isUnderConstruction());
-    if (!blockManager.commitOrCompleteLastBlock(
-            fileINode, commitBlock, !fileINode.isStriped() && completeFile)) {
+    if (!blockManager.commitOrCompleteLastBlock(fileINode, commitBlock)) {
       return;
     }
 
@@ -3470,7 +3469,7 @@ public class FSNamesystem implements Namesystem, FSNamesystemMBean,
     final String src = iip.getPath();
 
     // commit the last block and complete it if it has minimum replicas
-    commitOrCompleteLastBlock(pendingFile, iip, storedBlock, true);
+    commitOrCompleteLastBlock(pendingFile, iip, storedBlock);
 
     //remove lease, close file
     finalizeINodeFileUnderConstruction(src, pendingFile,
