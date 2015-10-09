@@ -106,6 +106,7 @@ public class DfsClientConf {
   private final ByteArrayManager.Conf writeByteArrayManagerConf;
   private final int socketTimeout;
   private final long excludedNodesCacheExpiry;
+  private final long deadNodesCacheExpiry;
   /** Wait time window (in msec) if BlockMissingException is caught. */
   private final int timeWindow;
   private final int numCachedConnRetry;
@@ -207,6 +208,9 @@ public class DfsClientConf {
     excludedNodesCacheExpiry = conf.getLong(
         Write.EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_KEY,
         Write.EXCLUDE_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT);
+    deadNodesCacheExpiry = conf.getLong(
+        Read.DEAD_NODES_CACHE_EXPIRY_INTERVAL_KEY,
+        Read.DEAD_NODES_CACHE_EXPIRY_INTERVAL_DEFAULT);
     prefetchSize = conf.getLong(Read.PREFETCH_SIZE_KEY,
         10 * defaultBlockSize);
     numCachedConnRetry = conf.getInt(DFS_CLIENT_CACHED_CONN_RETRY_KEY,
@@ -412,6 +416,13 @@ public class DfsClientConf {
    */
   public long getExcludedNodesCacheExpiry() {
     return excludedNodesCacheExpiry;
+  }
+
+  /**
+   * @return the deadNodesCacheExpiry
+   */
+  public long getDeadNodesCacheExpiry() {
+    return deadNodesCacheExpiry;
   }
 
   /**

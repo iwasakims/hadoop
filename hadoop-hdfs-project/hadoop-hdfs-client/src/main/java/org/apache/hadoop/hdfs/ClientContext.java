@@ -96,6 +96,11 @@ public class ClientContext {
   private final ByteArrayManager byteArrayManager;
 
   /**
+   * List of dead datanodes shared by DFSInputStreams.
+   */
+  private final DeadNodes deadNodes;
+
+  /**
    * Whether or not we complained about a DFSClient fetching a CacheContext that
    * didn't match its config values yet.
    */
@@ -116,6 +121,7 @@ public class ClientContext {
 
     this.byteArrayManager = ByteArrayManager.newInstance(
         conf.getWriteByteArrayManagerConf());
+    this.deadNodes = new DeadNodes(conf.getDeadNodesCacheExpiry());
   }
 
   public static ClientContext get(String name, DfsClientConf conf) {
@@ -192,5 +198,9 @@ public class ClientContext {
 
   public ByteArrayManager getByteArrayManager() {
     return byteArrayManager;
+  }
+
+  public DeadNodes getDeadNodes() {
+    return deadNodes;
   }
 }

@@ -21,7 +21,6 @@ import java.io.EOFException;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -36,7 +35,6 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletionService;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorCompletionService;
 import java.util.concurrent.Future;
@@ -242,15 +240,12 @@ public class DFSInputStream extends FSInputStream
    */
   protected int failures = 0;
 
-  /* XXX Use of CocurrentHashMap is temp fix. Need to fix
-   * parallel accesses to DFSInputStream (through ptreads) properly */
-  private final ConcurrentHashMap<DatanodeInfo, DatanodeInfo> deadNodes =
-             new ConcurrentHashMap<>();
+  private final DeadNodes deadNodes;
 
   private byte[] oneByteBuf; // used for 'int read()'
 
   void addToDeadNodes(DatanodeInfo dnInfo) {
-    deadNodes.put(dnInfo, dnInfo);
+    deadNodes.put(dnInfo);
   }
 
   DFSInputStream(DFSClient dfsClient, String src, boolean verifyChecksum,
@@ -258,6 +253,7 @@ public class DFSInputStream extends FSInputStream
     this.dfsClient = dfsClient;
     this.verifyChecksum = verifyChecksum;
     this.src = src;
+    this.deadNodes = dfsClient.getClientContext().getDeadNodes();
     synchronized (infoLock) {
       this.cachingStrategy = dfsClient.getDefaultReadCachingStrategy();
     }
@@ -977,7 +973,7 @@ public class DFSInputStream extends FSInputStream
         return result;
       } else {
         String errMsg = getBestNodeDNAddrPairErrorString(block.getLocations(),
-            deadNodes, ignoredNodes);
+            deadNodes.getNodes(), ignoredNodes);
         String blockInfo = block.getBlock() + " file=" + src;
         if (failures >= dfsClient.getConf().getMaxBlockAcquireFailures()) {
           String description = "Could not obtain block: " + blockInfo;
@@ -1035,7 +1031,7 @@ public class DFSInputStream extends FSInputStream
     StorageType storageType = null;
     if (nodes != null) {
       for (int i = 0; i < nodes.length; i++) {
-        if (!deadNodes.containsKey(nodes[i])
+        if (!deadNodes.contains(nodes[i])
             && (ignoredNodes == null || !ignoredNodes.contains(nodes[i]))) {
           chosenNode = nodes[i];
           // Storage types are ordered to correspond with nodes, so use the same
@@ -1069,9 +1065,9 @@ public class DFSInputStream extends FSInputStream
         ", ignoredNodes = " + ignoredNodes);
   }
 
-  private static String getBestNodeDNAddrPairErrorString(
-      DatanodeInfo nodes[], AbstractMap<DatanodeInfo,
-      DatanodeInfo> deadNodes, Collection<DatanodeInfo> ignoredNodes) {
+  private static String getBestNodeDNAddrPairErrorString(DatanodeInfo nodes[],
+      Collection<DatanodeInfo> deadNodes,
+      Collection<DatanodeInfo> ignoredNodes) {
     StringBuilder errMsgr = new StringBuilder(
         " No live nodes contain current block ");
     errMsgr.append("Block locations:");
@@ -1080,7 +1076,7 @@ public class DFSInputStream extends FSInputStream
       errMsgr.append(datanode.toString());
     }
     errMsgr.append(" Dead nodes: ");
-    for (DatanodeInfo datanode : deadNodes.keySet()) {
+    for (DatanodeInfo datanode : deadNodes) {
       errMsgr.append(" ");
       errMsgr.append(datanode.toString());
     }
@@ -1571,7 +1567,7 @@ public class DFSInputStream extends FSInputStream
     if (currentNode == null) {
       return seekToBlockSource(targetPos);
     }
-    boolean markedDead = deadNodes.containsKey(currentNode);
+    boolean markedDead = deadNodes.contains(currentNode);
     addToDeadNodes(currentNode);
     DatanodeInfo oldNode = currentNode;
     DatanodeInfo newNode = blockSeekTo(targetPos);
