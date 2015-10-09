@@ -747,8 +747,6 @@ public class TestReplication {
   private void assertNoReplicationWasPerformed(MiniDFSCluster cluster) {
     for (DataNode dn : cluster.getDataNodes()) {
       MetricsRecordBuilder rb = getMetrics(dn.getMetrics().name());
-      // Expect 2 packets, 1 for the 1 byte read, 1 for the empty packet
-      // signaling the end of the block
       assertCounter("BlocksReplicated", 0L, rb);
     }
   }

@@ -695,7 +695,8 @@ public class BlockManager implements BlockStatsMXBean {
     DatanodeStorageInfo[] expectedStorages =
         lastBlock.getUnderConstructionFeature().getExpectedStorageLocations();
     if (expectedStorages.length - lastBlock.numNodes() > 0) {
-      ArrayList<DatanodeDescriptor> pendingNodes = new ArrayList<DatanodeDescriptor>();
+      ArrayList<DatanodeDescriptor> pendingNodes =
+          new ArrayList<DatanodeDescriptor>();
       for (DatanodeStorageInfo storage : expectedStorages) {
         DatanodeDescriptor dnd = storage.getDatanodeDescriptor();
         if (lastBlock.findStorageInfo(dnd) == null) {
