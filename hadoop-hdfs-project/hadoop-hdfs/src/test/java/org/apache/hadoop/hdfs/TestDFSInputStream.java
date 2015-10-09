@@ -20,11 +20,14 @@ package org.apache.hadoop.hdfs;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.hamcrest.CoreMatchers.equalTo;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.Random;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.FSDataOutputStream;
@@ -33,8 +36,11 @@ import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.net.unix.DomainSocket;
 import org.apache.hadoop.net.unix.TemporarySocketDirectory;
+import org.apache.hadoop.test.GenericTestUtils;
 import org.junit.Assume;
 import org.junit.Test;
+
+import com.google.common.base.Supplier;
 
 public class TestDFSInputStream {
   private void testSkipInner(MiniDFSCluster cluster) throws IOException {
@@ -133,6 +139,46 @@ public class TestDFSInputStream {
       assertFalse(firstNode.equals(fin.getCurrentDatanode()));
     } finally {
       fin.close();
+      cluster.shutdown();
+    }
+  }
+
+  @Test(timeout=60000)
+  public void testDeadNodes() throws IOException {
+    Configuration conf = new Configuration();
+    int expiry = 500; // short expiry period for test
+    conf.setLong(HdfsClientConfigKeys.Read.DEAD_NODES_CACHE_EXPIRY_INTERVAL_KEY,
+        Long.valueOf(expiry));
+    MiniDFSCluster cluster =
+        new MiniDFSCluster.Builder(conf).numDataNodes(3).build();
+    try {
+      DistributedFileSystem fs = cluster.getFileSystem();
+      DFSClient client = fs.getClient();
+      String filename = "/testfile";
+      DFSTestUtil.createFile(fs, new Path(filename), 1024, (short) 3, 0);
+      DFSInputStream in = client.open(filename);
+      in.seekToNewSource(1);
+      final DatanodeInfo dn = in.getCurrentDatanode();
+      in.addToDeadNodes(dn);
+
+      // check if shared deadNodes contains added datanode.
+      final DeadNodes deadNodes = client.getClientContext().getDeadNodes();
+      assertTrue(deadNodes.contains(dn));
+
+      // making sure that the entry in deadNodes is expired.
+      try {
+        GenericTestUtils.waitFor(new Supplier<Boolean>() {
+          @Override
+          public Boolean get() {
+            return !deadNodes.contains(dn);
+          }
+        }, 100, expiry * 3);
+      } catch (TimeoutException e) {
+        fail("timed out while waiting cache expiry: " + e.getMessage());
+      } catch (InterruptedException e) {
+        fail("interrupted while waiting cache expiry: " + e.getMessage());
+      }
+    } finally {
       cluster.shutdown();
     }
   }
