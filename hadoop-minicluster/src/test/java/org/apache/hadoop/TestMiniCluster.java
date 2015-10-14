@@ -18,6 +18,7 @@
 
 package org.apache.hadoop;
 
+import org.junit.Ignore;
 import org.junit.Test;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
@@ -28,7 +29,8 @@ import org.apache.hadoop.yarn.server.MiniYARNCluster;
 /**
  * Verify mini cluster works with declared dependencies.
  * Because dependencies of test-jar is not transitive by design (MNG-1378),
- * mini cluster fails if it depends on artifacts depended by only test-jars.
+ * mini cluster throws NoClassDefFoundError if it depends on artifacts
+ * depended by only test-jars.
  */
 public class TestMiniCluster {
 
@@ -43,8 +45,8 @@ public class TestMiniCluster {
   @Test(timeout=60000)
   public void testMiniYARNCluster() throws Throwable {
     Configuration conf = new YarnConfiguration();
-    MiniYARNCluster cluster = new MiniYARNCluster(TestMiniCluster.class.getName(),
-        1, 3, 1, 1);
+    MiniYARNCluster cluster =
+        new MiniYARNCluster("testMiniYARNCluster", 1, 3, 1, 1);
     cluster.init(conf);
     cluster.start();
     cluster.waitForNodeManagersToConnect(10000);
