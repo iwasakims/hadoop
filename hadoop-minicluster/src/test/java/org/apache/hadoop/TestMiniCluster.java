@@ -18,7 +18,6 @@
 
 package org.apache.hadoop;
 
-import org.junit.Ignore;
 import org.junit.Test;
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
