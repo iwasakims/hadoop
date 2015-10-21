@@ -20,8 +20,10 @@ package org.apache.hadoop;
 
 import org.junit.Test;
 import org.apache.hadoop.conf.Configuration;
+import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.mapred.MiniMRCluster;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 
@@ -51,4 +53,13 @@ public class TestMiniCluster {
     cluster.waitForNodeManagersToConnect(10000);
     cluster.stop();
   }
+
+  @Test(timeout=60000)
+  public void testMiniMRCluster() throws Throwable {
+    Configuration conf = new Configuration();
+    FileSystem fs = FileSystem.get(conf);
+    MiniMRCluster cluster = new MiniMRCluster(1, fs.getUri().toString(), 1);
+    cluster.shutdown()
+  }
+
 }
