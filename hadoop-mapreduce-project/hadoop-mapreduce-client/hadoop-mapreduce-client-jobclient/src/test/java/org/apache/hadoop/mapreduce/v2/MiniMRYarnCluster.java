@@ -116,10 +116,6 @@ public class MiniMRYarnCluster extends MiniYARNCluster {
   @Override
   public void serviceInit(Configuration conf) throws Exception {
     conf.set(MRConfig.FRAMEWORK_NAME, MRConfig.YARN_FRAMEWORK_NAME);
-    if (conf.get(MRJobConfig.MR_AM_STAGING_DIR) == null) {
-      conf.set(MRJobConfig.MR_AM_STAGING_DIR, new File(getTestWorkDir(),
-          "apps_staging_dir/").getAbsolutePath());
-    }
 
     // By default, VMEM monitoring disabled, PMEM monitoring enabled.
     if (!conf.getBoolean(
@@ -131,24 +127,24 @@ public class MiniMRYarnCluster extends MiniYARNCluster {
 
     conf.set(CommonConfigurationKeys.FS_PERMISSIONS_UMASK_KEY,  "000");
 
-    try {
-      Path stagingPath = FileContext.getFileContext(conf).makeQualified(
-          new Path(conf.get(MRJobConfig.MR_AM_STAGING_DIR)));
+    Path stagingPath = FileContext.getFileContext(conf).makeQualified(
+        new Path(conf.get(MRJobConfig.MR_AM_STAGING_DIR)));
+    if (LocalFileSystem.class.isInstance(stagingPath.getFileSystem(conf))) {
       /*
-       * Re-configure the staging path on Windows if the file system is localFs.
-       * We need to use a absolute path that contains the drive letter. The unit
+       * Re-configure the staging path if the file system is localFs.
+       * In addition, if we are on Windows,
+       * we need to use a absolute path that contains the drive letter. The unit
        * test could run on a different drive than the AM. We can run into the
        * issue that job files are localized to the drive where the test runs on,
        * while the AM starts on a different drive and fails to find the job
        * metafiles. Using absolute path can avoid this ambiguity.
        */
-      if (Path.WINDOWS) {
-        if (LocalFileSystem.class.isInstance(stagingPath.getFileSystem(conf))) {
-          conf.set(MRJobConfig.MR_AM_STAGING_DIR,
-              new File(conf.get(MRJobConfig.MR_AM_STAGING_DIR))
-                  .getAbsolutePath());
-        }
-      }
+      String absolutePath =
+          new File(getTestWorkDir(), "apps_staging_dir/").getAbsolutePath();
+      conf.set(MRJobConfig.MR_AM_STAGING_DIR, absolutePath);
+      stagingPath = new Path(absolutePath);
+    }
+    try {
       FileContext fc=FileContext.getFileContext(stagingPath.toUri(), conf);
       if (fc.util().exists(stagingPath)) {
         LOG.info(stagingPath + " exists! deleting...");
