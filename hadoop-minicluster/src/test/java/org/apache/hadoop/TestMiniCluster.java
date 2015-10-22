@@ -24,6 +24,8 @@ import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
 import org.apache.hadoop.mapred.MiniMRCluster;
+import org.apache.hadoop.mapred.JobConf;
+import org.apache.hadoop.mapreduce.MRJobConfig;
 import org.apache.hadoop.yarn.conf.YarnConfiguration;
 import org.apache.hadoop.yarn.server.MiniYARNCluster;
 
@@ -56,10 +58,11 @@ public class TestMiniCluster {
 
   @Test(timeout=60000)
   public void testMiniMRCluster() throws Throwable {
-    Configuration conf = new Configuration();
+    JobConf conf = new JobConf();
+    conf.unset(MRJobConfig.MR_AM_STAGING_DIR);
     FileSystem fs = FileSystem.get(conf);
-    MiniMRCluster cluster = new MiniMRCluster(1, fs.getUri().toString(), 1);
-    cluster.shutdown()
+    MiniMRCluster cluster =
+      new MiniMRCluster(1, fs.getUri().toString(), 1, null, null, conf);
+    cluster.shutdown();
   }
-
 }
