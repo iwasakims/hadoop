@@ -29,6 +29,7 @@ import org.apache.hadoop.metrics2.MetricsException;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsSink;
 import org.apache.hadoop.metrics2.MetricsTag;
+import org.apache.hadoop.metrics2.impl.MsInfo;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -46,52 +47,65 @@ public class GraphiteSink implements MetricsSink, Closeable {
     private static final String SERVER_HOST_KEY = "server_host";
     private static final String SERVER_PORT_KEY = "server_port";
     private static final String METRICS_PREFIX = "metrics_prefix";
+    private static final String TAGS_ADD_ALL_KEY = "tags_add_all";
+    private static final String TAGS_KV_SEPARATOR_KEY = "tags_kv_separator";
     private String metricsPrefix = null;
+    private boolean tagsAddAll = true;
+    private String tagsKVSeparator = "=";
     private Graphite graphite = null;
 
     @Override
     public void init(SubsetConfiguration conf) {
-        // Get Graphite host configurations.
-        final String serverHost = conf.getString(SERVER_HOST_KEY);
-        final int serverPort = Integer.parseInt(conf.getString(SERVER_PORT_KEY));
+      // Get Graphite host configurations.
+      final String serverHost = conf.getString(SERVER_HOST_KEY);
+      final int serverPort = Integer.parseInt(conf.getString(SERVER_PORT_KEY));
+  
+      // Get Graphite metrics graph prefix.
+      metricsPrefix = conf.getString(METRICS_PREFIX);
+      if (metricsPrefix == null) {
+        metricsPrefix = "";
+      }
 
-        // Get Graphite metrics graph prefix.
-        metricsPrefix = conf.getString(METRICS_PREFIX);
-        if (metricsPrefix == null)
-            metricsPrefix = "";
-
-        graphite = new Graphite(serverHost, serverPort);
-        graphite.connect();
+      tagsAddAll = conf.getBoolean(TAGS_ADD_ALL_KEY, tagsAddAll);
+      tagsKVSeparator = conf.getString(TAGS_KV_SEPARATOR_KEY, tagsKVSeparator);
+          
+      graphite = new Graphite(serverHost, serverPort);
+      graphite.connect();
     }
 
     @Override
     public void putMetrics(MetricsRecord record) {
-        StringBuilder lines = new StringBuilder();
-        StringBuilder metricsPathPrefix = new StringBuilder();
+      StringBuilder lines = new StringBuilder();
+      StringBuilder metricsPathPrefix = new StringBuilder();
 
-        // Configure the hierarchical place to display the graph.
-        metricsPathPrefix.append(metricsPrefix).append(".")
-                .append(record.context()).append(".").append(record.name());
+      // Configure the hierarchical place to display the graph.
+      metricsPathPrefix.append(metricsPrefix).append(".")
+        .append(record.context()).append(".").append(record.name());
 
-        for (MetricsTag tag : record.tags()) {
-            if (tag.value() != null) {
-                metricsPathPrefix.append(".");
-                metricsPathPrefix.append(tag.name());
-                metricsPathPrefix.append("=");
-                metricsPathPrefix.append(tag.value());
-            }
+      for (MetricsTag tag : record.tags()) {
+        if (tagsAddAll || (tag.info() instanceof MsInfo)) {
+          if (tag.value() != null) {
+            metricsPathPrefix.append(".")
+                             .append(tag.name())
+                             .append(tagsKVSeparator)
+                             .append(tag.value().replace(' ', '_'));
+          }
         }
+      }
 
-        // The record timestamp is in milliseconds while Graphite expects an epoc time in seconds.
-        long timestamp = record.timestamp() / 1000L;
+      // The record timestamp is in milliseconds while Graphite expects an epoc time in seconds.
+      long timestamp = record.timestamp() / 1000L;
 
-        // Collect datapoints.
-        for (AbstractMetric metric : record.metrics()) {
-            lines.append(
-                    metricsPathPrefix.toString() + "."
-                            + metric.name().replace(' ', '.')).append(" ")
-                    .append(metric.value()).append(" ").append(timestamp)
-                    .append("\n");
+      // Collect datapoints.
+      for (AbstractMetric metric : record.metrics()) {
+        lines.append(metricsPathPrefix.toString())
+             .append(".")
+             .append(metric.name().replace(' ', '.'))
+             .append(" ")
+             .append(metric.value())
+             .append(" ")
+             .append(timestamp)
+             .append("\n");
         }
 
         try {

@@ -20,6 +20,7 @@ package org.apache.hadoop.metrics2.impl;
 
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsRecord;
+import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsTag;
 import org.apache.hadoop.metrics2.sink.GraphiteSink;
 import org.junit.Test;
@@ -212,4 +213,37 @@ public class TestGraphiteMetrics {
             ioe.printStackTrace();
         }
     }
+
+  @Test
+  public void testMatricPath() {
+    GraphiteSink sink = new GraphiteSink();
+    Whitebox.setInternalState(sink, "tagsAddAll", true);
+    Whitebox.setInternalState(sink, "tagsKVSeparator", "_");
+    List<MetricsTag> tags = new ArrayList<MetricsTag>();
+    tags.add(new MetricsTag(MsInfo.Context, "all"));
+    tags.add(new MetricsTag(MsInfo.Hostname, "host"));
+    tags.add(new MetricsTag(new MetricsInfo() {
+        public String name() { return "nonMsInfo"; }
+        public String description() { return "not instance of MsInfo"; }
+      }, "nonMsInfo"));
+    Set<AbstractMetric> metrics = new HashSet<AbstractMetric>();
+    metrics.add(makeMetric("foo1", 1.25));
+    MetricsRecord record =
+        new MetricsRecordImpl(MsInfo.Context, (long) 10000, tags, metrics);
+
+    ArgumentCaptor<String> argument = ArgumentCaptor.forClass(String.class);
+    final GraphiteSink.Graphite mockGraphite = makeGraphite();
+    Whitebox.setInternalState(sink, "graphite", mockGraphite);
+    sink.putMetrics(record);
+
+    try {
+      verify(mockGraphite).write(argument.capture());
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
+
+    String result = argument.getValue();
+    assertEquals("null.all.Context.Context_all.Hostname_host.foo1 1.25 10\n",
+        result);
+  }
 }
