@@ -44,7 +44,9 @@ import java.net.Socket;
 public class GraphiteSink implements MetricsSink, Closeable {
     private static final Log LOG = LogFactory.getLog(GraphiteSink.class);
     private static final String SERVER_HOST_KEY = "server_host";
+    private static final String SERVER_HOST_DEFAULT = "localhost";
     private static final String SERVER_PORT_KEY = "server_port";
+    private static final String SERVER_PORT_DEFAULT = "2003";
     private static final String METRICS_PREFIX = "metrics_prefix";
     private String metricsPrefix = null;
     private Graphite graphite = null;
@@ -52,8 +54,10 @@ public class GraphiteSink implements MetricsSink, Closeable {
     @Override
     public void init(SubsetConfiguration conf) {
         // Get Graphite host configurations.
-        final String serverHost = conf.getString(SERVER_HOST_KEY);
-        final int serverPort = Integer.parseInt(conf.getString(SERVER_PORT_KEY));
+        final String serverHost =
+            conf.getString(SERVER_HOST_KEY, SERVER_HOST_DEFAULT);
+        final int serverPort = Integer.parseInt(
+            conf.getString(SERVER_PORT_KEY, SERVER_PORT_DEFAULT));
 
         // Get Graphite metrics graph prefix.
         metricsPrefix = conf.getString(METRICS_PREFIX);
