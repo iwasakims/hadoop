@@ -19,7 +19,6 @@
 package org.apache.hadoop.metrics2.impl;
 
 import org.apache.hadoop.metrics2.AbstractMetric;
-import org.apache.hadoop.metrics2.MetricsException;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsTag;
 import org.apache.hadoop.metrics2.sink.GraphiteSink;
@@ -213,21 +212,4 @@ public class TestGraphiteMetrics {
             ioe.printStackTrace();
         }
     }
-
-  @Test
-  public void testDefaultConfig() {
-    GraphiteSink sink = new GraphiteSink();
-    MetricsConfig conf = MetricsConfig.create("dummy");
-    try {
-      sink.init(conf.subset("dummy"));
-    } catch (MetricsException e) {
-      // ignore connection failure.
-    }
-    GraphiteSink.Graphite graphite =
-        (GraphiteSink.Graphite)Whitebox.getInternalState(sink, "graphite");
-    assertEquals((String)Whitebox.getInternalState(sink, "SERVER_HOST_DEFAULT"),
-        (String)Whitebox.getInternalState(graphite, "serverHost"));
-    assertEquals((String)Whitebox.getInternalState(sink, "SERVER_PORT_DEFAULT"),
-        (Whitebox.getInternalState(graphite, "serverPort")).toString());
-  }
 }

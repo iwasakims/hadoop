@@ -43,11 +43,11 @@ import java.net.Socket;
 @InterfaceStability.Evolving
 public class GraphiteSink implements MetricsSink, Closeable {
     private static final Log LOG = LogFactory.getLog(GraphiteSink.class);
-    private static final String SERVER_HOST_KEY = "server_host";
-    private static final String SERVER_HOST_DEFAULT = "localhost";
-    private static final String SERVER_PORT_KEY = "server_port";
-    private static final String SERVER_PORT_DEFAULT = "2003";
-    private static final String METRICS_PREFIX = "metrics_prefix";
+    static final String SERVER_HOST_KEY = "server_host";
+    static final String SERVER_HOST_DEFAULT = "localhost";
+    static final String SERVER_PORT_KEY = "server_port";
+    static final String SERVER_PORT_DEFAULT = "2003";
+    static final String METRICS_PREFIX = "metrics_prefix";
     private String metricsPrefix = null;
     private Graphite graphite = null;
 
