@@ -18,15 +18,12 @@
 
 package org.apache.hadoop.metrics2.impl;
 
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsTag;
+import org.apache.hadoop.metrics2.MetricsVisitor;
+import org.apache.hadoop.metrics2.MetricType;
 import org.apache.hadoop.metrics2.sink.InfluxDBSink;
 import org.junit.Test;
 import org.junit.Assert;
@@ -35,31 +32,23 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestInfluxDBMetrics {
-  private static final Log LOG = LogFactory.getLog(TestInfluxDBMetrics.class);
-
   @Test
-  public void testGetLine() {
+  public void testBuildLine() {
     List<MetricsTag> tags = new ArrayList<MetricsTag>();
     tags.add(new MetricsTag(MsInfo.Context, "test"));
     tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
     tags.add(new MetricsTag(MsInfo.ProcessName, "process name"));
     List<AbstractMetric> metrics = new ArrayList<AbstractMetric>();
-    metrics.add(makeMetric("metric1", 1.0));
-    metrics.add(makeMetric("metric2", 2));
-    MetricsInfo info = new MetricsInfo() {
-        public String name() { return "name1"; }
-        public String description() { return "metrics description."; }
-      };
+    metrics.add(new TestMetric("metric1", 1.0));
+    metrics.add(new TestMetric("metric2", 2));
+    MetricsInfo info = new TestMetricsInfo("name1");
     MetricsRecord record =
         new MetricsRecordImpl(info, (long) 10000, tags, metrics);
-
-    StringBuilder builder = new StringBuilder();
-    InfluxDBSink.buildLine(builder, record);
 
     Assert.assertEquals(
         "test.name1,Context=test,Hostname=host1,ProcessName=process\\ name" +
         " metric1=1.0,metric2=2 10000000\n",
-        builder.toString());
+        InfluxDBSink.buildLine(new StringBuilder(), record).toString());
   }
 
   @Test
@@ -71,10 +60,51 @@ public class TestInfluxDBMetrics {
     sink.init(cb.subset("test.sink.influxdb"));
   }
 
-  private AbstractMetric makeMetric(String name, Number value) {
-    AbstractMetric metric = mock(AbstractMetric.class);
-    when(metric.name()).thenReturn(name);
-    when(metric.value()).thenReturn(value);
-    return metric;
+  private static class TestMetricsInfo implements MetricsInfo {
+    private final String name;
+
+    public TestMetricsInfo(String name) {
+      this.name = name;
+    }
+    
+    @Override 
+    public String name() {
+      return name;
+    }
+
+    @Override 
+    public String description() {
+      return "metrics description.";
+    }
+  }
+  
+  private static class TestMetric extends AbstractMetric {
+    private final String name;
+    private final Number value;
+
+    public TestMetric(String name, Number value) {
+      super(new TestMetricsInfo(name));
+      this.name = name;
+      this.value = value;
+    }
+
+    @Override 
+    public String name() {
+      return name;
+    }
+
+    @Override 
+    public Number value() {
+      return value;
+    }
+
+    @Override 
+    public MetricType type() {
+      return MetricType.COUNTER;
+    }
+
+    @Override 
+    public void visit(MetricsVisitor visitor) {
+    };
   }
 }

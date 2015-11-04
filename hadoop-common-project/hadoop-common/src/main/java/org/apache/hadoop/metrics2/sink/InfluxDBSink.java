@@ -50,8 +50,7 @@ public class InfluxDBSink implements MetricsSink {
   @Override
   public void putMetrics(MetricsRecord record) {
     builder.setLength(0);
-    buildLine(builder, record);
-    influxdb.putLine(builder.toString());
+    influxdb.putLine(buildLine(builder, record).toString());
   }
   
   @Override
@@ -59,41 +58,43 @@ public class InfluxDBSink implements MetricsSink {
     influxdb.flush();
   }
 
-  public static void buildLine(StringBuilder builder, MetricsRecord record) {
+  public static StringBuilder buildLine(StringBuilder buf, MetricsRecord rec) {
     // measurement
-    builder.append(record.context())
-           .append(".")
-           .append(record.name());
+    buf.append(rec.context())
+       .append(".")
+       .append(rec.name());
 
     // tags
-    for (MetricsTag tag : record.tags()) {
+    for (MetricsTag tag : rec.tags()) {
       if (tag.value() != null) {
-        builder.append(",")
-               .append(tag.name())
-               .append("=")
-               .append(tag.value().replace(" ", "\\ "));
+        buf.append(",")
+           .append(tag.name())
+           .append("=")
+           .append(tag.value().replace(" ", "\\ "));
       }
     }
 
-    builder.append(" ");
+    buf.append(" ");
 
     // fields
     String prefix = "";
-    for (AbstractMetric metric : record.metrics()) {
-      builder.append(prefix)
-             .append(metric.name().replace(" ", "\\ "))
-             .append("=")
-             .append(metric.value());
+    for (AbstractMetric metric : rec.metrics()) {
+      buf.append(prefix)
+         .append(metric.name().replace(" ", "\\ "))
+         .append("=")
+         .append(metric.value());
       prefix = ",";
     }
 
-    builder.append(" ");
+    buf.append(" ");
     
     // The record timestamp is in milliseconds
-    // while InfluxDB expects an nanoseconds.
-    builder.append(record.timestamp() * 1000L);
+    // while InfluxDB expects nanoseconds.
+    buf.append(rec.timestamp() * 1000L);
 
-    builder.append("\n");
+    buf.append("\n");
+
+    return buf;
   }
   
   public static class InfluxDB {
