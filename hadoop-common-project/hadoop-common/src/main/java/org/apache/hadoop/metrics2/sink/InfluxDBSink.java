@@ -28,11 +28,7 @@ import org.apache.hadoop.metrics2.MetricsException;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsSink;
 import org.apache.hadoop.metrics2.MetricsTag;
-import org.apache.hadoop.metrics2.util.Servers;
-
 import java.io.IOException;
-import java.net.SocketAddress;
-import java.util.List;
 
 /**
  * A metrics sink that writes to a Graphite server
@@ -41,58 +37,73 @@ import java.util.List;
 @InterfaceStability.Evolving
 public class InfluxDBSink implements MetricsSink {
   private static final Log LOG = LogFactory.getLog(InfluxDBSink.class);
-  public static final String SERVERS_PROPERTY = "servers";
-  public static final int DEFAULT_PORT = 8089;
-  private List<? extends SocketAddress> metricsServers;
-  private final StringBuilder buffer = new StringBuilder();
+  public static final String ADDRESS_KEY = "address";
+  public static final String ADDRESS_DEFAULT = "address";
+  private InfluxDB influxdb = new InfluxDB();
+  private final StringBuilder builder = new StringBuilder();
 
   @Override
   public void init(SubsetConfiguration conf) {
-    metricsServers =
-        Servers.parse(conf.getString(SERVERS_PROPERTY), DEFAULT_PORT);
+    influxdb.init(conf);
   }
 
   @Override
   public void putMetrics(MetricsRecord record) {
-    buffer.setLength(0);
+    builder.setLength(0);
+    buildLine(builder, record);
+    influxdb.putLine(builder.toString());
+  }
+  
+  @Override
+  public void flush() {
+    influxdb.flush();
+  }
 
+  public static void buildLine(StringBuilder builder, MetricsRecord record) {
     // measurement
-    buffer.append(record.context())
-          .append(".")
-          .append(record.name());
+    builder.append(record.context())
+           .append(".")
+           .append(record.name());
 
     // tags
     for (MetricsTag tag : record.tags()) {
       if (tag.value() != null) {
-        buffer.append(",")
-              .append(tag.name())
-              .append("=")
-              .append(tag.value().replace(" ", "\\ "));
+        builder.append(",")
+               .append(tag.name())
+               .append("=")
+               .append(tag.value().replace(" ", "\\ "));
       }
     }
 
-    buffer.append(" ");
+    builder.append(" ");
 
     // fields
     String prefix = "";
     for (AbstractMetric metric : record.metrics()) {
-      buffer.append(prefix)
-            .append(metric.name().replace(" ", "\\ "))
-            .append("=")
-        .append(metric.value());
+      builder.append(prefix)
+             .append(metric.name().replace(" ", "\\ "))
+             .append("=")
+             .append(metric.value());
       prefix = ",";
     }
 
-    buffer.append(" ");
+    builder.append(" ");
     
     // The record timestamp is in milliseconds
     // while InfluxDB expects an nanoseconds.
-    buffer.append(record.timestamp() * 1000L);
+    builder.append(record.timestamp() * 1000L);
 
-    buffer.append("\n");
+    builder.append("\n");
   }
+  
+  public static class InfluxDB {
+    public void init(SubsetConfiguration conf) {
+    }
+    
+    public void putLine(String record) {
+    }
 
-  @Override
-  public void flush() {
+    public void flush() {
+    }
   }
 }
