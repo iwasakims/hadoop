@@ -18,6 +18,8 @@
 
 package org.apache.hadoop.metrics2.sink;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsInfo;
@@ -35,12 +37,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestInfluxDBSink {
+  private static final Log LOG = LogFactory.getLog(TestInfluxDBSink.class);
+  
   @Test
   public void testBuildLine() {
-    MetricsRecord record = getTestRecord(10000L);
+    MetricsRecord record = getTestRecord(10000L, 12345L);
     Assert.assertEquals(
         "test.name1,Context=test,Hostname=host1,ProcessName=process\\ name" +
-        " metric1=1.0,metric2=2 10000000000\n",
+        " metric1=12345,metric2=2.0 10000000000\n",
         InfluxDBSink.buildLine(new StringBuilder(), record).toString());
   }
 
@@ -66,20 +70,35 @@ public class TestInfluxDBSink {
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
 
+  @Test
+  public void testUdpConfiguration() {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.protocol", "udp");
+    InfluxDBSink.InfluxDB  influxdb =
+        InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+    Assert.assertTrue(influxdb instanceof InfluxDBSink.UdpInfluxDB);
+  }
+
   //@Ignore
   @Test
   public void testHttpInfluxDBSink() {
-    main(new String[]{});
+    main(new String[]{"localhost:8086", "http", "mydb"});
+  }
+
+  //@Ignore
+  @Test
+  public void testUdpInfluxDBSink() {
+    main(new String[]{"localhost:8087", "udp"});
   }
   
-  private static MetricsRecord getTestRecord(long timestamp) {
+  private static MetricsRecord getTestRecord(long timestamp, long metrics1) {
     List<MetricsTag> tags = new ArrayList<MetricsTag>();
     tags.add(new MetricsTag(MsInfo.Context, "test"));
     tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
     tags.add(new MetricsTag(MsInfo.ProcessName, "process name"));
     List<AbstractMetric> metrics = new ArrayList<AbstractMetric>();
-    metrics.add(new TestMetric("metric1", 1.0));
-    metrics.add(new TestMetric("metric2", 2));
+    metrics.add(new TestMetric("metric1", metrics1));
+    metrics.add(new TestMetric("metric2", 2.0));
     MetricsInfo info = new TestMetricsInfo("name1");
     return new TestMetricsRecord(info, (long) timestamp, tags, metrics);
   }
@@ -176,16 +195,20 @@ public class TestInfluxDBSink {
   }
 
   public static void main(String[] args) {
-    InfluxDBSink sink = new InfluxDBSink();
     ConfigBuilder cb = new ConfigBuilder();
     if (args.length > 0) {
       cb.add("test.sink.influxdb.servers", args[0]);
     }
     if (args.length > 1) {
-      cb.add("test.sink.influxdb.db", args[1]);
+      cb.add("test.sink.influxdb.protocol", args[1]);
     }
+    if (args.length > 2) {
+      cb.add("test.sink.influxdb.db", args[2]);
+    }
+    InfluxDBSink sink = new InfluxDBSink();
     sink.init(cb.subset("test.sink.influxdb"));
-    sink.putMetrics(getTestRecord(System.currentTimeMillis()));
+    sink.putMetrics(getTestRecord(System.currentTimeMillis(), 10));
+    sink.putMetrics(getTestRecord(System.currentTimeMillis(), 20));
     sink.flush();
   }
 }
