@@ -16,7 +16,7 @@
  * limitations under the License.
  */
 
-package org.apache.hadoop.metrics2.impl;
+package org.apache.hadoop.metrics2.sink;
 
 import org.apache.hadoop.metrics2.AbstractMetric;
 import org.apache.hadoop.metrics2.MetricsRecord;
@@ -24,6 +24,8 @@ import org.apache.hadoop.metrics2.MetricsInfo;
 import org.apache.hadoop.metrics2.MetricsTag;
 import org.apache.hadoop.metrics2.MetricsVisitor;
 import org.apache.hadoop.metrics2.MetricType;
+import org.apache.hadoop.metrics2.impl.ConfigBuilder;
+import org.apache.hadoop.metrics2.impl.MsInfo;
 import org.apache.hadoop.metrics2.sink.InfluxDBSink;
 import org.junit.Test;
 import org.junit.Assert;
@@ -68,18 +70,18 @@ public class TestInfluxDBSink {
     public TestMetricsInfo(String name) {
       this.name = name;
     }
-    
-    @Override 
+
+    @Override
     public String name() {
       return name;
     }
 
-    @Override 
+    @Override
     public String description() {
       return "metrics description.";
     }
   }
-  
+
   private static class TestMetric extends AbstractMetric {
     private final Number value;
 
@@ -88,12 +90,12 @@ public class TestInfluxDBSink {
       this.value = value;
     }
 
-    @Override 
+    @Override
     public Number value() {
       return value;
     }
 
-    @Override 
+    @Override
     public MetricType type() {
       return MetricType.COUNTER;
     }
@@ -103,7 +105,7 @@ public class TestInfluxDBSink {
     };
   }
 
-  private class TestMetricsRecord extends AbstractMetricsRecord {
+  private class TestMetricsRecord implements MetricsRecord {
     private final long timestamp;
     private final MetricsInfo info;
     private final List<MetricsTag> tags;
@@ -152,5 +154,17 @@ public class TestInfluxDBSink {
     public Iterable<AbstractMetric> metrics() {
       return metrics;
     }
+  }
+
+  public static void main(String[] args) {
+    InfluxDBSink sink = new InfluxDBSink();
+    ConfigBuilder cb = new ConfigBuilder();
+    if (args.length > 0) {
+      cb.add("test.sink.influxdb.servers", args[0]);
+    }
+    if (args.length > 1) {
+      cb.add("test.sink.influxdb.db", args[1]);
+    }
+    sink.init(cb.subset("test.sink.influxdb"));
   }
 }
