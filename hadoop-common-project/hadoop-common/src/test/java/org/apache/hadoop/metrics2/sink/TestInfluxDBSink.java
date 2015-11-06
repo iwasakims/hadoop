@@ -27,6 +27,7 @@ import org.apache.hadoop.metrics2.MetricType;
 import org.apache.hadoop.metrics2.impl.ConfigBuilder;
 import org.apache.hadoop.metrics2.impl.MsInfo;
 import org.apache.hadoop.metrics2.sink.InfluxDBSink;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.Assert;
 import java.io.IOException;
@@ -36,16 +37,15 @@ import java.util.List;
 public class TestInfluxDBSink {
   @Test
   public void testBuildLine() {
-    MetricsRecord record = getTestRecord();
+    MetricsRecord record = getTestRecord(10000L);
     Assert.assertEquals(
         "test.name1,Context=test,Hostname=host1,ProcessName=process\\ name" +
-        " metric1=1.0,metric2=2 10000000\n",
+        " metric1=1.0,metric2=2 10000000000\n",
         InfluxDBSink.buildLine(new StringBuilder(), record).toString());
   }
 
   @Test
   public void testDefaultConfiguration() {
-    InfluxDBSink sink = new InfluxDBSink();
     ConfigBuilder cb = new ConfigBuilder();
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
@@ -56,7 +56,6 @@ public class TestInfluxDBSink {
 
   @Test
   public void testConfiguration() {
-    InfluxDBSink sink = new InfluxDBSink();
     ConfigBuilder cb = new ConfigBuilder()
         .add("test.sink.influxdb.servers", "host1:1234")
         .add("test.sink.influxdb.db", "db1");
@@ -67,7 +66,13 @@ public class TestInfluxDBSink {
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
 
-  private static MetricsRecord getTestRecord() {
+  //@Ignore
+  @Test
+  public void testHttpInfluxDBSink() {
+    main(new String[]{});
+  }
+  
+  private static MetricsRecord getTestRecord(long timestamp) {
     List<MetricsTag> tags = new ArrayList<MetricsTag>();
     tags.add(new MetricsTag(MsInfo.Context, "test"));
     tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
@@ -76,7 +81,7 @@ public class TestInfluxDBSink {
     metrics.add(new TestMetric("metric1", 1.0));
     metrics.add(new TestMetric("metric2", 2));
     MetricsInfo info = new TestMetricsInfo("name1");
-    return new TestMetricsRecord(info, (long) 10000, tags, metrics);
+    return new TestMetricsRecord(info, (long) timestamp, tags, metrics);
   }
 
   private static class TestMetricsInfo implements MetricsInfo {
@@ -180,7 +185,7 @@ public class TestInfluxDBSink {
       cb.add("test.sink.influxdb.db", args[1]);
     }
     sink.init(cb.subset("test.sink.influxdb"));
-    sink.putMetrics(getTestRecord());
+    sink.putMetrics(getTestRecord(System.currentTimeMillis()));
     sink.flush();
   }
 }
