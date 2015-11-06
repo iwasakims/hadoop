@@ -79,13 +79,13 @@ public class TestInfluxDBSink {
     Assert.assertTrue(influxdb instanceof InfluxDBSink.UdpInfluxDB);
   }
 
-  //@Ignore
+  @Ignore
   @Test
   public void testHttpInfluxDBSink() {
     main(new String[]{"localhost:8086", "http", "mydb"});
   }
 
-  //@Ignore
+  @Ignore
   @Test
   public void testUdpInfluxDBSink() {
     main(new String[]{"localhost:8087", "udp"});
