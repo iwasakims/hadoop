@@ -183,7 +183,7 @@ public class InfluxDBSink implements MetricsSink {
             socket.send(new DatagramPacket(buf, buf.length, addr));
           }
         } catch (IOException e) {
-          LOG.info(e);
+          LOG.debug(e);
           throw new MetricsException("Failed to putMetrics", e);
         }
       }
