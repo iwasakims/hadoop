@@ -28,7 +28,15 @@ import org.apache.hadoop.metrics2.MetricsException;
 import org.apache.hadoop.metrics2.MetricsRecord;
 import org.apache.hadoop.metrics2.MetricsSink;
 import org.apache.hadoop.metrics2.MetricsTag;
+import org.apache.hadoop.metrics2.util.Servers;
+import org.apache.hadoop.net.NetUtils;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.util.List;
 
 /**
  * A metrics sink that writes to a Graphite server
@@ -37,13 +45,16 @@ import java.io.IOException;
 @InterfaceStability.Evolving
 public class InfluxDBSink implements MetricsSink {
   private static final Log LOG = LogFactory.getLog(InfluxDBSink.class);
-  public static final String ADDRESS_KEY = "address";
-  public static final String ADDRESS_DEFAULT = "address";
-  private InfluxDB influxdb = new InfluxDB();
+  public static final String SERVERS_KEY = "servers";
+  public static final int PORT_DEFAULT = 8086;
+  public static final String DB_KEY = "db";
+  public static final String DB_DEFAULT = "mydb";
   private final StringBuilder builder = new StringBuilder();
+  private InfluxDB influxdb;
 
   @Override
   public void init(SubsetConfiguration conf) {
+    influxdb = getInfluxDB(conf);
     influxdb.init(conf);
   }
 
@@ -96,14 +107,41 @@ public class InfluxDBSink implements MetricsSink {
 
     return buf;
   }
-  
-  public static class InfluxDB {
+
+  private static InfluxDB getInfluxDB(SubsetConfiguration conf) {
+    return new HttpInfluxDB();
+  }
+
+  public interface InfluxDB {
+    void init(SubsetConfiguration conf);
+    void putLine(String record);
+    void flush();
+  }
+
+  private static class HttpInfluxDB implements InfluxDB {
+    private HttpClient client;
+    private HttpPost post;
+
+    @Override
     public void init(SubsetConfiguration conf) {
-    }
-    
-    public void putLine(String record) {
+      client = new DefaultHttpClient();
+      List<InetSocketAddress> servers =
+          Servers.parse(conf.getString(SERVERS_KEY), PORT_DEFAULT);
+      String url =
+          "http://" + NetUtils.getHostPortString(servers.get(0)) +
+          "/write?db=" + conf.getString(DB_KEY, DB_DEFAULT);
+      post = new HttpPost(url);
     }
 
+    @Override
+    public void putLine(String record) {
+      try {
+        HttpResponse response = client.execute(post);
+      } catch (IOException e) {
+      }
+    }
+
+    @Override
     public void flush() {
     }
   }
