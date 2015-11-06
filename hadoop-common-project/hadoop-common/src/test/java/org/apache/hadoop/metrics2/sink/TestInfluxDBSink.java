@@ -31,20 +31,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestInfluxDBMetrics {
+public class TestInfluxDBSink {
   @Test
   public void testBuildLine() {
-    List<MetricsTag> tags = new ArrayList<MetricsTag>();
-    tags.add(new MetricsTag(MsInfo.Context, "test"));
-    tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
-    tags.add(new MetricsTag(MsInfo.ProcessName, "process name"));
-    List<AbstractMetric> metrics = new ArrayList<AbstractMetric>();
-    metrics.add(new TestMetric("metric1", 1.0));
-    metrics.add(new TestMetric("metric2", 2));
-    MetricsInfo info = new TestMetricsInfo("name1");
-    MetricsRecord record =
-        new MetricsRecordImpl(info, (long) 10000, tags, metrics);
-
+    MetricsRecord record = getTestRecord();
     Assert.assertEquals(
         "test.name1,Context=test,Hostname=host1,ProcessName=process\\ name" +
         " metric1=1.0,metric2=2 10000000\n",
@@ -55,9 +45,21 @@ public class TestInfluxDBMetrics {
   public void testINfluxDBSink() {
     InfluxDBSink sink = new InfluxDBSink();
     ConfigBuilder cb = new ConfigBuilder()
-        .add("test.sink.influxdb.address", "localhost")
-        .add("test.sink.influxdb.dummy", "true");
+        .add("test.sink.influxdb.servers", "localhost:8086")
+        .add("test.sink.influxdb.db", "mydb");
     sink.init(cb.subset("test.sink.influxdb"));
+  }
+
+  private MetricsRecord getTestRecord() {
+    List<MetricsTag> tags = new ArrayList<MetricsTag>();
+    tags.add(new MetricsTag(MsInfo.Context, "test"));
+    tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
+    tags.add(new MetricsTag(MsInfo.ProcessName, "process name"));
+    List<AbstractMetric> metrics = new ArrayList<AbstractMetric>();
+    metrics.add(new TestMetric("metric1", 1.0));
+    metrics.add(new TestMetric("metric2", 2));
+    MetricsInfo info = new TestMetricsInfo("name1");
+    return new TestMetricsRecord(info, (long) 10000, tags, metrics);
   }
 
   private static class TestMetricsInfo implements MetricsInfo {
@@ -96,8 +98,59 @@ public class TestInfluxDBMetrics {
       return MetricType.COUNTER;
     }
 
-    @Override 
+    @Override
     public void visit(MetricsVisitor visitor) {
     };
+  }
+
+  private class TestMetricsRecord extends AbstractMetricsRecord {
+    private final long timestamp;
+    private final MetricsInfo info;
+    private final List<MetricsTag> tags;
+    private final Iterable<AbstractMetric> metrics;
+
+    public TestMetricsRecord(MetricsInfo info, long timestamp,
+        List<MetricsTag> tags, Iterable<AbstractMetric> metrics) {
+
+      this.timestamp = timestamp;
+      this.info = info;
+      this.tags = tags;
+      this.metrics = metrics;
+    }
+
+    @Override
+    public long timestamp() {
+      return timestamp;
+    }
+
+    @Override
+    public String name() {
+      return info.name();
+    }
+
+    @Override
+    public String description() {
+      return info.description();
+    }
+
+    @Override
+    public String context() {
+      for (MetricsTag t : tags) {
+        if (t.info() == MsInfo.Context) {
+          return t.value();
+        }
+      }
+      return "default";
+    }
+
+    @Override
+    public List<MetricsTag> tags() {
+      return tags;
+    }
+
+    @Override
+    public Iterable<AbstractMetric> metrics() {
+      return metrics;
+    }
   }
 }
