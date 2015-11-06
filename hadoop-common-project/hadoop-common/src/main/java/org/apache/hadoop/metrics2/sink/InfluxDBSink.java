@@ -39,16 +39,16 @@ import java.net.InetSocketAddress;
 import java.util.List;
 
 /**
- * A metrics sink that writes to a Graphite server
+ * A metrics sink that writes to a InfluxDB
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
 public class InfluxDBSink implements MetricsSink {
   private static final Log LOG = LogFactory.getLog(InfluxDBSink.class);
-  public static final String SERVERS_KEY = "servers";
-  public static final int PORT_DEFAULT = 8086;
-  public static final String DB_KEY = "db";
-  public static final String DB_DEFAULT = "mydb";
+  static final String SERVERS_KEY = "servers";
+  static final int PORT_DEFAULT = 8086;
+  static final String DB_KEY = "db";
+  static final String DB_DEFAULT = "mydb";
   private final StringBuilder builder = new StringBuilder();
   private InfluxDB influxdb;
 
@@ -69,7 +69,10 @@ public class InfluxDBSink implements MetricsSink {
     influxdb.flush();
   }
 
-  public static StringBuilder buildLine(StringBuilder buf, MetricsRecord rec) {
+  /**
+   * Create metrics record expression in Line Protocol syntax of InfluxDB.
+   */
+  static StringBuilder buildLine(StringBuilder buf, MetricsRecord rec) {
     // measurement
     buf.append(rec.context())
        .append(".")
