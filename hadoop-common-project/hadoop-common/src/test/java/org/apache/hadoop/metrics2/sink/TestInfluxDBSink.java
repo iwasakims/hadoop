@@ -44,15 +44,30 @@ public class TestInfluxDBSink {
   }
 
   @Test
-  public void testINfluxDBSink() {
+  public void testDefaultConfiguration() {
     InfluxDBSink sink = new InfluxDBSink();
-    ConfigBuilder cb = new ConfigBuilder()
-        .add("test.sink.influxdb.servers", "localhost:8086")
-        .add("test.sink.influxdb.db", "mydb");
-    sink.init(cb.subset("test.sink.influxdb"));
+    ConfigBuilder cb = new ConfigBuilder();
+    InfluxDBSink.InfluxDB  influxdb =
+        InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+    Assert.assertTrue(influxdb instanceof InfluxDBSink.HttpInfluxDB);
+    Assert.assertEquals("http://localhost:8086/write?db=mydb",
+        ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
 
-  private MetricsRecord getTestRecord() {
+  @Test
+  public void testConfiguration() {
+    InfluxDBSink sink = new InfluxDBSink();
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.servers", "host1:1234")
+        .add("test.sink.influxdb.db", "db1");
+    InfluxDBSink.InfluxDB  influxdb =
+        InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+    Assert.assertTrue(influxdb instanceof InfluxDBSink.HttpInfluxDB);
+    Assert.assertEquals("http://host1:1234/write?db=db1",
+        ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
+  }
+
+  private static MetricsRecord getTestRecord() {
     List<MetricsTag> tags = new ArrayList<MetricsTag>();
     tags.add(new MetricsTag(MsInfo.Context, "test"));
     tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
@@ -105,7 +120,7 @@ public class TestInfluxDBSink {
     };
   }
 
-  private class TestMetricsRecord implements MetricsRecord {
+  private static class TestMetricsRecord implements MetricsRecord {
     private final long timestamp;
     private final MetricsInfo info;
     private final List<MetricsTag> tags;
@@ -113,7 +128,6 @@ public class TestInfluxDBSink {
 
     public TestMetricsRecord(MetricsInfo info, long timestamp,
         List<MetricsTag> tags, Iterable<AbstractMetric> metrics) {
-
       this.timestamp = timestamp;
       this.info = info;
       this.tags = tags;
@@ -166,5 +180,7 @@ public class TestInfluxDBSink {
       cb.add("test.sink.influxdb.db", args[1]);
     }
     sink.init(cb.subset("test.sink.influxdb"));
+    sink.putMetrics(getTestRecord());
+    sink.flush();
   }
 }

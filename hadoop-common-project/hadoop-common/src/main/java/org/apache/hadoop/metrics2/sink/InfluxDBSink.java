@@ -55,7 +55,6 @@ public class InfluxDBSink implements MetricsSink {
   @Override
   public void init(SubsetConfiguration conf) {
     influxdb = getInfluxDB(conf);
-    influxdb.init(conf);
   }
 
   @Override
@@ -111,8 +110,10 @@ public class InfluxDBSink implements MetricsSink {
     return buf;
   }
 
-  private static InfluxDB getInfluxDB(SubsetConfiguration conf) {
-    return new HttpInfluxDB();
+  static InfluxDB getInfluxDB(SubsetConfiguration conf) {
+    InfluxDB influxdb = new HttpInfluxDB();
+    influxdb.init(conf);
+    return influxdb;
   }
 
   interface InfluxDB {
@@ -146,6 +147,10 @@ public class InfluxDBSink implements MetricsSink {
 
     @Override
     public void flush() {
+    }
+
+    String getURI() {
+      return post.getURI().toString();
     }
   }
 }
