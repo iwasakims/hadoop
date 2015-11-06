@@ -112,13 +112,13 @@ public class InfluxDBSink implements MetricsSink {
     return new HttpInfluxDB();
   }
 
-  public interface InfluxDB {
+  interface InfluxDB {
     void init(SubsetConfiguration conf);
     void putLine(String record);
     void flush();
   }
 
-  private static class HttpInfluxDB implements InfluxDB {
+  static class HttpInfluxDB implements InfluxDB {
     private HttpClient client;
     private HttpPost post;
 
