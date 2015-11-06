@@ -33,6 +33,7 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -103,7 +104,7 @@ public class InfluxDBSink implements MetricsSink {
     
     // The record timestamp is in milliseconds
     // while InfluxDB expects nanoseconds.
-    buf.append(rec.timestamp() * 1000L);
+    buf.append(rec.timestamp() * 1000000L);
 
     buf.append("\n");
 
@@ -140,8 +141,10 @@ public class InfluxDBSink implements MetricsSink {
     @Override
     public void putLine(String record) {
       try {
+        post.setEntity(new StringEntity(record));
         HttpResponse response = client.execute(post);
       } catch (IOException e) {
+        LOG.debug("Error while posting metrics record.", e);
       }
     }
 
