@@ -33,10 +33,13 @@ import org.apache.hadoop.net.NetUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.net.InetSocketAddress;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
 import java.util.List;
 
 /**
@@ -46,6 +49,9 @@ import java.util.List;
 @InterfaceStability.Evolving
 public class InfluxDBSink implements MetricsSink {
   private static final Log LOG = LogFactory.getLog(InfluxDBSink.class);
+  private static final Charset UTF8 = Charset.forName("UTF-8");
+  static final String PROTOCOL_KEY = "protocol";
+  static final String PROTOCOL_DEFAULT = "http";
   static final String SERVERS_KEY = "servers";
   static final int PORT_DEFAULT = 8086;
   static final String DB_KEY = "db";
@@ -66,7 +72,6 @@ public class InfluxDBSink implements MetricsSink {
   
   @Override
   public void flush() {
-    influxdb.flush();
   }
 
   /**
@@ -112,7 +117,10 @@ public class InfluxDBSink implements MetricsSink {
   }
 
   static InfluxDB getInfluxDB(SubsetConfiguration conf) {
-    InfluxDB influxdb = new HttpInfluxDB();
+    String protocol =
+        conf.getString(PROTOCOL_KEY, PROTOCOL_DEFAULT).toUpperCase();
+    InfluxDB influxdb =
+        protocol.equals("HTTP")? new HttpInfluxDB() : new UdpInfluxDB();
     influxdb.init(conf);
     return influxdb;
   }
@@ -120,7 +128,6 @@ public class InfluxDBSink implements MetricsSink {
   interface InfluxDB {
     void init(SubsetConfiguration conf);
     void putLine(String record);
-    void flush();
   }
 
   static class HttpInfluxDB implements InfluxDB {
@@ -141,19 +148,45 @@ public class InfluxDBSink implements MetricsSink {
     @Override
     public void putLine(String record) {
       try {
-        post.setEntity(new StringEntity(record));
+        post.setEntity(new ByteArrayEntity(record.getBytes(UTF8)));
         HttpResponse response = client.execute(post);
       } catch (IOException e) {
         LOG.debug("Error while posting metrics record.", e);
       }
     }
 
-    @Override
-    public void flush() {
-    }
-
     String getURI() {
       return post.getURI().toString();
+    }
+  }
+
+  static class UdpInfluxDB implements InfluxDB {
+    private DatagramSocket socket;
+    private List<InetSocketAddress> servers;
+    
+    @Override
+    public void init(SubsetConfiguration conf) {
+      try {
+        socket = new DatagramSocket();
+      } catch (IOException e) {
+        LOG.error(e);
+      }
+      servers = Servers.parse(conf.getString(SERVERS_KEY), PORT_DEFAULT);
+    }
+
+    @Override
+    public void putLine(String record) {
+      if (socket != null) {
+        try {
+          for (InetSocketAddress addr : servers) {
+            byte[] buf = record.getBytes(UTF8);
+            socket.send(new DatagramPacket(buf, buf.length, addr));
+          }
+        } catch (IOException e) {
+          LOG.info(e);
+          throw new MetricsException("Failed to putMetrics", e);
+        }
+      }
     }
   }
 }
