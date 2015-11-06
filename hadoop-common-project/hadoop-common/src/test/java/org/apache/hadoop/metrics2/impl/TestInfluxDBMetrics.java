@@ -79,18 +79,11 @@ public class TestInfluxDBMetrics {
   }
   
   private static class TestMetric extends AbstractMetric {
-    private final String name;
     private final Number value;
 
     public TestMetric(String name, Number value) {
       super(new TestMetricsInfo(name));
-      this.name = name;
       this.value = value;
-    }
-
-    @Override 
-    public String name() {
-      return name;
     }
 
     @Override 
