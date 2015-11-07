@@ -91,13 +91,13 @@ public class TestInfluxDBSink {
     main(new String[]{"localhost:8087", "udp"});
   }
 
-  private static MetricsRecord getTestRecord(long timestamp, long metrics1) {
+  private static MetricsRecord getTestRecord(long timestamp, long metric1) {
     List<MetricsTag> tags = new ArrayList<MetricsTag>();
     tags.add(new MetricsTag(MsInfo.Context, "test"));
     tags.add(new MetricsTag(MsInfo.Hostname, "host1"));
     tags.add(new MetricsTag(MsInfo.ProcessName, "process name"));
     List<AbstractMetric> metrics = new ArrayList<AbstractMetric>();
-    metrics.add(new TestMetric("metric1", metrics1));
+    metrics.add(new TestMetric("metric1", metric1));
     metrics.add(new TestMetric("metric2", 2.0));
     MetricsInfo info = new TestMetricsInfo("name1");
     return new TestMetricsRecord(info, (long) timestamp, tags, metrics);
