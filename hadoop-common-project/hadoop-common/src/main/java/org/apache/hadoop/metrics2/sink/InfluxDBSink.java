@@ -114,7 +114,7 @@ public class InfluxDBSink implements MetricsSink {
     }
 
     buf.append(" ");
-  
+
     // The record timestamp is in milliseconds
     // while InfluxDB expects nanoseconds.
     buf.append(rec.timestamp() * 1000000L);
