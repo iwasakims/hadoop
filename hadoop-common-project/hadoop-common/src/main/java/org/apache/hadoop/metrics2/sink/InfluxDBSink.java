@@ -31,10 +31,12 @@ import org.apache.hadoop.metrics2.MetricsTag;
 import org.apache.hadoop.metrics2.util.Servers;
 import org.apache.hadoop.net.NetUtils;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.util.EntityUtils;
 import java.io.IOException;
 import java.nio.charset.Charset;
 import java.net.InetSocketAddress;
@@ -150,6 +152,11 @@ public class InfluxDBSink implements MetricsSink {
       try {
         post.setEntity(new ByteArrayEntity(record.getBytes(UTF8)));
         HttpResponse response = client.execute(post);
+        int status = response.getStatusLine().getStatusCode();
+        if (status >= HttpStatus.SC_BAD_REQUEST) {
+          LOG.debug(response.getStatusLine().getReasonPhrase());
+        }
+        EntityUtils.consumeQuietly(response.getEntity());
       } catch (IOException e) {
         LOG.debug("Error while posting metrics record.", e);
       }
