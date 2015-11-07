@@ -68,8 +68,12 @@ public class InfluxDBSink implements MetricsSink {
 
   @Override
   public void putMetrics(MetricsRecord record) {
-    builder.setLength(0);
-    influxdb.putLine(buildLine(builder, record).toString());
+    if (record.metrics().iterator().hasNext()) {
+      builder.setLength(0);
+      String line = buildLine(builder, record).toString();
+      LOG.trace(line);
+      influxdb.putLine(line);
+    }
   }
 
   @Override
@@ -91,7 +95,9 @@ public class InfluxDBSink implements MetricsSink {
         buf.append(",")
            .append(tag.name())
            .append("=")
-           .append(tag.value().replace(" ", "\\ "));
+           .append(tag.value().replace(" ", "\\ ")
+                              .replace("=", "\\=")
+                              .replace(",", "\\,"));
       }
     }
 
