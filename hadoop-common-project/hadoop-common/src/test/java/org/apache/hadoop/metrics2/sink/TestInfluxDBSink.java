@@ -38,7 +38,7 @@ import java.util.List;
 
 public class TestInfluxDBSink {
   private static final Log LOG = LogFactory.getLog(TestInfluxDBSink.class);
-  
+
   @Test
   public void testBuildLine() {
     MetricsRecord record = getTestRecord(10000L, 12345L);
@@ -90,7 +90,7 @@ public class TestInfluxDBSink {
   public void testUdpInfluxDBSink() {
     main(new String[]{"localhost:8087", "udp"});
   }
-  
+
   private static MetricsRecord getTestRecord(long timestamp, long metrics1) {
     List<MetricsTag> tags = new ArrayList<MetricsTag>();
     tags.add(new MetricsTag(MsInfo.Context, "test"));

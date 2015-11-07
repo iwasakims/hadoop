@@ -43,7 +43,7 @@ import java.net.DatagramSocket;
 import java.util.List;
 
 /**
- * A metrics sink that writes to a InfluxDB
+ * A metrics sink that writes to a InfluxDB.
  */
 @InterfaceAudience.Public
 @InterfaceStability.Evolving
@@ -69,7 +69,7 @@ public class InfluxDBSink implements MetricsSink {
     builder.setLength(0);
     influxdb.putLine(buildLine(builder, record).toString());
   }
-  
+
   @Override
   public void flush() {
   }
@@ -106,7 +106,7 @@ public class InfluxDBSink implements MetricsSink {
     }
 
     buf.append(" ");
-    
+  
     // The record timestamp is in milliseconds
     // while InfluxDB expects nanoseconds.
     buf.append(rec.timestamp() * 1000000L);
@@ -163,7 +163,7 @@ public class InfluxDBSink implements MetricsSink {
   static class UdpInfluxDB implements InfluxDB {
     private DatagramSocket socket;
     private List<InetSocketAddress> servers;
-    
+
     @Override
     public void init(SubsetConfiguration conf) {
       try {
@@ -177,9 +177,9 @@ public class InfluxDBSink implements MetricsSink {
     @Override
     public void putLine(String record) {
       if (socket != null) {
+        byte[] buf = record.getBytes(UTF8);
         try {
           for (InetSocketAddress addr : servers) {
-            byte[] buf = record.getBytes(UTF8);
             socket.send(new DatagramPacket(buf, buf.length, addr));
           }
         } catch (IOException e) {
