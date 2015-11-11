@@ -20,7 +20,6 @@ package org.apache.hadoop.hdfs.tools;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import java.net.ServerSocket;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -110,13 +109,12 @@ public class TestDFSZKFailoverController extends ClientBaseWithFixes {
     // get rancomly chosen port number of ZKFC's rpc server on startup.
     int port1 = thr1.getZkfcPort();
     int port2 = thr2.getZkfcPort();
-
-    // ZKFC need to know port number of other ZKFC's rpc server from conf.
+    // ZKFC needs port number of other ZKFC's rpc server to create
+    // NNHAServiceTarget in DFSZKFailoverController#getAllOtherNodes.
     thr1.setZkfcPort(".ns1.nn1", port1);
     thr1.setZkfcPort(".ns1.nn2", port2);
     thr2.setZkfcPort(".ns1.nn1", port1);
     thr2.setZkfcPort(".ns1.nn2", port2);
-
     // set ZKFC port numbers for DFSHAAdmin.
     conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn1", port1);
     conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn2", port2);
