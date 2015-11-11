@@ -111,10 +111,8 @@ public class TestDFSZKFailoverController extends ClientBaseWithFixes {
     int port2 = thr2.getZkfcPort();
     // ZKFC needs port number of other ZKFC's rpc server to create
     // NNHAServiceTarget in DFSZKFailoverController#getAllOtherNodes.
-    thr1.setZkfcPort(".ns1.nn1", port1);
     thr1.setZkfcPort(".ns1.nn2", port2);
     thr2.setZkfcPort(".ns1.nn1", port1);
-    thr2.setZkfcPort(".ns1.nn2", port2);
     // set ZKFC port numbers for DFSHAAdmin.
     conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn1", port1);
     conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn2", port2);
