@@ -20,6 +20,7 @@ package org.apache.hadoop.hdfs.tools;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
+import java.net.ServerSocket;
 import java.util.concurrent.TimeoutException;
 
 import org.apache.hadoop.conf.Configuration;
@@ -76,14 +77,14 @@ public class TestDFSZKFailoverController extends ClientBaseWithFixes {
     conf.setInt(
         CommonConfigurationKeysPublic.IPC_CLIENT_CONNECTION_MAXIDLETIME_KEY,
         0);
-    
-    conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn1", 10023);
-    conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn2", 10024);
+
+    conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn1", 0);
+    conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn2", 0);
 
     MiniDFSNNTopology topology = new MiniDFSNNTopology()
     .addNameservice(new MiniDFSNNTopology.NSConf("ns1")
-        .addNN(new MiniDFSNNTopology.NNConf("nn1").setIpcPort(10021))
-        .addNN(new MiniDFSNNTopology.NNConf("nn2").setIpcPort(10022)));
+        .addNN(new MiniDFSNNTopology.NNConf("nn1").setIpcPort(0))
+        .addNN(new MiniDFSNNTopology.NNConf("nn2").setIpcPort(0)));
     cluster = new MiniDFSCluster.Builder(conf)
         .nnTopology(topology)
         .numDataNodes(0)
@@ -105,7 +106,21 @@ public class TestDFSZKFailoverController extends ClientBaseWithFixes {
         HealthMonitor.State.SERVICE_HEALTHY, ctx);
     ZKFCTestUtil.waitForHealthState(thr2.zkfc,
         HealthMonitor.State.SERVICE_HEALTHY, ctx);
-    
+
+    // get rancomly chosen port number of ZKFC's rpc server on startup.
+    int port1 = thr1.getZkfcPort();
+    int port2 = thr2.getZkfcPort();
+
+    // ZKFC need to know port number of other ZKFC's rpc server from conf.
+    thr1.setZkfcPort(".ns1.nn1", port1);
+    thr1.setZkfcPort(".ns1.nn2", port2);
+    thr2.setZkfcPort(".ns1.nn1", port1);
+    thr2.setZkfcPort(".ns1.nn2", port2);
+
+    // set ZKFC port numbers for DFSHAAdmin.
+    conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn1", port1);
+    conf.setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + ".ns1.nn2", port2);
+
     fs = HATestUtil.configureFailoverFs(cluster, conf);
   }
   
@@ -238,6 +253,13 @@ public class TestDFSZKFailoverController extends ClientBaseWithFixes {
         // Interrupted by main thread, that's OK.
       }
     }
-  }
 
+    int getZkfcPort() {
+      return ZKFCTestUtil.getRpcServerForTests(zkfc).getAddress().getPort();
+    }
+
+    synchronized void setZkfcPort(String suffix, int port) {
+      zkfc.getConf().setInt(DFSConfigKeys.DFS_HA_ZKFC_PORT_KEY + suffix, port);
+    }
+  }
 }

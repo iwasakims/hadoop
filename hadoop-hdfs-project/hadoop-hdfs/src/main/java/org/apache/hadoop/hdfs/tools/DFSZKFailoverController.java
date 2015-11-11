@@ -264,6 +264,11 @@ public class DFSZKFailoverController extends ZKFailoverController {
     return isThreadDumpCaptured;
   }
 
+  @VisibleForTesting
+  Configuration getConf() {
+    return conf;
+  }
+
   @Override
   public List<HAServiceTarget> getAllOtherNodes() {
     String nsId = DFSUtil.getNamenodeNameServiceId(conf);

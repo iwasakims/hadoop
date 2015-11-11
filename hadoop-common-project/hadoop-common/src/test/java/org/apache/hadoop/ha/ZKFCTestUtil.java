@@ -31,4 +31,8 @@ public class ZKFCTestUtil {
       Thread.sleep(50);
     }
   }
+
+  public static ZKFCRpcServer getRpcServerForTests(ZKFailoverController zkfc) {
+    return zkfc.getRpcServerForTests();
+  }
 }
