@@ -439,6 +439,7 @@ public class TestDNFencing {
       numQueued += numDN; // RBW messages      
     } finally {
       IOUtils.closeStream(out);
+      cluster.triggerHeartbeats();
       numQueued += numDN; // blockReceived messages
     }
 
