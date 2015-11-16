@@ -439,7 +439,6 @@ public class TestDNFencing {
       numQueued += numDN; // RBW messages      
     } finally {
       IOUtils.closeStream(out);
-      cluster.triggerHeartbeats();
       numQueued += numDN; // blockReceived messages
     }
 
@@ -457,6 +456,7 @@ public class TestDNFencing {
       numQueued += numDN * 2; // RBW messages, see comments in case 1
     } finally {
       IOUtils.closeStream(out);
+      cluster.triggerHeartbeats();
       numQueued += numDN; // blockReceived
     }
     assertEquals(numQueued, cluster.getNameNode(1).getNamesystem().
