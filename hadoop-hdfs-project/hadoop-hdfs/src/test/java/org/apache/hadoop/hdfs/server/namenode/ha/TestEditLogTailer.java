@@ -143,13 +143,14 @@ public class TestEditLogTailer {
                     .setIpcPort(ports[1]))
                 .addNN(new MiniDFSNNTopology.NNConf("nn3")
                     .setIpcPort(ports[2])));
+
         cluster = new MiniDFSCluster.Builder(conf)
           .nnTopology(topology)
           .numDataNodes(0)
           .build();
         break;
       } catch (BindException e) {
-        // retry if race on port given by ServerSocketUtil#getPorts
+        // retry if race on ports given by ServerSocketUtil#getPorts
         continue;
       }
     }

@@ -65,6 +65,8 @@ public class ServerSocketUtil {
 
   /**
    * Find the specified number of unique ports avaliable.
+   * The ports are all closed afterwards,
+   * so other network services started may grab those same ports.
    *
    * @param numPorts number of required port nubmers
    * @return array of available port numbers
