@@ -18,10 +18,12 @@
 package org.apache.hadoop.hdfs.server.namenode.ha;
 
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.BindException;
 
 import org.apache.hadoop.conf.Configuration;
 import org.apache.hadoop.fs.permission.FsPermission;
@@ -127,21 +129,33 @@ public class TestEditLogTailer {
     conf.setInt(DFSConfigKeys.DFS_HA_LOGROLL_PERIOD_KEY, 1);
     conf.setInt(DFSConfigKeys.DFS_HA_TAILEDITS_PERIOD_KEY, 1);
     conf.setInt(DFSConfigKeys.DFS_HA_TAILEDITS_ALL_NAMESNODES_RETRY_KEY, 100);
-    
-    // Have to specify IPC ports so the NNs can talk to each other.
-    MiniDFSNNTopology topology = new MiniDFSNNTopology()
-        .addNameservice(new MiniDFSNNTopology.NSConf("ns1")
-            .addNN(new MiniDFSNNTopology.NNConf("nn1")
-                .setIpcPort(ServerSocketUtil.getPort(0, 100)))
-            .addNN(new MiniDFSNNTopology.NNConf("nn2")
-                .setIpcPort(ServerSocketUtil.getPort(0, 100)))
-            .addNN(new MiniDFSNNTopology.NNConf("nn3")
-                .setIpcPort(ServerSocketUtil.getPort(0, 100))));
 
-    MiniDFSCluster cluster = new MiniDFSCluster.Builder(conf)
-      .nnTopology(topology)
-      .numDataNodes(0)
-      .build();
+    MiniDFSCluster cluster = null;
+    for (int i = 0; i < 5; i++) {
+      try {
+        // Have to specify IPC ports so the NNs can talk to each other.
+        int[] ports = ServerSocketUtil.getPorts(3);
+        MiniDFSNNTopology topology = new MiniDFSNNTopology()
+            .addNameservice(new MiniDFSNNTopology.NSConf("ns1")
+                .addNN(new MiniDFSNNTopology.NNConf("nn1")
+                    .setIpcPort(ports[0]))
+                .addNN(new MiniDFSNNTopology.NNConf("nn2")
+                    .setIpcPort(ports[1]))
+                .addNN(new MiniDFSNNTopology.NNConf("nn3")
+                    .setIpcPort(ports[2])));
+        cluster = new MiniDFSCluster.Builder(conf)
+          .nnTopology(topology)
+          .numDataNodes(0)
+          .build();
+        break;
+      } catch (BindException e) {
+        // retry if race on port given by ServerSocketUtil#getPorts
+        continue;
+      }
+    }
+    if (cluster == null) {
+      fail("failed to start mini cluster.");
+    }
     try {
       cluster.transitionToActive(activeIndex);
       waitForLogRollInSharedDir(cluster, 3);
