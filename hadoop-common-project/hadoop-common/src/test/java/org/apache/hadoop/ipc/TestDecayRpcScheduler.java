@@ -121,7 +121,7 @@ public class TestDecayRpcScheduler {
   public void testAccumulate() {
     Configuration conf = new Configuration();
     conf.set("ns." + DecayRpcScheduler.IPC_CALLQUEUE_DECAYSCHEDULER_PERIOD_KEY, "99999999"); // Never flush
-    scheduler = new DecayRpcScheduler(1, "ns", conf);
+    scheduler = new DecayRpcScheduler(1, "ns", conf, 60000L);
 
     assertEquals(0, scheduler.getCallCountSnapshot().size()); // empty first
 
@@ -189,7 +189,7 @@ public class TestDecayRpcScheduler {
     conf.set("ns." + DecayRpcScheduler.IPC_CALLQUEUE_DECAYSCHEDULER_PERIOD_KEY, "99999999"); // Never flush
     conf.set("ns." + DecayRpcScheduler.IPC_CALLQUEUE_DECAYSCHEDULER_THRESHOLDS_KEY,
       "25, 50, 75");
-    scheduler = new DecayRpcScheduler(4, "ns", conf);
+    scheduler = new DecayRpcScheduler(4, "ns", conf, 60000L);
 
     assertEquals(0, scheduler.getPriorityLevel(mockCall("A")));
     assertEquals(2, scheduler.getPriorityLevel(mockCall("A")));
