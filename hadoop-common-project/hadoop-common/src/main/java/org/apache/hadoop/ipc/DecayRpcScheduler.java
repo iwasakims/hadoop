@@ -138,15 +138,6 @@ public class DecayRpcScheduler implements RpcScheduler, DecayRpcSchedulerMXBean 
    * @param conf configuration to use.
    */
   public DecayRpcScheduler(int numQueues, String ns, Configuration conf) {
-    this(numQueues, ns, conf, 0L);
-  }
-
-  /**
-   * Create a decay scheduler.
-   * Initial delay for DecayTask can be set for tests.
-   */
-  @VisibleForTesting
-  DecayRpcScheduler(int numQueues, String ns, Configuration conf, long delay) {
     if (numQueues < 1) {
       throw new IllegalArgumentException("number of queues must be > 0");
     }
@@ -160,7 +151,7 @@ public class DecayRpcScheduler implements RpcScheduler, DecayRpcSchedulerMXBean 
     // Setup delay timer
     Timer timer = new Timer();
     DecayTask task = new DecayTask(this, timer);
-    timer.scheduleAtFixedRate(task, delay, this.decayPeriodMillis);
+    timer.scheduleAtFixedRate(task, decayPeriodMillis, decayPeriodMillis);
 
     MetricsProxy prox = MetricsProxy.getInstance(ns);
     prox.setDelegate(this);
