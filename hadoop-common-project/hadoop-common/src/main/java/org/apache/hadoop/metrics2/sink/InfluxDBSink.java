@@ -72,7 +72,11 @@ public class InfluxDBSink implements MetricsSink {
       builder.setLength(0);
       String line = buildLine(builder, record).toString();
       LOG.trace(line);
-      influxdb.putLine(line);
+      try {
+        influxdb.putLine(line);
+      } catch (IOException e) {
+        throw new MetricsException("Failed to put metrics.", e);
+      }
     }
   }
 
@@ -135,7 +139,7 @@ public class InfluxDBSink implements MetricsSink {
 
   interface InfluxDB {
     void init(SubsetConfiguration conf);
-    void putLine(String record);
+    void putLine(String record) throws IOException;
   }
 
   static class HttpInfluxDB implements InfluxDB {
@@ -154,7 +158,7 @@ public class InfluxDBSink implements MetricsSink {
     }
 
     @Override
-    public void putLine(String record) {
+    public void putLine(String record) throws IOException {
       try {
         post.setEntity(new ByteArrayEntity(record.getBytes(UTF8)));
         HttpResponse response = client.execute(post);
@@ -164,7 +168,7 @@ public class InfluxDBSink implements MetricsSink {
         }
         EntityUtils.consumeQuietly(response.getEntity());
       } catch (IOException e) {
-        LOG.debug("Error while posting metrics record.", e);
+        throw new MetricsException("Failed to put metrics.", e);
       }
     }
 
@@ -182,22 +186,17 @@ public class InfluxDBSink implements MetricsSink {
       try {
         socket = new DatagramSocket();
       } catch (IOException e) {
-        LOG.error(e);
+        LOG.error("Failed to create datagram socket.", e);
       }
       servers = Servers.parse(conf.getString(SERVERS_KEY), PORT_DEFAULT);
     }
 
     @Override
-    public void putLine(String record) {
+    public void putLine(String record) throws IOException {
       if (socket != null) {
         byte[] buf = record.getBytes(UTF8);
-        try {
-          for (InetSocketAddress addr : servers) {
-            socket.send(new DatagramPacket(buf, buf.length, addr));
-          }
-        } catch (IOException e) {
-          LOG.debug(e);
-          throw new MetricsException("Failed to putMetrics", e);
+        for (InetSocketAddress addr : servers) {
+          socket.send(new DatagramPacket(buf, buf.length, addr));
         }
       }
     }
