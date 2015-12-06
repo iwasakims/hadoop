@@ -53,7 +53,8 @@ public class TestInfluxDBSink {
     ConfigBuilder cb = new ConfigBuilder();
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
-    Assert.assertTrue(influxdb instanceof InfluxDBSink.HttpInfluxDB);
+    Assert.assertTrue("instance must be HttpInfluxDB",
+        influxdb instanceof InfluxDBSink.HttpInfluxDB);
     Assert.assertEquals("http://localhost:8086/write?db=mydb",
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
@@ -65,7 +66,8 @@ public class TestInfluxDBSink {
         .add("test.sink.influxdb.db", "db1");
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
-    Assert.assertTrue(influxdb instanceof InfluxDBSink.HttpInfluxDB);
+    Assert.assertTrue("instance must be HttpInfluxDB",
+        influxdb instanceof InfluxDBSink.HttpInfluxDB);
     Assert.assertEquals("http://host1:1234/write?db=db1",
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
@@ -76,18 +78,19 @@ public class TestInfluxDBSink {
         .add("test.sink.influxdb.protocol", "udp");
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
-    Assert.assertTrue(influxdb instanceof InfluxDBSink.UdpInfluxDB);
+    Assert.assertTrue("instance must be UdpInfluxDB",
+        influxdb instanceof InfluxDBSink.UdpInfluxDB);
   }
 
   @Ignore
   @Test
-  public void testHttpInfluxDBSink() {
+  public void testHttpInfluxDBSink() throws Exception {
     main(new String[]{"localhost:8086", "http", "mydb"});
   }
 
   @Ignore
   @Test
-  public void testUdpInfluxDBSink() {
+  public void testUdpInfluxDBSink() throws Exception {
     main(new String[]{"localhost:8087", "udp"});
   }
 
@@ -194,7 +197,7 @@ public class TestInfluxDBSink {
     }
   }
 
-  public static void main(String[] args) {
+  public static void main(String[] args) throws Exception {
     ConfigBuilder cb = new ConfigBuilder();
     if (args.length > 0) {
       cb.add("test.sink.influxdb.servers", args[0]);
@@ -208,6 +211,7 @@ public class TestInfluxDBSink {
     InfluxDBSink sink = new InfluxDBSink();
     sink.init(cb.subset("test.sink.influxdb"));
     sink.putMetrics(getTestRecord(System.currentTimeMillis(), 10));
+    Thread.sleep(1000);
     sink.putMetrics(getTestRecord(System.currentTimeMillis(), 20));
     sink.flush();
   }
