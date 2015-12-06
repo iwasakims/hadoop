@@ -18,6 +18,10 @@
 
 package org.apache.hadoop.metrics2.sink;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.metrics2.AbstractMetric;
@@ -31,7 +35,6 @@ import org.apache.hadoop.metrics2.impl.MsInfo;
 import org.apache.hadoop.metrics2.sink.InfluxDBSink;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.Assert;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -42,49 +45,116 @@ public class TestInfluxDBSink {
   @Test
   public void testBuildLine() {
     MetricsRecord record = getTestRecord(10000L, 12345L);
-    Assert.assertEquals(
+    assertEquals(
         "test.name1,Context=test,Hostname=host1,ProcessName=process\\ name" +
         " metric1=12345,metric2=2.0 10000000000\n",
         InfluxDBSink.buildLine(new StringBuilder(), record).toString());
   }
 
   @Test
-  public void testDefaultConfiguration() {
+  public void testDefaultConfiguration() throws IOException {
     ConfigBuilder cb = new ConfigBuilder();
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
-    Assert.assertTrue("instance must be HttpInfluxDB",
+    assertTrue("instance must be HttpInfluxDB",
         influxdb instanceof InfluxDBSink.HttpInfluxDB);
-    Assert.assertEquals("http://localhost:8086/write?db=mydb",
+    assertEquals("http://localhost:8086/write?db=mydb",
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
 
   @Test
-  public void testConfiguration() {
+  public void testHttpConfiguration() throws IOException {
     ConfigBuilder cb = new ConfigBuilder()
         .add("test.sink.influxdb.servers", "host1:1234")
         .add("test.sink.influxdb.db", "db1");
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
-    Assert.assertTrue("instance must be HttpInfluxDB",
+    assertTrue("instance must be HttpInfluxDB",
         influxdb instanceof InfluxDBSink.HttpInfluxDB);
-    Assert.assertEquals("http://host1:1234/write?db=db1",
+    assertEquals("http://host1:1234/write?db=db1",
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
   }
 
   @Test
-  public void testUdpConfiguration() {
+  public void testUdpConfiguration() throws IOException {
     ConfigBuilder cb = new ConfigBuilder()
         .add("test.sink.influxdb.protocol", "udp");
     InfluxDBSink.InfluxDB  influxdb =
         InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
-    Assert.assertTrue("instance must be UdpInfluxDB",
+    assertTrue("instance must be UdpInfluxDB",
         influxdb instanceof InfluxDBSink.UdpInfluxDB);
   }
 
+  @Test
+  public void testInvalidProtocolConfiguration() throws IOException {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.protocol", "invlid");
+    try {
+      InfluxDBSink.InfluxDB  influxdb =
+          InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+      fail("should throw exception for invalid configuration.");
+    } catch (IOException e) {
+      // should throw IOException.
+    }
+  }
+
+  @Test
+  public void testInvalidHttpServersConfiguration() throws IOException {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.protocol", "http")
+        .add("test.sink.influxdb.servers", "---invalid---");
+    try {
+      InfluxDBSink.InfluxDB  influxdb =
+          InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+      fail("should throw exception for invalid servers configuration.");
+    } catch (IllegalArgumentException e) {
+      // should throw IllegalArgumentException.
+    }
+  }
+
+  @Test
+  public void testInvalidUdpServersConfiguration() throws IOException {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.protocol", "udp")
+        .add("test.sink.influxdb.servers", "---invalid,servers---");
+    try {
+      InfluxDBSink.InfluxDB  influxdb =
+          InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+      fail("should throw exception for invalid servers configuration.");
+    } catch (IllegalArgumentException e) {
+      // should throw IllegalArgumentException.
+    }
+  }
+
+  @Test
+  public void testInitFailure1() throws IOException {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.protocol", "invlid");
+    InfluxDBSink sink = new InfluxDBSink();
+
+    // should not throw exception
+    sink.init(cb.subset("test.sink.influxdb"));
+
+    // should be no-op
+    sink.putMetrics(null);
+  }
+  
+  @Test
+  public void testInitFailure2() throws IOException {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.servers", "---invlid---");
+    InfluxDBSink sink = new InfluxDBSink();
+
+    // should not throw exception
+    sink.init(cb.subset("test.sink.influxdb"));
+
+    // should be no-op
+    sink.putMetrics(null);
+  }
+  
   @Ignore
   @Test
-  public void testHttpInfluxDBSink() throws Exception {
+  public void testHttpInflnuxDBSink() throws Exception {
     main(new String[]{"localhost:8086", "http", "mydb"});
   }
 

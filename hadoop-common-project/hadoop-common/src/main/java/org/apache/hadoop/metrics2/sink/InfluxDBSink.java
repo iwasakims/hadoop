@@ -42,6 +42,7 @@ import java.nio.charset.Charset;
 import java.net.InetSocketAddress;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.URI;
 import java.util.List;
 
 /**
@@ -59,23 +60,31 @@ public class InfluxDBSink implements MetricsSink {
   static final String DB_KEY = "db";
   static final String DB_DEFAULT = "mydb";
   private final StringBuilder builder = new StringBuilder();
-  private InfluxDB influxdb;
+  private InfluxDB influxdb = null;
 
   @Override
   public void init(SubsetConfiguration conf) {
-    influxdb = getInfluxDB(conf);
+    try {
+      influxdb = getInfluxDB(conf);
+    } catch (IOException e) {
+      LOG.error("Failed to initialize InfluxDB sink.", e);
+    } catch (IllegalArgumentException e) {
+      LOG.error("Failed to initialize InfluxDB sink.", e);
+    }
   }
 
   @Override
   public void putMetrics(MetricsRecord record) {
-    if (record.metrics().iterator().hasNext()) {
-      builder.setLength(0);
-      String line = buildLine(builder, record).toString();
-      LOG.trace(line);
-      try {
-        influxdb.putLine(line);
-      } catch (IOException e) {
-        throw new MetricsException("Failed to put metrics.", e);
+    if (influxdb != null) {
+      if (record.metrics().iterator().hasNext()) { // skip empty record
+        builder.setLength(0);
+        String line = buildLine(builder, record).toString();
+        LOG.trace(line);
+        try {
+          influxdb.putLine(line);
+        } catch (IOException e) {
+          throw new MetricsException("Failed to put metrics.", e);
+        }
       }
     }
   }
@@ -90,18 +99,18 @@ public class InfluxDBSink implements MetricsSink {
   static StringBuilder buildLine(StringBuilder buf, MetricsRecord rec) {
     // measurement
     buf.append(rec.context())
-       .append(".")
-       .append(rec.name());
+        .append(".")
+        .append(rec.name());
 
     // tags
     for (MetricsTag tag : rec.tags()) {
       if (tag.value() != null) {
         buf.append(",")
-           .append(tag.name())
-           .append("=")
-           .append(tag.value().replace(" ", "\\ ")
-                              .replace("=", "\\=")
-                              .replace(",", "\\,"));
+            .append(tag.name())
+            .append("=")
+            .append(tag.value().replace(" ", "\\ ")
+                               .replace("=", "\\=")
+                               .replace(",", "\\,"));
       }
     }
 
@@ -128,17 +137,23 @@ public class InfluxDBSink implements MetricsSink {
     return buf;
   }
 
-  static InfluxDB getInfluxDB(SubsetConfiguration conf) {
+  static InfluxDB getInfluxDB(SubsetConfiguration conf) throws IOException {
     String protocol =
         conf.getString(PROTOCOL_KEY, PROTOCOL_DEFAULT).toUpperCase();
-    InfluxDB influxdb =
-        protocol.equals("HTTP")? new HttpInfluxDB() : new UdpInfluxDB();
+    InfluxDB influxdb = null;
+    if (protocol.equals("HTTP")) {
+      influxdb = new HttpInfluxDB();
+    } else if (protocol.equals("UDP")) {
+      influxdb = new UdpInfluxDB();
+    } else {
+      throw new IOException("invalid protocol: " + protocol);
+    }
     influxdb.init(conf);
     return influxdb;
   }
 
   interface InfluxDB {
-    void init(SubsetConfiguration conf);
+    void init(SubsetConfiguration conf) throws IOException;
     void putLine(String record) throws IOException;
   }
 
@@ -147,14 +162,18 @@ public class InfluxDBSink implements MetricsSink {
     private HttpPost post;
 
     @Override
-    public void init(SubsetConfiguration conf) {
+    public void init(SubsetConfiguration conf) throws IOException {
       client = new DefaultHttpClient();
       List<InetSocketAddress> servers =
           Servers.parse(conf.getString(SERVERS_KEY), PORT_DEFAULT);
       String url =
           "http://" + NetUtils.getHostPortString(servers.get(0)) +
           "/write?db=" + conf.getString(DB_KEY, DB_DEFAULT);
-      post = new HttpPost(url);
+      try {
+        post = new HttpPost(URI.create(url));
+      } catch (IllegalArgumentException e) {
+        throw new IOException(e);
+      }
     }
 
     @Override
@@ -182,13 +201,9 @@ public class InfluxDBSink implements MetricsSink {
     private List<InetSocketAddress> servers;
 
     @Override
-    public void init(SubsetConfiguration conf) {
-      try {
-        socket = new DatagramSocket();
-      } catch (IOException e) {
-        LOG.error("Failed to create datagram socket.", e);
-      }
+    public void init(SubsetConfiguration conf) throws IOException {
       servers = Servers.parse(conf.getString(SERVERS_KEY), PORT_DEFAULT);
+      socket = new DatagramSocket();
     }
 
     @Override
