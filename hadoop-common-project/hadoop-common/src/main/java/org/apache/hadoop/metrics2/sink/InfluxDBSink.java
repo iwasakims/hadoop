@@ -18,6 +18,13 @@
 
 package org.apache.hadoop.metrics2.sink;
 
+import com.google.common.annotations.VisibleForTesting;
+import java.io.IOException;
+import java.nio.charset.Charset;
+import java.net.InetSocketAddress;
+import java.net.DatagramPacket;
+import java.net.DatagramSocket;
+import java.util.List;
 import org.apache.commons.configuration.SubsetConfiguration;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -36,14 +43,9 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.util.EntityUtils;
-import java.io.IOException;
-import java.nio.charset.Charset;
-import java.net.InetSocketAddress;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.URI;
-import java.util.List;
 
 /**
  * A metrics sink that writes to a InfluxDB.
@@ -53,12 +55,16 @@ import java.util.List;
 public class InfluxDBSink implements MetricsSink {
   private static final Log LOG = LogFactory.getLog(InfluxDBSink.class);
   private static final Charset UTF8 = Charset.forName("UTF-8");
+  static final String DB_KEY = "db";
+  static final String DB_DEFAULT = "mydb";
   static final String PROTOCOL_KEY = "protocol";
   static final String PROTOCOL_DEFAULT = "http";
   static final String SERVERS_KEY = "servers";
   static final int PORT_DEFAULT = 8086;
-  static final String DB_KEY = "db";
-  static final String DB_DEFAULT = "mydb";
+  static final String CONNECTION_TIMEOUT_KEY = "connection-timeout";
+  static final int CONNECTION_TIMEOUT_DEFAULT = 60000;
+  static final String SOTIMEOUT_KEY = "sotimeout";
+  static final int SOTIMEOUT_DEFAULT = 60000;
   private final StringBuilder builder = new StringBuilder();
   private InfluxDB influxdb = null;
 
@@ -163,17 +169,18 @@ public class InfluxDBSink implements MetricsSink {
 
     @Override
     public void init(SubsetConfiguration conf) throws IOException {
-      client = new DefaultHttpClient();
       List<InetSocketAddress> servers =
           Servers.parse(conf.getString(SERVERS_KEY), PORT_DEFAULT);
       String url =
           "http://" + NetUtils.getHostPortString(servers.get(0)) +
           "/write?db=" + conf.getString(DB_KEY, DB_DEFAULT);
-      try {
-        post = new HttpPost(URI.create(url));
-      } catch (IllegalArgumentException e) {
-        throw new IOException(e);
-      }
+      post = new HttpPost(url);
+      client = new DefaultHttpClient();
+      HttpParams params = client.getParams();
+      HttpConnectionParams.setConnectionTimeout(params,
+          conf.getInt(CONNECTION_TIMEOUT_KEY, CONNECTION_TIMEOUT_DEFAULT));
+      HttpConnectionParams.setSoTimeout(params,
+          conf.getInt(SOTIMEOUT_KEY, SOTIMEOUT_DEFAULT));
     }
 
     @Override
@@ -191,6 +198,12 @@ public class InfluxDBSink implements MetricsSink {
       }
     }
 
+    @VisibleForTesting
+    HttpClient getClient() {
+      return client;
+    }
+
+    @VisibleForTesting
     String getURI() {
       return post.getURI().toString();
     }
