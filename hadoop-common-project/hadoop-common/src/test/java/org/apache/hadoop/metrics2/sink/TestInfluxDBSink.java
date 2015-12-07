@@ -22,6 +22,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.apache.hadoop.metrics2.AbstractMetric;
@@ -33,11 +36,10 @@ import org.apache.hadoop.metrics2.MetricType;
 import org.apache.hadoop.metrics2.impl.ConfigBuilder;
 import org.apache.hadoop.metrics2.impl.MsInfo;
 import org.apache.hadoop.metrics2.sink.InfluxDBSink;
+import org.apache.http.params.HttpParams;
+import org.apache.http.params.HttpConnectionParams;
 import org.junit.Ignore;
 import org.junit.Test;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class TestInfluxDBSink {
   private static final Log LOG = LogFactory.getLog(TestInfluxDBSink.class);
@@ -73,6 +75,22 @@ public class TestInfluxDBSink {
         influxdb instanceof InfluxDBSink.HttpInfluxDB);
     assertEquals("http://host1:1234/write?db=db1",
         ((InfluxDBSink.HttpInfluxDB) influxdb).getURI());
+  }
+
+  @Test
+  public void testHttpParams() throws IOException {
+    ConfigBuilder cb = new ConfigBuilder()
+        .add("test.sink.influxdb.protocol", "http")
+        .add("test.sink.influxdb.connection-timeout", "30000")
+        .add("test.sink.influxdb.sotimeout", "60000");
+    InfluxDBSink.InfluxDB  influxdb =
+        InfluxDBSink.getInfluxDB(cb.subset("test.sink.influxdb"));
+    assertTrue("instance must be HttpInfluxDB",
+        influxdb instanceof InfluxDBSink.HttpInfluxDB);
+    HttpParams params =
+        ((InfluxDBSink.HttpInfluxDB) influxdb).getClient().getParams();
+    assertEquals(30000, HttpConnectionParams.getConnectionTimeout(params));
+    assertEquals(60000, HttpConnectionParams.getSoTimeout(params));
   }
 
   @Test
