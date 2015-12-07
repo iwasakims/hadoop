@@ -67,6 +67,7 @@
       <item name="Service Level Authorization" href="hadoop-project-dist/hadoop-common/ServiceLevelAuth.html"/>
       <item name="HTTP Authentication" href="hadoop-project-dist/hadoop-common/HttpAuthentication.html"/>
       <item name="Hadoop KMS" href="hadoop-kms/index.html"/>
+      <item name="Metrics" href="hadoop-project-dist/hadoop-common/Metrics.html"/>
       <item name="Tracing" href="hadoop-project-dist/hadoop-common/Tracing.html"/>
       <item name="Unix Shell Guide" href="hadoop-project-dist/hadoop-common/UnixShellGuide.html"/>
     </menu>
@@ -167,7 +168,7 @@
       <item name="Changelog and Release Notes" href="hadoop-project-dist/hadoop-common/release/index.html"/>
       <item name="Java API docs" href="api/index.html"/>
       <item name="Unix Shell API" href="hadoop-project-dist/hadoop-common/UnixShellAPI.html"/>
-      <item name="Metrics" href="hadoop-project-dist/hadoop-common/Metrics.html"/>
+      <item name="Metrics" href="hadoop-project-dist/hadoop-common/Metrics.html#Reference"/>
     </menu>
     
     <menu name="Configuration" inherit="top">
