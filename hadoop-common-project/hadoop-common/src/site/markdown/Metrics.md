@@ -13,6 +13,9 @@
 -->
 
 * [Overview](#Overview)
+* [Configuration](#Configuration)
+* [Metrics Sinks](#Metrics_Sinks)
+* [Developing Metrics Sink](#Developing_Metrics_Sink)
 * [Reference](#Reference)
     * [jvm context](#jvm_context)
         * [JvmMetrics](#JvmMetrics)
@@ -46,6 +49,20 @@ Metrics are statistical information exposed by Hadoop daemons, used for monitori
 Configuration
 =============
 
+`${HADOOP_CONF_DIR}/hadoop-metrics2.properties` is the file to configure metrics system.
+
+
+
+You can use `*` (asterisk) as prefix to specify default values of all contexts.
+
+```
+    *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+    *.period=10
+```
+
+
+Metrics Sinks
+=============
 
 
 Developing Metrics Sink
