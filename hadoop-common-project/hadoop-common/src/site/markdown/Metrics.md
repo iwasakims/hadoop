@@ -12,10 +12,14 @@
   limitations under the License. See accompanying LICENSE file.
 -->
 
+Metrics
+=======
+
 * [Overview](#Overview)
 * [Configuration](#Configuration)
-* [Metrics Sinks](#Metrics_Sinks)
-* [Developing Metrics Sink](#Developing_Metrics_Sink)
+    * [Prefixes](#Prefixes)
+    * [Metrics Sinks](#Metrics_Sinks)
+* [Developers](#Developers)
 * [Reference](#Reference)
     * [jvm context](#jvm_context)
         * [JvmMetrics](#JvmMetrics)
@@ -41,45 +45,131 @@
         * [StartupProgress](#StartupProgress)
 
 Overview
-========
+--------
 
 Metrics are statistical information exposed by Hadoop daemons, used for monitoring, performance tuning and debug. There are many metrics available by default and they are very useful for troubleshooting. This page shows the details of the available metrics.
 
 
 Configuration
-=============
+-------------
 
-`${HADOOP_CONF_DIR}/hadoop-metrics2.properties` is the file to configure metrics system.
+Metrics system load configuration from files named as
+`hadoop-metrics2[-prefix].properties`.
+
+Configuration properties are in the form as
+`[prefix].[source|sink|jvm].[instance].[options]`.
+
+You can see some examples in the default configuration file located as
+`${HADOOP_CONF_DIR}/hadoop-metrics2.properties`.
 
 
+### Prefixes
 
-You can use `*` (asterisk) as prefix to specify default values of all contexts.
+Each Hadoop daemons emitting metrics have associated configuration prefix.
+Users can use prefixes listed below for built-in Hadoop daemons.
+
+* `namenode`
+* `datanode`
+* `secondarynamenode`
+* `journalnode`
+* `resourcemanager`
+* `nodemanager`
+* `applicationhistoryserver`
+* `sharedcachemanager`
+* `webappproxyserver`
+* `mrappmaster`
+* `jobhistoryserver`
+
+The metrics system associated with prefix `namenode` would try to load
+`hadoop-metrics2-namenode.properties` first, and if not found,
+try the default `hadoop-metrics2.properties` in the class path.
+
+Then the namenode uses the configurations specified by 
+configuration keys prefixed with `namenode.`, for example:
+ 
+```
+    namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+```
+
+The asterisk (`*`) can be used to specify default values for all prefixes.
 
 ```
     *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
-    *.period=10
 ```
 
 
-Metrics Sinks
-=============
+### Metrics Sinks
+
+Users need to configure metric sinks to save metrics emitted by Hadoop daemons
+to files or external data stores.
+
+Metrics sink would be loaded on daemon start-up by specifying class name of the
+sink implementation with `[prefix].sink.[instance].class` property.
+Name of the instance (`file` in the example) is arbitrary.
+Each metrics sink implementation has associated configuration.
+
+```
+    namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+    namenode.sink.file.filename=path/to/namenode-metrics.out
+```
+
+Hadoop provides built-in metrics sinks as listed below.
+See [Javadoc of metrics sinks](../../api/org/apache/hadoop/metrics2/sink/package-summary.html)
+for more information.
+
+* `org.apache.hadoop.metrics2.sink.FileSink`
+* `org.apache.hadoop.metrics2.sink.GraphiteSink`
+* `org.apache.hadoop.metrics2.sink.KafkaSink`
+* `org.apache.hadoop.metrics2.sink.StatsDSink`
+* `org.apache.hadoop.metrics2.sink.ganglia.GangliaSink30`
+* `org.apache.hadoop.metrics2.sink.ganglia.GangliaSink31`
+
+Multiple sink instances could be used in the same Hadoop daemon.
+
+```
+    namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+    namenode.sink.file.filename=path/to/namenode-metrics.out
+    namenode.sink.file.period=8
+
+    namenode.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.GangliaSink30    
+    namenode.sink.ganglia.servers=yourgangliahost_1:8649,yourgangliahost_2:8649
+```
+
+The asterisk (`*`) can be used to specify default values for all instances.
+
+```
+    namenode.sink.*.period=8
+```
+
+Notice: At least one configuration keys with explicit prefix is needed to load metrics sinks.
+For example, no daemons will load `FileSink` by only specifying `*.sink.ganglia.class`.
+
+```
+    *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+```
+
+Default class for `file` sink with options specific to `namenode` and `file` will work (for `namenode`).
+
+```
+    *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+    namenode.sink.file.filename=path/to/namenode-metrics.out
+```
 
 
-Developing Metrics Sink
-=======================
+Developers
+----------
 
-The documentation of Metrics 2.0 framework is [Javadoc](../../api/org/apache/hadoop/metrics2/package-summary.html).
+See [the documentation of Metrics 2.0 framework](../../api/org/apache/hadoop/metrics2/package-summary.html).
 
 
 Reference
-=========
+---------
 
 Each section describes each context into which metrics are grouped.
 
-jvm context
------------
+### jvm context
 
-### JvmMetrics
+#### JvmMetrics
 
 Each metrics record contains tags such as ProcessName, SessionID and Hostname as additional information along with metrics.
 
@@ -109,10 +199,9 @@ Each metrics record contains tags such as ProcessName, SessionID and Hostname as
 | `GcNumInfoThresholdExceeded` | Number of times that the GC info threshold is exceeded |
 | `GcTotalExtraSleepTime` | Total GC extra sleep time in msec |
 
-rpc context
------------
+### rpc context
 
-### rpc
+#### rpc
 
 Each metrics record contains tags such as Hostname and port (number to which server is bound) as additional information along with metrics.
 
@@ -143,7 +232,7 @@ Each metrics record contains tags such as Hostname and port (number to which ser
 | `rpcProcessingTime`*num*`s95thPercentileLatency` | Shows the 95th percentile of RPC processing time in milliseconds (*num* seconds granularity) if `rpc.metrics.quantile.enable` is set to true. *num* is specified by `rpc.metrics.percentiles.intervals`. |
 | `rpcProcessingTime`*num*`s99thPercentileLatency` | Shows the 99th percentile of RPC processing time in milliseconds (*num* seconds granularity) if `rpc.metrics.quantile.enable` is set to true. *num* is specified by `rpc.metrics.percentiles.intervals`. |
 
-### RetryCache/NameNodeRetryCache
+#### RetryCache/NameNodeRetryCache
 
 RetryCache metrics is useful to monitor NameNode fail-over. Each metrics record contains Hostname tag.
 
@@ -153,12 +242,11 @@ RetryCache metrics is useful to monitor NameNode fail-over. Each metrics record 
 | `CacheCleared` | Total number of RetryCache cleared |
 | `CacheUpdated` | Total number of RetryCache updated |
 
-rpcdetailed context
--------------------
+### rpcdetailed context
 
 Metrics of rpcdetailed context are exposed in unified manner by RPC layer. Two metrics are exposed for each RPC based on its name. Metrics named "(RPC method name)NumOps" indicates total number of method calls, and metrics named "(RPC method name)AvgTime" shows average turn around time for method calls in milliseconds.
 
-### rpcdetailed
+#### rpcdetailed
 
 Each metrics record contains tags such as Hostname and port (number to which server is bound) as additional information along with metrics.
 
@@ -169,10 +257,9 @@ The Metrics about RPCs which is not called are not included in metrics record.
 | *methodname*`NumOps` | Total number of the times the method is called |
 | *methodname*`AvgTime` | Average turn around time of the method in milliseconds |
 
-dfs context
------------
+### dfs context
 
-### namenode
+#### namenode
 
 Each metrics record contains tags such as ProcessName, SessionId, and Hostname as additional information along with metrics.
 
@@ -220,7 +307,7 @@ Each metrics record contains tags such as ProcessName, SessionId, and Hostname a
 | `TotalFileOps`| Total number of file operations performed |
 | `NNStartedTimeInMillis`| NameNode start time in milliseconds |
 
-### FSNamesystem
+#### FSNamesystem
 
 Each metrics record contains tags such as HAState and Hostname as additional information along with metrics.
 
@@ -266,7 +353,7 @@ Each metrics record contains tags such as HAState and Hostname as additional inf
 | `TotalSyncTimes` | Total number of milliseconds spent by various edit logs in sync operation|
 | `NameDirSize` | NameNode name directories size in bytes |
 
-### JournalNode
+#### JournalNode
 
 The server-side metrics for a journal from the JournalNode's perspective. Each metrics record contains Hostname tag as additional information along with metrics.
 
@@ -300,7 +387,7 @@ The server-side metrics for a journal from the JournalNode's perspective. Each m
 | `LastPromisedEpoch` | The last epoch number which this node has promised not to accept any lower epoch, or 0 if no promises have been made |
 | `LastJournalTimestamp` | The timestamp of last successfully written transaction |
 
-### datanode
+#### datanode
 
 Each metrics record contains tags such as SessionId and Hostname as additional information along with metrics.
 
@@ -356,10 +443,9 @@ Each metrics record contains tags such as SessionId and Hostname as additional i
 | `RemoteBytesRead` | Number of bytes read by remote clients |
 | `RemoteBytesWritten` | Number of bytes written by remote clients |
 
-yarn context
-------------
+### yarn context
 
-### ClusterMetrics
+#### ClusterMetrics
 
 ClusterMetrics shows the metrics of the YARN cluster from the ResourceManager's perspective. Each metrics record contains Hostname tag as additional information along with metrics.
 
@@ -371,7 +457,7 @@ ClusterMetrics shows the metrics of the YARN cluster from the ResourceManager's 
 | `NumUnhealthyNMs` | Current number of unhealthy NodeManagers |
 | `NumRebootedNMs` | Current number of rebooted NodeManagers |
 
-### QueueMetrics
+#### QueueMetrics
 
 QueueMetrics shows an application queue from the ResourceManager's perspective. Each metrics record shows the statistics of each queue, and contains tags such as queue name and Hostname as additional information along with metrics.
 
@@ -411,7 +497,7 @@ In `running_`*num* metrics such as `running_0`, you can set the property `yarn.r
 | `MaxShareMB` | (FairScheduler only) Maximum share of memory in MB |
 | `MaxShareVCores` | (FairScheduler only) Maximum share of CPU in virtual cores |
 
-### NodeManagerMetrics
+#### NodeManagerMetrics
 
 NodeManagerMetrics shows the statistics of the containers in the node. Each metrics record contains Hostname tag as additional information along with metrics.
 
@@ -427,10 +513,9 @@ NodeManagerMetrics shows the statistics of the containers in the node. Each metr
 | `allocatedGB` | Current allocated memory in GB |
 | `availableGB` | Current available memory in GB |
 
-ugi context
------------
+### ugi context
 
-### UgiMetrics
+#### UgiMetrics
 
 UgiMetrics is related to user and group information. Each metrics record contains Hostname tag as additional information along with metrics.
 
@@ -449,10 +534,9 @@ UgiMetrics is related to user and group information. Each metrics record contain
 | `getGroups`*num*`s95thPercentileLatency` | Shows the 95th percentile of group resolution time in milliseconds (*num* seconds granularity). *num* is specified by `hadoop.user.group.metrics.percentiles.intervals`. |
 | `getGroups`*num*`s99thPercentileLatency` | Shows the 99th percentile of group resolution time in milliseconds (*num* seconds granularity). *num* is specified by `hadoop.user.group.metrics.percentiles.intervals`. |
 
-metricssystem context
----------------------
+### metricssystem context
 
-### MetricsSystem
+#### MetricsSystem
 
 MetricsSystem shows the statistics for metrics snapshots and publishes. Each metrics record contains Hostname tag as additional information along with metrics.
 
@@ -472,10 +556,9 @@ MetricsSystem shows the statistics for metrics snapshots and publishes. Each met
 | `Sink_`*instance*`Dropped` | Total number of dropped sink operations for the *instance* |
 | `Sink_`*instance*`Qsize` | Current queue length of sink operations |
 
-default context
----------------
+### default context
 
-### StartupProgress
+#### StartupProgress
 
 StartupProgress metrics shows the statistics of NameNode startup. Four metrics are exposed for each startup phase based on its name. The startup *phase*s are `LoadingFsImage`, `LoadingEdits`, `SavingCheckpoint`, and `SafeMode`. Each metrics record contains Hostname tag as additional information along with metrics.
 
