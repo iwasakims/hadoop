@@ -19,6 +19,7 @@ Metrics
 * [Configuration](#Configuration)
     * [Prefixes](#Prefixes)
     * [Metrics Sinks](#Metrics_Sinks)
+    * [Metrics Filtering](#Metrics_Filtering)
 * [Developers](#Developers)
 * [Reference](#Reference)
     * [jvm context](#jvm_context)
@@ -84,17 +85,17 @@ The metrics system associated with prefix `namenode` would try to load
 `hadoop-metrics2-namenode.properties` first, and if not found,
 try the default `hadoop-metrics2.properties` in the class path.
 
-Then the namenode uses the configurations specified by 
+Then the namenode uses the configurations specified by
 configuration keys prefixed with `namenode.`, for example:
- 
+
 ```
-    namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
 ```
 
 The asterisk (`*`) can be used to specify default values for all prefixes.
 
 ```
-    *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+*.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
 ```
 
 
@@ -109,8 +110,8 @@ Name of the instance (`file` in the example) is arbitrary.
 Each metrics sink implementation has associated configuration.
 
 ```
-    namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
-    namenode.sink.file.filename=path/to/namenode-metrics.out
+namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+namenode.sink.file.filename=path/to/namenode-metrics.out
 ```
 
 Hadoop provides built-in metrics sinks as listed below.
@@ -127,33 +128,72 @@ for more information.
 Multiple sink instances could be used in the same Hadoop daemon.
 
 ```
-    namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
-    namenode.sink.file.filename=path/to/namenode-metrics.out
-    namenode.sink.file.period=8
+namenode.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+namenode.sink.file.filename=path/to/namenode-metrics.out
+namenode.sink.file.period=8
 
-    namenode.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.GangliaSink30    
-    namenode.sink.ganglia.servers=yourgangliahost_1:8649,yourgangliahost_2:8649
+namenode.sink.ganglia.class=org.apache.hadoop.metrics2.sink.ganglia.GangliaSink30
+namenode.sink.ganglia.servers=yourgangliahost_1:8649,yourgangliahost_2:8649
 ```
 
 The asterisk (`*`) can be used to specify default values for all instances.
 
 ```
-    namenode.sink.*.period=8
+namenode.sink.*.period=8
 ```
 
 Notice: At least one configuration keys with explicit prefix is needed to load metrics sinks.
 For example, no daemons will load `FileSink` by only specifying `*.sink.ganglia.class`.
 
 ```
-    *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+*.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
 ```
 
 Default class for `file` sink with options specific to `namenode` and `file` will work (for `namenode`).
 
 ```
-    *.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
-    namenode.sink.file.filename=path/to/namenode-metrics.out
+*.sink.file.class=org.apache.hadoop.metrics2.sink.FileSink
+namenode.sink.file.filename=path/to/namenode-metrics.out
 ```
+
+
+### Metrics Filtering
+
+One of the features of the default metrics system is metrics filtering
+configuration by source, context, record/tags and metrics. The least
+expensive way to filter out metrics would be at the source level, e.g.,
+filtering out source named "MyMetrics". The most expensive way would be
+per metric filtering.
+
+Here are some examples:
+
+```
+test.sink.file0.class=org.apache.hadoop.metrics2.sink.FileSink
+test.sink.file0.context=foo
+```
+
+In this example, we configured one sink instance that would
+accept metrics from context `foo` only.
+
+```
+*.source.filter.class=org.apache.hadoop.metrics2.filter.GlobFilter
+test.*.source.filter.include=foo
+test.*.source.filter.exclude=bar
+```
+
+In this example, we specify a source filter that includes source
+`foo` and excludes `bar`. When only include
+patterns are specified, the filter operates in the white listing mode,
+where only matched sources are included. Likewise, when only exclude
+patterns are specified, only matched sources are excluded. Sources that
+are not matched in either patterns are included as well when both patterns
+are present. Note, the include patterns have precedence over the exclude
+patterns.
+
+Similarly, you can specify the `record.filter` and
+`metric.filter` options, which operate at record and metric
+level, respectively. Filters can be combined to optimize
+the filtering efficiency.
 
 
 Developers

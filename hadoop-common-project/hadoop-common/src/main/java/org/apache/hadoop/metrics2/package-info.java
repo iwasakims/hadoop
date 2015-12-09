@@ -186,59 +186,6 @@
   <pre>
   DefaultMetricsSystem.initialize("test"); // called once per application
   DefaultMetricsSystem.register(new MyStat());</pre>
-  <h2><a name="config">Metrics system configuration</a></h2>
-  <p>Sinks are usually specified in a configuration file, say,
-  "hadoop-metrics2-test.properties", as:
-  </p>
-  <pre>
-  test.sink.mysink0.class=com.example.hadoop.metrics.MySink</pre>
-  <p>The configuration syntax is:</p>
-  <pre>
-  [prefix].[source|sink|jmx|].[instance].[option]</pre>
-  <p>In the previous example, <code>test</code> is the prefix and
-    <code>mysink0</code> is an instance name.
-    <code>DefaultMetricsSystem</code> would try to load
-    <code>hadoop-metrics2-[prefix].properties</code> first, and if not found,
-    try the default <code>hadoop-metrics2.properties</code> in the class path.
-    Note, the <code>[instance]</code> is an arbitrary name to uniquely
-    identify a particular sink instance. The asterisk (<code>*</code>) can be
-    used to specify default options.
-  </p>
-  <p>Consult the metrics instrumentation in jvm, rpc, hdfs and mapred, etc.
-    for more examples.
-  </p>
-
-  <h2><a name="filtering">Metrics Filtering</a></h2>
-  <p>One of the features of the default metrics system is metrics filtering
-    configuration by source, context, record/tags and metrics. The least
-    expensive way to filter out metrics would be at the source level, e.g.,
-    filtering out source named "MyMetrics". The most expensive way would be
-    per metric filtering.
-  </p>
-  <p>Here are some examples:</p>
-  <pre>
-  test.sink.file0.class=org.apache.hadoop.metrics2.sink.FileSink
-  test.sink.file0.context=foo</pre>
-  <p>In this example, we configured one sink instance that would
-    accept metrics from context <code>foo</code> only.
-  </p>
-  <pre>
-  *.source.filter.class=org.apache.hadoop.metrics2.filter.GlobFilter
-  test.*.source.filter.include=foo
-  test.*.source.filter.exclude=bar</pre>
-  <p>In this example, we specify a source filter that includes source
-    <code>foo</code> and excludes <code>bar</code>. When only include
-    patterns are specified, the filter operates in the white listing mode,
-    where only matched sources are included. Likewise, when only exclude
-    patterns are specified, only matched sources are excluded. Sources that
-    are not matched in either patterns are included as well when both patterns
-    are present. Note, the include patterns have precedence over the exclude
-    patterns.
-  </p>
-  <p>Similarly, you can specify the <code>record.filter</code> and
-    <code>metric.filter</code> options, which operate at record and metric
-    level, respectively. Filters can be combined to optimize
-    the filtering efficiency.</p>
 
   <h2><a name="instrumentation">Metrics instrumentation strategy</a></h2>
 
