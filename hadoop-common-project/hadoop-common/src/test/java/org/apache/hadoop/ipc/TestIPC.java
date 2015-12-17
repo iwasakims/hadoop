@@ -88,6 +88,7 @@ import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mockito;
+import org.mockito.internal.util.reflection.Whitebox;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -685,14 +686,6 @@ public class TestIPC {
       }
       return param;
     }
-
-    CallQueueManager<Call> getCallQueue() {
-      return callQueue;
-    }
-
-    void setCallQueue(CallQueueManager<Call> queue) {
-      this.callQueue = queue;
-    }
   }
 
   /**
@@ -734,8 +727,9 @@ public class TestIPC {
     // start server
     final TestServerQueue server =
         new TestServerQueue(clients, readers, callQ, handlers, conf);
-    CallQueueManager<Call> spy = Mockito.spy(server.getCallQueue());
-    server.setCallQueue(spy);
+    CallQueueManager<Call> spy = spy(
+        (CallQueueManager<Call>)Whitebox.getInternalState(server, "callQueue"));
+    Whitebox.setInternalState(server, "callQueue", spy);
     final InetSocketAddress addr = NetUtils.getConnectAddress(server);
     server.start();
 
@@ -772,11 +766,12 @@ public class TestIPC {
         // let first reader block in a call
         server.firstCallLatch.await();
       } else if (i <= callQ) {
-        // let subsequent readers jam the callq, will happen immediately 
+        // wait until reader put a call to callQueue, to make sure all readers
+        // are blocking on the queue after initialClients threads are started.
         while (server.getCallQueueLen() != i) {
           verify(spy, timeout(100).times(i + 1)).put(Mockito.<Call>anyObject());
         }
-      } // additional threads block the readers trying to add to the callq
+      } 
     }
 
     try {
