@@ -765,13 +765,10 @@ public class TestIPC {
       if (i==0) {
         // let first reader block in a call
         server.firstCallLatch.await();
-      } else if (i <= callQ) {
-        // wait until reader put a call to callQueue, to make sure all readers
-        // are blocking on the queue after initialClients threads are started.
-        while (server.getCallQueueLen() != i) {
-          verify(spy, timeout(100).times(i + 1)).put(Mockito.<Call>anyObject());
-        }
       } 
+      // wait until reader put a call to callQueue, to make sure all readers
+      // are blocking on the queue after initialClients threads are started.
+      verify(spy, timeout(100).times(i + 1)).put(Mockito.<Call>anyObject());
     }
 
     try {
