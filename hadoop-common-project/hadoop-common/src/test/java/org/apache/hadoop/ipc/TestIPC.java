@@ -27,6 +27,9 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.timeout;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 import java.io.ByteArrayOutputStream;
 import java.io.DataInput;
@@ -71,6 +74,7 @@ import org.apache.hadoop.io.retry.RetryPolicies;
 import org.apache.hadoop.io.retry.RetryProxy;
 import org.apache.hadoop.ipc.Client.ConnectionId;
 import org.apache.hadoop.ipc.RPC.RpcKind;
+import org.apache.hadoop.ipc.Server.Call;
 import org.apache.hadoop.ipc.Server.Connection;
 import org.apache.hadoop.ipc.protobuf.RpcHeaderProtos.RpcResponseHeaderProto;
 import org.apache.hadoop.net.ConnectTimeoutException;
@@ -681,6 +685,14 @@ public class TestIPC {
       }
       return param;
     }
+
+    CallQueueManager<Call> getCallQueue() {
+      return callQueue;
+    }
+
+    void setCallQueue(CallQueueManager<Call> queue) {
+      this.callQueue = queue;
+    }
   }
 
   /**
@@ -722,6 +734,8 @@ public class TestIPC {
     // start server
     final TestServerQueue server =
         new TestServerQueue(clients, readers, callQ, handlers, conf);
+    CallQueueManager<Call> spy = Mockito.spy(server.getCallQueue());
+    server.setCallQueue(spy);
     final InetSocketAddress addr = NetUtils.getConnectAddress(server);
     server.start();
 
@@ -760,7 +774,7 @@ public class TestIPC {
       } else if (i <= callQ) {
         // let subsequent readers jam the callq, will happen immediately 
         while (server.getCallQueueLen() != i) {
-          Thread.sleep(1);
+          verify(spy, timeout(100).times(i + 1)).put(Mockito.<Call>anyObject());
         }
       } // additional threads block the readers trying to add to the callq
     }

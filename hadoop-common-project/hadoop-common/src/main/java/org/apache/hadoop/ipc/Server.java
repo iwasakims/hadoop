@@ -379,7 +379,7 @@ public abstract class Server {
   private final boolean tcpNoDelay; // if T then disable Nagle's Algorithm
 
   volatile private boolean running = true;         // true while server runs
-  private CallQueueManager<Call> callQueue;
+  protected CallQueueManager<Call> callQueue;
 
   // maintains the set of client connections and handles idle timeouts
   private ConnectionManager connectionManager;
