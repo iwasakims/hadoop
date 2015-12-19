@@ -281,8 +281,9 @@ Accessibility
 HDFS can be accessed from applications in many different ways.
 Natively, HDFS provides a [FileSystem Java API](http://hadoop.apache.org/docs/current/api/) for applications to use.
 A [C language wrapper for this Java API](./LibHdfs.html) and [REST API](./WebHDFS.html) is also available.
-In addition, an HTTP browser can also be used to browse the files of an HDFS instance.
-Work is in progress to expose HDFS through the WebDAV protocol.
+In addition, an HTTP browser and can also be used to browse the files of an HDFS instance.
+By using [NFS gateway](./HdfsNfsGateway.html),
+HDFS can be mounted as part of the client’s local file system.
 
 ### FS Shell
 
