@@ -319,64 +319,55 @@ Space Reclamation
 
 ### File Deletes and Undeletes
 
-When a file is deleted by a user or an application, it is not immediately removed from HDFS. Instead, HDFS moves it to a trash directory (each user has its own trash directory under `/user/<username>/.Trash`).
-The file can be restored quickly as long as it remains in trash. Most recent deleted files are moved to the current trash directory (`/user/<username>/.Trash/Current`), and in a configurable interval, HDFS creates checkpoints (under `/user/<username>/.Trash/<date>`) for files in current trash directory and deletes old checkpoints when they are expired.
+If trash configuration is enabled, files removed by
+[FS Shell](../hadoop-common/FileSystemShell.html#rm)
+is not immediately removed from HDFS.
+Instead, HDFS moves it to a trash directory
+(each user has its own trash directory under `/user/<username>/.Trash`).
+The file can be restored quickly as long as it remains in trash.
+
+Most recent deleted files are moved to the current trash directory
+(`/user/<username>/.Trash/Current`), and in a configurable interval,
+HDFS creates checkpoints (under `/user/<username>/.Trash/<date>`)
+for files in current trash directory and deletes old checkpoints when they are expired.
+See [expunge command of FS shell](../hadoop-common/FileSystemShell.html#expunge)
+about checkpointing of trash.
+
 After the expiry of its life in trash, the NameNode deletes the file from the HDFS namespace. The deletion of a file causes the blocks associated with the file to be freed. Note that there could be an appreciable time delay between the time a file is deleted by a user and the time of the corresponding increase in free space in HDFS.
 
-Currently, the trash feature is disabled by default (deleting files without storing in trash). User can enable this feature by setting a value greater than zero for parameter `fs.trash.interval` (in core-site.xml). This value tells the NameNode how long a checkpoint will be expired and removed from HDFS. In addition, user can configure an appropriate time to tell NameNode how often to create checkpoints in trash (the parameter stored as `fs.trash.checkpoint.interval` in core-site.xml), this value should be smaller or equal to fs.trash.interval.
-
-### Decrease Replication Factor
-
-When the replication factor of a file is reduced, the NameNode selects excess replicas that can be deleted. The next Heartbeat transfers this information to the DataNode. The DataNode then removes the corresponding blocks and the corresponding free space appears in the cluster. Once again, there might be a time delay between the completion of the setReplication API call and the appearance of free space in the cluster.
-
-### HDFS Trash Management
-
-Following is an example which will show how the files are deleted from HDFS.
+Following is an example which will show how the files are deleted from HDFS by FS Shell.
 We created 2 files (test1 & test2) under the directory delete
 
-```
-$ hadoop fs -mkdir -p delete/test1
-$ hadoop fs -mkdir -p delete/test2
-$ hadoop fs -ls delete/
-Found 2 items
-drwxr-xr-x   - hadoop hadoop          0 2015-05-08 12:39 delete/test1
-drwxr-xr-x   - hadoop hadoop          0 2015-05-08 12:40 delete/test2
-```
+    $ hadoop fs -mkdir -p delete/test1
+    $ hadoop fs -mkdir -p delete/test2
+    $ hadoop fs -ls delete/
+    Found 2 items
+    drwxr-xr-x   - hadoop hadoop          0 2015-05-08 12:39 delete/test1
+    drwxr-xr-x   - hadoop hadoop          0 2015-05-08 12:40 delete/test2
 
 We are going to remove the file test1.
-The comment below shows that the file has been moved to Trash directory and
-it will be deleted after a period of 1440 mins which is the time set up in core-site.xml file.
+The comment below shows that the file has been moved to Trash directory.
 
-```
-$ hadoop fs -rm -r delete/test1
-
-15/05/08 12:40:43 INFO fs.TrashPolicyDefault: Namenode trash configuration: Deletion interval = 1440 minutes, Emptier interval = 0 minutes.
-Moved: hdfs://localhost:8020/user/hadoop/delete/test1 to trash at: hdfs://localhost:8020/user/hadoop/.Trash/Current
-```
+    $ hadoop fs -rm -r delete/test1
+    Moved: hdfs://localhost:8020/user/hadoop/delete/test1 to trash at: hdfs://localhost:8020/user/hadoop/.Trash/Current
 
 now we are going to remove the file with skipTrash option,
 which will not send the file to Trash.It will be completely removed from HDFS.
 
-```
-$ hadoop fs -rm -r -skipTrash delete/test2
-Deleted delete/test2
-```
+    $ hadoop fs -rm -r -skipTrash delete/test2
+    Deleted delete/test2
 
 We can see now that the Trash directory contains only file test1.
 
-```
-$ hadoop fs -ls .Trash/Current/user/hadoop/delete/
-Found 1 items\
-drwxr-xr-x   - hadoop hadoop          0 2015-05-08 12:39 .Trash/Current/user/hadoop/delete/test1
-```
+    $ hadoop fs -ls .Trash/Current/user/hadoop/delete/
+    Found 1 items\
+    drwxr-xr-x   - hadoop hadoop          0 2015-05-08 12:39 .Trash/Current/user/hadoop/delete/test1
 
 So file test1 goes to Trash and file test2 is deleted permanently.
 
-The below command will empty the Trash folder and all the files in .Trash folder will be deleted.
+### Decrease Replication Factor
 
-```
-$ hadoop fs -expunge
-```
+When the replication factor of a file is reduced, the NameNode selects excess replicas that can be deleted. The next Heartbeat transfers this information to the DataNode. The DataNode then removes the corresponding blocks and the corresponding free space appears in the cluster. Once again, there might be a time delay between the completion of the setReplication API call and the appearance of free space in the cluster.
 
 References
 ----------
