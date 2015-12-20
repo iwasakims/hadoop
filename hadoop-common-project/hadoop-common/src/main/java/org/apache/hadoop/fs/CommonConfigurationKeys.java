@@ -45,7 +45,6 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
   /** Default value for FS_PERMISSIONS_UMASK_KEY */
   public static final int     FS_PERMISSIONS_UMASK_DEFAULT = 0022;
   /** How often does RPC client send pings to RPC server */
-
   public static final String  IPC_PING_INTERVAL_KEY = "ipc.ping.interval";
   /** Default value for IPC_PING_INTERVAL_KEY */
   public static final int     IPC_PING_INTERVAL_DEFAULT = 60000; // 1 min

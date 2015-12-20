@@ -1181,5 +1181,4 @@ public class TestRPC {
     new TestRPC().testCallsInternal(conf);
 
   }
-
 }
