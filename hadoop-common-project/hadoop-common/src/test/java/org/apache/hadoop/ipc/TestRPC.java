@@ -1150,7 +1150,7 @@ public class TestRPC {
   /**
    *  Test RPC timeout.
    */
-  @Test(timeout=10000)
+  @Test(timeout=30000)
   public void testClientRpcTimeout() throws Exception {
     final Server server = new RPC.Builder(conf)
         .setProtocol(TestProtocol.class).setInstance(new TestImpl())
@@ -1161,7 +1161,6 @@ public class TestRPC {
 
     final Configuration conf = new Configuration();
     conf.setInt(CommonConfigurationKeys.IPC_CLIENT_RPC_TIMEOUT_KEY, 1000);
-
     final TestProtocol proxy =
         RPC.getProxy(TestProtocol.class, TestProtocol.versionID,
             NetUtils.getConnectAddress(server), conf);
