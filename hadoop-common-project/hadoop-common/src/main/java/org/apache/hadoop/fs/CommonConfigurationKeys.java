@@ -45,6 +45,7 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
   /** Default value for FS_PERMISSIONS_UMASK_KEY */
   public static final int     FS_PERMISSIONS_UMASK_DEFAULT = 0022;
   /** How often does RPC client send pings to RPC server */
+
   public static final String  IPC_PING_INTERVAL_KEY = "ipc.ping.interval";
   /** Default value for IPC_PING_INTERVAL_KEY */
   public static final int     IPC_PING_INTERVAL_DEFAULT = 60000; // 1 min
@@ -52,6 +53,12 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
   public static final String  IPC_CLIENT_PING_KEY = "ipc.client.ping";
   /** Default value of IPC_CLIENT_PING_KEY */
   public static final boolean IPC_CLIENT_PING_DEFAULT = true;
+  /** Timeout value for RPC client on waiting for response */
+  public static final String IPC_CLIENT_RPC_TIMEOUT_KEY =
+    "ipc.client.rpc-timeout.ms";
+  /** Default value for IPC_CLIENT_RPC_TIMEOUT_KEY */
+  public static final int IPC_CLIENT_RPC_TIMEOUT_DEFAULT = 0;
+
   /** Responses larger than this will be logged */
   public static final String  IPC_SERVER_RPC_MAX_RESPONSE_SIZE_KEY =
     "ipc.server.max.response.size";
@@ -81,14 +88,6 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
     "ipc.server.handler.queue.size";
   /** Default value for IPC_SERVER_HANDLER_QUEUE_SIZE_KEY */
   public static final int     IPC_SERVER_HANDLER_QUEUE_SIZE_DEFAULT = 100;
-
-  /** Timeout value for RPC client write actions */
-  public static final String IPC_CLIENT_WRITE_TIMEOUT_MS_KEY =
-    "ipc.client.write.timeout.ms";
-
-  /** Default value for IPC_CLIENT_WRITE_TIMEOUT_MS_KEY */
-  public static final int    IPC_CLIENT_WRITE_TIMEOUT_MS_DEFAULT =
-    5 * 60 * 1000; // 5 min
 
   /**
    * CallQueue related settings. These are not used directly, but rather

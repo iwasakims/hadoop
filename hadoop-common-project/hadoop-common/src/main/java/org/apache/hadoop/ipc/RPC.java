@@ -349,7 +349,7 @@ public class RPC {
                              InetSocketAddress addr, Configuration conf,
                              long connTimeout) throws IOException { 
     return waitForProtocolProxy(protocol, clientVersion, addr, conf,
-        getRPCWriteTimeout(conf), null, connTimeout);
+        getRpcTimeout(conf), null, connTimeout);
   }
   
   /**
@@ -494,7 +494,7 @@ public class RPC {
                                 Configuration conf,
                                 SocketFactory factory) throws IOException {
     return getProtocolProxy(protocol, clientVersion, addr, ticket, conf,
-        factory, getRPCWriteTimeout(conf), null);
+        factory, getRpcTimeout(conf), null);
   }
   
   /**
@@ -689,15 +689,15 @@ public class RPC {
             + proxy.getClass());
   }
   /**
-   * Get the write time from configuration;
+   * Get the RPC time from configuration;
    * If not set in the configuration, return the default value.
    *
    * @param conf Configuration
-   * @return the write timeout (ms)
+   * @return the RPC timeout (ms)
    */
-  public static int getRPCWriteTimeout(Configuration conf) {
-    return conf.getInt(CommonConfigurationKeys.IPC_CLIENT_WRITE_TIMEOUT_MS_KEY,
-        CommonConfigurationKeys.IPC_CLIENT_WRITE_TIMEOUT_MS_DEFAULT);
+  public static int getRpcTimeout(Configuration conf) {
+    return conf.getInt(CommonConfigurationKeys.IPC_CLIENT_RPC_TIMEOUT_KEY,
+        CommonConfigurationKeys.IPC_CLIENT_RPC_TIMEOUT_DEFAULT);
   }
 
   /**
