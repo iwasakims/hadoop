@@ -82,6 +82,14 @@ public class CommonConfigurationKeys extends CommonConfigurationKeysPublic {
   /** Default value for IPC_SERVER_HANDLER_QUEUE_SIZE_KEY */
   public static final int     IPC_SERVER_HANDLER_QUEUE_SIZE_DEFAULT = 100;
 
+  /** Timeout value for RPC client write actions */
+  public static final String IPC_CLIENT_WRITE_TIMEOUT_MS_KEY =
+    "ipc.client.write.timeout.ms";
+
+  /** Default value for IPC_CLIENT_WRITE_TIMEOUT_MS_KEY */
+  public static final int    IPC_CLIENT_WRITE_TIMEOUT_MS_DEFAULT =
+    5 * 60 * 1000; // 5 min
+
   /**
    * CallQueue related settings. These are not used directly, but rather
    * combined with a namespace and port. For instance:
