@@ -559,6 +559,16 @@ public abstract class Server {
     callQueue.swapQueue(getQueueClass(prefix, conf), maxQueueSize, prefix, conf);
   }
 
+  @VisibleForTesting
+  CallQueueManager<Call> getCallQueue() {
+    return callQueue;
+  }
+
+  @VisibleForTesting
+  void setCallQueue(CallQueueManager<Call> queue) {
+    this.callQueue = queue;
+  }
+
   /**
    * Get from config if client backoff is enabled on that port.
    */
@@ -2448,8 +2458,8 @@ public abstract class Server {
 
     // Setup appropriate callqueue
     final String prefix = getQueueClassPrefix();
-    this.callQueue = new CallQueueManager<Call>(getQueueClass(prefix, conf),
-        getClientBackoffEnable(prefix, conf), maxQueueSize, prefix, conf);
+    this.setCallQueue(new CallQueueManager<Call>(getQueueClass(prefix, conf),
+        getClientBackoffEnable(prefix, conf), maxQueueSize, prefix, conf));
 
     this.secretManager = (SecretManager<TokenIdentifier>) secretManager;
     this.authorize = 
