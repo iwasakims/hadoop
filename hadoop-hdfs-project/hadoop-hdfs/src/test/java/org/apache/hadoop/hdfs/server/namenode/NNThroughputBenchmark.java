@@ -40,6 +40,7 @@ import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.DFSUtilClient;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
+import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.BlockWrite;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs.BlockReportReplica;
@@ -68,6 +69,7 @@ import org.apache.hadoop.hdfs.server.protocol.StorageBlockReport;
 import org.apache.hadoop.hdfs.server.protocol.StorageReceivedDeletedBlocks;
 import org.apache.hadoop.hdfs.server.protocol.StorageReport;
 import org.apache.hadoop.io.EnumSetWritable;
+import org.apache.hadoop.ipc.RemoteException;
 import org.apache.hadoop.net.DNS;
 import org.apache.hadoop.net.NetworkTopology;
 import org.apache.hadoop.security.Groups;
@@ -1181,7 +1183,7 @@ public class NNThroughputBenchmark implements Tool {
     throws IOException {
       ExtendedBlock prevBlock = null;
       for(int jdx = 0; jdx < blocksPerFile; jdx++) {
-        LocatedBlock loc = clientProto.addBlock(fileName, clientName,
+        LocatedBlock loc = addBlock(fileName, clientName,
             prevBlock, null, HdfsConstants.GRANDFATHER_INODE_ID, null);
         prevBlock = loc.getBlock();
         for(DatanodeInfo dnInfo : loc.getLocations()) {
@@ -1197,6 +1199,42 @@ public class NNThroughputBenchmark implements Tool {
         }
       }
       return prevBlock;
+    }
+
+    private LocatedBlock addBlock(String src, String clientName,
+        ExtendedBlock previous, DatanodeInfo[] excludeNodes, long fileId,
+        String[] favoredNodes) throws IOException {
+      int retries= getConf().getInt(
+          BlockWrite.LOCATEFOLLOWINGBLOCK_RETRIES_KEY,
+          BlockWrite.LOCATEFOLLOWINGBLOCK_RETRIES_DEFAULT);
+      int sleeptime = getConf().getInt(
+          BlockWrite.LOCATEFOLLOWINGBLOCK_INITIAL_DELAY_MS_KEY,
+          BlockWrite.LOCATEFOLLOWINGBLOCK_INITIAL_DELAY_MS_DEFAULT);
+      while (true) {
+        try {
+          return clientProto.addBlock(src, clientName,
+              previous, excludeNodes, fileId, favoredNodes);
+        } catch (NotReplicatedYetException|RemoteException e) {
+          if (e instanceof RemoteException) {
+            String className = ((RemoteException) e).getClassName();
+            if (!className.equals(NotReplicatedYetException.class.getName())) {
+              throw e;
+            }
+          }
+          if (retries == 0) {
+            throw e;
+          } else {
+            --retries;
+            try {
+              LOG.info("NotReplicatedYetException for " + src);
+              Thread.sleep(sleeptime);
+              sleeptime *= 2;
+            } catch (InterruptedException ie) {
+              LOG.warn("Caught exception", ie);
+            }
+          }
+        }
+      }
     }
 
     /**
