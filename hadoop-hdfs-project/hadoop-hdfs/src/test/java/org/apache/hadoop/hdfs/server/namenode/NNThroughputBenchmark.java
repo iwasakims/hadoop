@@ -1197,10 +1197,17 @@ public class NNThroughputBenchmark implements Tool {
           dataNodeProto.blockReceivedAndDeleted(datanodes[dnIdx].dnRegistration,
               bpid, report);
         }
+        // IBRs are asynchronously processed by NameNode. The next
+        // ClientProtocol#addBlock() may throw NotReplicatedYetException.
       }
       return prevBlock;
     }
 
+    /**
+     * retry ClientProtocol.addBlock() if it throws NotReplicatedYetException.
+     * Because addBlock() also commits the previous block,
+     * it fails if enough IBRs are not processed by NameNode.
+     */
     private LocatedBlock addBlock(String src, String clientName,
         ExtendedBlock previous, DatanodeInfo[] excludeNodes, long fileId,
         String[] favoredNodes) throws IOException {
@@ -1226,11 +1233,10 @@ public class NNThroughputBenchmark implements Tool {
           } else {
             --retries;
             try {
-              LOG.info("NotReplicatedYetException for " + src);
               Thread.sleep(sleeptime);
               sleeptime *= 2;
             } catch (InterruptedException ie) {
-              LOG.warn("Caught exception", ie);
+              LOG.warn("interrupted while retrying addBlock.", ie);
             }
           }
         }
