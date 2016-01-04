@@ -40,7 +40,6 @@ import org.apache.hadoop.hdfs.DFSTestUtil;
 import org.apache.hadoop.hdfs.DFSUtilClient;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
-import org.apache.hadoop.hdfs.client.HdfsClientConfigKeys.BlockWrite;
 import org.apache.hadoop.hdfs.protocol.Block;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs;
 import org.apache.hadoop.hdfs.protocol.BlockListAsLongs.BlockReportReplica;
@@ -1204,20 +1203,14 @@ public class NNThroughputBenchmark implements Tool {
     }
 
     /**
-     * retry ClientProtocol.addBlock() if it throws NotReplicatedYetException.
+     * Retry ClientProtocol.addBlock() if it throws NotReplicatedYetException.
      * Because addBlock() also commits the previous block,
      * it fails if enough IBRs are not processed by NameNode.
      */
     private LocatedBlock addBlock(String src, String clientName,
         ExtendedBlock previous, DatanodeInfo[] excludeNodes, long fileId,
         String[] favoredNodes) throws IOException {
-      int retries= getConf().getInt(
-          BlockWrite.LOCATEFOLLOWINGBLOCK_RETRIES_KEY,
-          BlockWrite.LOCATEFOLLOWINGBLOCK_RETRIES_DEFAULT);
-      int sleeptime = getConf().getInt(
-          BlockWrite.LOCATEFOLLOWINGBLOCK_INITIAL_DELAY_MS_KEY,
-          BlockWrite.LOCATEFOLLOWINGBLOCK_INITIAL_DELAY_MS_DEFAULT);
-      while (true) {
+      for (int i = 0; i < 30; i++) {
         try {
           return clientProto.addBlock(src, clientName,
               previous, excludeNodes, fileId, favoredNodes);
@@ -1228,19 +1221,14 @@ public class NNThroughputBenchmark implements Tool {
               throw e;
             }
           }
-          if (retries == 0) {
-            throw e;
-          } else {
-            --retries;
-            try {
-              Thread.sleep(sleeptime);
-              sleeptime *= 2;
-            } catch (InterruptedException ie) {
-              LOG.warn("interrupted while retrying addBlock.", ie);
-            }
+          try {
+            Thread.sleep(100);
+          } catch (InterruptedException ie) {
+            LOG.warn("interrupted while retrying addBlock.", ie);
           }
         }
       }
+      throw new IOException("failed to add block.");
     }
 
     /**
