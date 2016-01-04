@@ -25,8 +25,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import com.google.common.base.Preconditions;
+import com.google.common.base.Supplier;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -49,6 +51,7 @@ import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.ExtendedBlock;
 import org.apache.hadoop.hdfs.protocol.HdfsConstants;
 import org.apache.hadoop.hdfs.protocol.LocatedBlock;
+import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
 import org.apache.hadoop.hdfs.protocolPB.DatanodeProtocolClientSideTranslatorPB;
 import org.apache.hadoop.hdfs.security.token.block.ExportedBlockKeys;
 import org.apache.hadoop.hdfs.server.blockmanagement.BlockManagerTestUtil;
@@ -1180,6 +1183,11 @@ public class NNThroughputBenchmark implements Tool {
     private ExtendedBlock addBlocks(String fileName, String clientName)
     throws IOException {
       ExtendedBlock prevBlock = null;
+      long length = 1L;
+      short minReplication = (short) getConf().getInt(
+          DFSConfigKeys.DFS_NAMENODE_REPLICATION_MIN_KEY,
+          DFSConfigKeys.DFS_NAMENODE_REPLICATION_MIN_DEFAULT);
+
       for(int jdx = 0; jdx < blocksPerFile; jdx++) {
         LocatedBlock loc = clientProto.addBlock(fileName, clientName,
             prevBlock, null, HdfsConstants.GRANDFATHER_INODE_ID, null);
@@ -1195,8 +1203,37 @@ public class NNThroughputBenchmark implements Tool {
           dataNodeProto.blockReceivedAndDeleted(datanodes[dnIdx].dnRegistration,
               bpid, report);
         }
+        prevBlock.setNumBytes(length);
+        clientProto.fsync(fileName, HdfsConstants.GRANDFATHER_INODE_ID,
+            clientName, length);
+        waitForReplication(fileName, jdx * length, length, minReplication);
       }
       return prevBlock;
+    }
+
+    private void waitForReplication(final String src, final long offset,
+        final long length, final short replication) throws IOException {
+      try {
+        GenericTestUtils.waitFor(new Supplier<Boolean>() {
+          @Override
+          public Boolean get() {
+            LocatedBlocks locs = null;
+            try {
+              locs = clientProto.getBlockLocations(src, offset, length);
+            } catch (IOException e) {
+              return false;
+            }
+            for (LocatedBlock loc : locs.getLocatedBlocks()) {
+              if (loc.getLocations().length < replication) {
+                return false;
+              }
+            }
+            return true;
+          }
+        }, 100, 5000);
+      } catch (TimeoutException|InterruptedException e) {
+        throw new IOException("error while waiting for block replication", e);
+      }
     }
 
     /**
