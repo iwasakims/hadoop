@@ -386,7 +386,7 @@ public class Client {
     private Socket socket = null;                 // connected socket
     private DataInputStream in;
     private DataOutputStream out;
-    private int rpcTimeout;
+    private final int rpcTimeout;
     private int maxIdleTime; //connections will be culled if it was idle for 
     //maxIdleTime msecs
     private final RetryPolicy connectionRetryPolicy;
@@ -394,8 +394,9 @@ public class Client {
     private int maxRetriesOnSocketTimeouts;
     private final boolean tcpNoDelay; // if T then disable Nagle's Algorithm
     private final boolean tcpLowLatency; // if T then use low-delay QoS
-    private boolean doPing; //do we need to send ping message
-    private int pingInterval; // how often sends ping to the server in msecs
+    private final boolean doPing; //do we need to send ping message
+    private final int pingInterval; // how often sends ping to the server in msecs
+    private final int soTimeout; // used by ipc ping and rpc timeout
     private ByteArrayOutputStream pingRequest; // ping message
     
     // currently active calls
@@ -434,6 +435,9 @@ public class Client {
         pingHeader.writeDelimitedTo(pingRequest);
       }
       this.pingInterval = remoteId.getPingInterval();
+      this.soTimeout =
+          (rpcTimeout == 0 || (doPing && pingInterval < rpcTimeout))?
+              this.pingInterval : this.rpcTimeout;
       this.serviceClass = serviceClass;
       if (LOG.isDebugEnabled()) {
         LOG.debug("The ping interval is " + this.pingInterval + " ms.");
@@ -488,7 +492,7 @@ public class Client {
        */
       private int handleTimeout(SocketTimeoutException e, int waiting)
           throws IOException {
-        waiting += pingInterval;
+        waiting += soTimeout;
         if (shouldCloseConnection.get() || !running.get() ||
             (0 < rpcTimeout && rpcTimeout <= waiting)) {
           throw e;
@@ -635,10 +639,7 @@ public class Client {
           }
           
           NetUtils.connect(this.socket, server, connectionTimeout);
-          if (rpcTimeout > 0 && (!doPing || pingInterval > rpcTimeout)) {
-            pingInterval = rpcTimeout;
-          }
-          this.socket.setSoTimeout(pingInterval);
+          this.socket.setSoTimeout(soTimeout);
           return;
         } catch (ConnectTimeoutException toe) {
           /* Check for an address change and update the local reference.
