@@ -510,7 +510,7 @@ public class Client {
           try {
             return super.read();
           } catch (SocketTimeoutException e) {
-            waiting += handleTimeout(e, waiting);
+            waiting = handleTimeout(e, waiting);
           }
         } while (true);
       }
@@ -528,7 +528,7 @@ public class Client {
           try {
             return super.read(buf, off, len);
           } catch (SocketTimeoutException e) {
-            waiting += handleTimeout(e, waiting);
+            waiting = handleTimeout(e, waiting);
           }
         } while (true);
       }
