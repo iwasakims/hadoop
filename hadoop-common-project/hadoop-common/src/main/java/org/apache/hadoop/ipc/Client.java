@@ -484,16 +484,18 @@ public class Client {
 
       /* Process timeout exception
        * if the connection is not going to be closed or 
-       * is not configured to have a RPC timeout, send a ping.
-       * (if rpcTimeout is not set to be 0, then RPC should timeout.
-       * otherwise, throw the timeout exception.
+       * the RPC is not timed out yet, send a ping.
        */
-      private void handleTimeout(SocketTimeoutException e) throws IOException {
-        if (shouldCloseConnection.get() || !running.get() || rpcTimeout > 0) {
+      private int handleTimeout(SocketTimeoutException e, int waiting)
+          throws IOException {
+        waiting += pingInterval;
+        if (shouldCloseConnection.get() || !running.get() ||
+            (0 < rpcTimeout && rpcTimeout <= waiting)) {
           throw e;
         } else {
           sendPing();
         }
+        return waiting;
       }
       
       /** Read a byte from the stream.
@@ -503,11 +505,12 @@ public class Client {
        */
       @Override
       public int read() throws IOException {
+        int waiting = 0;
         do {
           try {
             return super.read();
           } catch (SocketTimeoutException e) {
-            handleTimeout(e);
+            waiting += handleTimeout(e, waiting);
           }
         } while (true);
       }
@@ -520,11 +523,12 @@ public class Client {
        */
       @Override
       public int read(byte[] buf, int off, int len) throws IOException {
+        int waiting = 0;
         do {
           try {
             return super.read(buf, off, len);
           } catch (SocketTimeoutException e) {
-            handleTimeout(e);
+            waiting += handleTimeout(e, waiting);
           }
         } while (true);
       }
@@ -631,8 +635,8 @@ public class Client {
           }
           
           NetUtils.connect(this.socket, server, connectionTimeout);
-          if (rpcTimeout > 0) {
-            pingInterval = rpcTimeout;  // rpcTimeout overwrites pingInterval
+          if (rpcTimeout > 0 && (!doPing || pingInterval > rpcTimeout)) {
+            pingInterval = rpcTimeout;
           }
           this.socket.setSoTimeout(pingInterval);
           return;
