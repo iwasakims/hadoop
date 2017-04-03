@@ -37,6 +37,8 @@ import org.apache.hadoop.fs.permission.FsPermission;
 import org.apache.hadoop.hdfs.DistributedFileSystem;
 import org.apache.hadoop.hdfs.HdfsConfiguration;
 import org.apache.hadoop.hdfs.MiniDFSCluster;
+import org.apache.hadoop.hdfs.MiniDFSNNTopology;
+import org.apache.hadoop.hdfs.server.namenode.ha.HATestUtil;
 import org.apache.hadoop.security.AccessControlException;
 import org.apache.hadoop.security.UserGroupInformation;
 import org.apache.hadoop.yarn.api.records.ApplicationAttemptId;
@@ -101,9 +103,11 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
       Path workingDirPath = new Path("/yarn/Test");
       this.adminCheckEnable = adminCheckEnable;
       this.cluster = cluster;
-      FileSystem fs = cluster.getFileSystem();
+      FileSystem fs = cluster.getFileSystem(0);
       fs.mkdirs(workingDirPath);
-      Path clusterURI = new Path(cluster.getURI());
+      Path clusterURI = (cluster.getNumNameNodes() > 1) ?
+          new Path(HATestUtil.getLogicalUri(cluster)) :
+          new Path(cluster.getURI());
       workingDirPathURI = new Path(clusterURI, workingDirPath);
       fs.close();
     }
@@ -121,6 +125,10 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
       if (adminCheckEnable) {
         conf.setBoolean(
           YarnConfiguration.YARN_INTERMEDIATE_DATA_ENCRYPTION, true);
+      }
+      if (cluster.getNumNameNodes() > 1) {
+        HATestUtil.setFailoverConfigurations(cluster, conf);
+        //conf.setBoolean(YarnConfiguration.FS_RM_STATE_STORE_RETRY_POLICY_ENABLED, false);
       }
       this.store = new TestFileSystemRMStore(conf);
       Assert.assertEquals(store.getNumRetries(), 8);
@@ -421,6 +429,34 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
       cluster.restartNameNode();
       clientThread.join();
       Assert.assertFalse(assertionFailedInThread.get());
+    } finally {
+      cluster.shutdown();
+    }
+  }
+
+  @Test (timeout = 10000)
+  public void testFSRMStateStoreNNFailover() throws Exception {
+    HdfsConfiguration conf = new HdfsConfiguration();
+    MiniDFSCluster cluster =
+      new MiniDFSCluster.Builder(conf)
+          .nnTopology(MiniDFSNNTopology.simpleHATopology())
+          .numDataNodes(2)
+          .build();
+    cluster.transitionToActive(0);
+    cluster.waitActive(0);
+    try {
+      TestFSRMStateStoreTester fsTester =
+          new TestFSRMStateStoreTester(cluster, false);
+      final RMStateStore store = fsTester.getRMStateStore();
+      store.setRMDispatcher(new TestDispatcher());
+      ApplicationId appid = ApplicationId.newInstance(100L, 1);
+      store.storeApplicationStateInternal(appid,
+          ApplicationStateData.newInstance(111, 111, "user", null,
+          RMAppState.ACCEPTED, "diagnostics", 333, null));
+      //cluster.shutdownNameNode(0);
+      cluster.transitionToStandby(0);
+      cluster.transitionToActive(1);
+      store.removeApplication(appid);
     } finally {
       cluster.shutdown();
     }

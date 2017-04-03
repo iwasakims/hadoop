@@ -668,6 +668,10 @@ public class YarnConfiguration extends Configuration {
   /** URI for FileSystemRMStateStore */
   public static final String FS_RM_STATE_STORE_URI = RM_PREFIX
       + "fs.state-store.uri";
+  public static final String FS_RM_STATE_STORE_RETRY_POLICY_ENABLED = RM_PREFIX
+      + "fs.state-store.retry-policy.enabled";
+  public static final boolean DEFAULT_FS_RM_STATE_STORE_RETRY_POLICY_ENABLED =
+      true;
   public static final String FS_RM_STATE_STORE_RETRY_POLICY_SPEC = RM_PREFIX
       + "fs.state-store.retry-policy-spec";
   public static final String DEFAULT_FS_RM_STATE_STORE_RETRY_POLICY_SPEC =
@@ -1936,6 +1940,12 @@ public class YarnConfiguration extends Configuration {
       = 24 * 60 * 60;
 
   public static final String
+      TIMELINE_SERVICE_ENTITYGROUP_FS_STORE_RETRY_POLICY_ENABLED =
+      TIMELINE_SERVICE_ENTITYGROUP_FS_STORE_PREFIX + "retry-policy.enabled";
+  public static final boolean
+      DEFAULT_TIMELINE_SERVICE_ENTITYGROUP_FS_STORE_RETRY_POLICY_ENABLED =
+          true;
+  public static final String
       TIMELINE_SERVICE_ENTITYGROUP_FS_STORE_RETRY_POLICY_SPEC =
       TIMELINE_SERVICE_ENTITYGROUP_FS_STORE_PREFIX + "retry-policy-spec";
   public static final String
@@ -2503,6 +2513,10 @@ public class YarnConfiguration extends Configuration {
   /** URI for NodeLabelManager */
   public static final String FS_NODE_LABELS_STORE_ROOT_DIR = NODE_LABELS_PREFIX
       + "fs-store.root-dir";
+  public static final String FS_NODE_LABELS_STORE_RETRY_POLICY_ENABLED =
+      NODE_LABELS_PREFIX + "fs-store.retry-policy.enabled";
+  public static final boolean DEFAULT_FS_NODE_LABELS_STORE_RETRY_POLICY_ENABLED
+      = true;
   public static final String FS_NODE_LABELS_STORE_RETRY_POLICY_SPEC =
       NODE_LABELS_PREFIX + "fs-store.retry-policy-spec";
   public static final String DEFAULT_FS_NODE_LABELS_STORE_RETRY_POLICY_SPEC =

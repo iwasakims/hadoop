@@ -142,7 +142,9 @@ public class FileSystemRMStateStore extends RMStateStore {
     // authenticated with kerberos so we are good to create a file-system
     // handle.
     fsConf = new Configuration(getConfig());
-    fsConf.setBoolean("dfs.client.retry.policy.enabled", true);
+    fsConf.setBoolean("dfs.client.retry.policy.enabled", fsConf.getBoolean(
+        YarnConfiguration.FS_RM_STATE_STORE_RETRY_POLICY_ENABLED,
+        YarnConfiguration.DEFAULT_FS_RM_STATE_STORE_RETRY_POLICY_ENABLED));
     String retryPolicy =
         fsConf.get(YarnConfiguration.FS_RM_STATE_STORE_RETRY_POLICY_SPEC,
           YarnConfiguration.DEFAULT_FS_RM_STATE_STORE_RETRY_POLICY_SPEC);

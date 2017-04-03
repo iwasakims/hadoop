@@ -94,7 +94,9 @@ public class FileSystemNodeLabelsStore extends NodeLabelsStore {
 
   void setFileSystem(Configuration conf) throws IOException {
     Configuration confCopy = new Configuration(conf);
-    confCopy.setBoolean("dfs.client.retry.policy.enabled", true);
+    confCopy.setBoolean("dfs.client.retry.policy.enabled", conf.getBoolean(
+        YarnConfiguration.FS_NODE_LABELS_STORE_RETRY_POLICY_ENABLED,
+        YarnConfiguration.DEFAULT_FS_NODE_LABELS_STORE_RETRY_POLICY_ENABLED));
     String retryPolicy =
         confCopy.get(YarnConfiguration.FS_NODE_LABELS_STORE_RETRY_POLICY_SPEC,
             YarnConfiguration.DEFAULT_FS_NODE_LABELS_STORE_RETRY_POLICY_SPEC);
