@@ -128,7 +128,7 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
       }
       if (cluster.getNumNameNodes() > 1) {
         HATestUtil.setFailoverConfigurations(cluster, conf);
-        //conf.setBoolean(YarnConfiguration.FS_RM_STATE_STORE_RETRY_POLICY_ENABLED, false);
+        conf.setBoolean(YarnConfiguration.FS_RM_STATE_STORE_RETRY_POLICY_ENABLED, false);
       }
       this.store = new TestFileSystemRMStore(conf);
       Assert.assertEquals(store.getNumRetries(), 8);
@@ -434,13 +434,13 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
     }
   }
 
-  @Test (timeout = 10000)
+  @Test(timeout = 30000)
   public void testFSRMStateStoreNNFailover() throws Exception {
     HdfsConfiguration conf = new HdfsConfiguration();
     MiniDFSCluster cluster =
       new MiniDFSCluster.Builder(conf)
           .nnTopology(MiniDFSNNTopology.simpleHATopology())
-          .numDataNodes(2)
+          .numDataNodes(1)
           .build();
     cluster.transitionToActive(0);
     cluster.waitActive(0);
@@ -449,14 +449,28 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
           new TestFSRMStateStoreTester(cluster, false);
       final RMStateStore store = fsTester.getRMStateStore();
       store.setRMDispatcher(new TestDispatcher());
-      ApplicationId appid = ApplicationId.newInstance(100L, 1);
+      final ApplicationId appid = ApplicationId.newInstance(100L, 1);
       store.storeApplicationStateInternal(appid,
           ApplicationStateData.newInstance(111, 111, "user", null,
           RMAppState.ACCEPTED, "diagnostics", 333, null));
-      //cluster.shutdownNameNode(0);
-      cluster.transitionToStandby(0);
+      cluster.shutdownNameNode(0);
+      Thread clientThread = new Thread() {
+        @Override
+        public void run() {
+          try {
+            // expected to keep retrying to connect to the stopped nn
+            // then time out if retry policy of dfs clinet is enabled.
+            store.removeApplication(appid);
+          } catch (Exception e) {
+            LOG.warn(e);
+            Assert.fail("failed to remove application.");
+          }
+        }
+      };
+      clientThread.start();
+      Thread.sleep(1000);
       cluster.transitionToActive(1);
-      store.removeApplication(appid);
+      clientThread.join();
     } finally {
       cluster.shutdown();
     }
