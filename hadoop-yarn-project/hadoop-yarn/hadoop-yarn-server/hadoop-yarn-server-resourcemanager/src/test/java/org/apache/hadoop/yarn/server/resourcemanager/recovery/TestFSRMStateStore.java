@@ -128,7 +128,6 @@ public class TestFSRMStateStore extends RMStateStoreTestBase {
       }
       if (cluster.getNumNameNodes() > 1) {
         HATestUtil.setFailoverConfigurations(cluster, conf);
-        conf.setBoolean(YarnConfiguration.FS_RM_STATE_STORE_RETRY_POLICY_ENABLED, false);
       }
       this.store = new TestFileSystemRMStore(conf);
       Assert.assertEquals(store.getNumRetries(), 8);

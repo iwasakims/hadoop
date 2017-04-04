@@ -530,7 +530,7 @@
     yarn.resourcemanager.fs.state-store.retry-policy-spec.
     </description>
     <name>yarn.resourcemanager.fs.state-store.retry-policy.enabled</name>
-    <value>true</value>
+    <value>false</value>
   </property>
 
   <property>
@@ -2430,7 +2430,7 @@
     yarn.node-labels.fs-store.retry-policy-spec.
     </description>
     <name>yarn.node-labels.fs-store.retry-policy.enabled</name>
-    <value>true</value>
+    <value>false</value>
   </property>
 
   <property>
