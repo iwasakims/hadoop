@@ -68,6 +68,27 @@ public class TestTracing {
     readWithTracing();
   }
 
+  @Test
+  public void testDataStreamerSpanWithSingleParent() throws Exception {
+    DistributedFileSystem fs = cluster.getFileSystem();
+    FSDataOutputStream os = fs.create(new Path("/testSpanWithMultipleParent"));
+    byte[] bytes = "foo-bar-baz".getBytes();
+    long expected = 0;
+
+    try (TraceScope ts = Trace.startSpan("single parent", Sampler.ALWAYS)) {
+      os.write(bytes);
+      os.hflush();
+      expected = ts.getSpan().getTraceId();
+    }
+    assertSpanNamesFound(new String[]{ "dataStreamer" });
+    for (Span s : SetSpanReceiver.SetHolder.spans.values()) {
+      if (s.getDescription().equals("dataStreamer")) {
+        Assert.assertEquals(expected, s.getTraceId());
+      }
+    }
+    os.close();
+  }
+
   public void writeWithTracing() throws Exception {
     long startTime = System.currentTimeMillis();
     TraceScope ts = Trace.startSpan("testWriteTraceHooks", Sampler.ALWAYS);

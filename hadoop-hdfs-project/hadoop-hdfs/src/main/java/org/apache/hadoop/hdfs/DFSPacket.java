@@ -63,6 +63,7 @@ class DFSPacket {
   private int checksumPos;
   private final int dataStart;
   private int dataPos;
+  private long traceId = 0;
   private long[] traceParents = EMPTY;
   private int traceParentsUsed;
   private Span span;
@@ -288,6 +289,7 @@ class DFSPacket {
     if (span == null) {
       return;
     }
+    traceId = traceParentsUsed > 0 ? 0 : span.getTraceId();
     addTraceParent(span.getSpanId());
   }
 
@@ -331,6 +333,10 @@ class DFSPacket {
       traceParentsUsed = traceParents.length;
     }
     return traceParents;
+  }
+
+  public long getTraceId() {
+    return traceId;
   }
 
   public void setTraceSpan(Span span) {

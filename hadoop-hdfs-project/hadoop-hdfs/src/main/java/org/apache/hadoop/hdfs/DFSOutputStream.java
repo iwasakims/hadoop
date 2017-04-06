@@ -515,7 +515,8 @@ public class DFSOutputStream extends FSOutputSummer
               one = dataQueue.getFirst(); // regular data packet
               long parents[] = one.getTraceParents();
               if (parents.length > 0) {
-                scope = Trace.startSpan("dataStreamer", new TraceInfo(0, parents[0]));
+                scope = Trace.startSpan("dataStreamer",
+                    new TraceInfo(one.getTraceId(), parents[0]));
                 // TODO: use setParents API once it's available from HTrace 3.2
 //                scope = Trace.startSpan("dataStreamer", Sampler.ALWAYS);
 //                scope.getSpan().setParents(parents);
