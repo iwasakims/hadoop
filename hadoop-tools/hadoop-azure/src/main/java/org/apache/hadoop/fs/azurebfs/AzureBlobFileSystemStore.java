@@ -1082,7 +1082,7 @@ public class AzureBlobFileSystemStore implements Closeable {
               group,
               null,
               path,
-              hasAcl, false, false);
+              hasAcl, true, false);
 
       this.version = version;
     }

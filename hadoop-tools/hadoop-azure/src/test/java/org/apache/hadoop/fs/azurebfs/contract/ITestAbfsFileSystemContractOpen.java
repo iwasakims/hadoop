@@ -49,4 +49,13 @@ public class ITestAbfsFileSystemContractOpen extends AbstractContractOpenTest {
   protected AbstractFSContract createContract(final Configuration conf) {
     return new AbfsFileSystemContract(conf, isSecure);
   }
+
+  /**
+   * All files in ABFS are encrypted.
+   * @return true, always.
+   */
+  @Override
+  protected boolean areZeroByteFilesEncrypted() {
+    return true;
+  }
 }
