@@ -148,16 +148,18 @@ public class AbfsRestOperation {
       httpOperation = new AbfsHttpOperation(url, method, requestHeaders);
 
       // sign the HTTP request
-      if (client.getAccessToken() == null) {
+      if (client.getAccessToken() != null) {
+        LOG.debug("Authenticating request with OAuth2 access token");
+        httpOperation.getConnection().setRequestProperty(HttpHeaderConfigurations.AUTHORIZATION,
+                client.getAccessToken());
+      } else if (client.getSharedKeyCredentials() != null) {
         LOG.debug("Signing request with shared key");
         // sign the HTTP request
         client.getSharedKeyCredentials().signRequest(
                 httpOperation.getConnection(),
                 hasRequestBody ? bufferLength : 0);
       } else {
-        LOG.debug("Authenticating request with OAuth2 access token");
-        httpOperation.getConnection().setRequestProperty(HttpHeaderConfigurations.AUTHORIZATION,
-                client.getAccessToken());
+        LOG.debug("Anonymous access");
       }
       // dump the headers
       AbfsIoUtils.dumpHeadersToDebugLog("Request Headers",

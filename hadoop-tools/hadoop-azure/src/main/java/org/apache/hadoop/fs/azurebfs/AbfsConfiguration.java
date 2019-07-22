@@ -440,7 +440,7 @@ public class AbfsConfiguration{
   }
 
   public AuthType getAuthType(String accountName) {
-    return getEnum(FS_AZURE_ACCOUNT_AUTH_TYPE_PROPERTY_NAME, AuthType.SharedKey);
+    return getEnum(FS_AZURE_ACCOUNT_AUTH_TYPE_PROPERTY_NAME, AuthType.Anonymous);
   }
 
   public boolean isDelegationTokenManagerEnabled() {

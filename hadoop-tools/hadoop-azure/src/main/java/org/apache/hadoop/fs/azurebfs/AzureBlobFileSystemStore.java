@@ -210,7 +210,7 @@ public class AzureBlobFileSystemStore implements Closeable {
   }
 
   public boolean getIsNamespaceEnabled() throws AzureBlobFileSystemException {
-    if (!isNamespaceEnabledSet) {
+    if (!isNamespaceEnabledSet && authType != AuthType.Anonymous) {
       LOG.debug("Get root ACL status");
       try {
         client.getAclStatus(AbfsHttpConstants.FORWARD_SLASH + AbfsHttpConstants.ROOT_PATH);
@@ -913,18 +913,25 @@ public class AzureBlobFileSystemStore implements Closeable {
     SharedKeyCredentials creds = null;
     AccessTokenProvider tokenProvider = null;
 
-    if (abfsConfiguration.getAuthType(accountName) == AuthType.SharedKey) {
+    switch (abfsConfiguration.getAuthType(accountName)) {
+    case Anonymous:
+      break;
+    case SharedKey:
       int dotIndex = accountName.indexOf(AbfsHttpConstants.DOT);
       if (dotIndex <= 0) {
         throw new InvalidUriException(
-                uri.toString() + " - account name is not fully qualified.");
+            uri.toString() + " - account name is not fully qualified.");
       }
       creds = new SharedKeyCredentials(accountName.substring(0, dotIndex),
-            abfsConfiguration.getStorageAccountKey());
-    } else {
+          abfsConfiguration.getStorageAccountKey());
+      break;
+    case OAuth:
+    case Custom:
       tokenProvider = abfsConfiguration.getTokenProvider();
       ExtensionHelper.bind(tokenProvider, uri,
-            abfsConfiguration.getRawConfiguration());
+          abfsConfiguration.getRawConfiguration());
+      break;
+    default:
     }
 
     this.client =  new AbfsClient(baseUrl, creds, abfsConfiguration, new ExponentialRetryPolicy(), tokenProvider);
