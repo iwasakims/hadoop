@@ -36,8 +36,6 @@ public class ITestAzureBlobFileSystemCLI extends AbstractAbfsIntegrationTest {
 
   public  ITestAzureBlobFileSystemCLI() throws Exception {
     super();
-    final AbfsConfiguration conf = getConfiguration();
-    conf.setBoolean(AZURE_CREATE_REMOTE_FILESYSTEM_DURING_INITIALIZATION, false);
   }
 
   /**
@@ -50,7 +48,9 @@ public class ITestAzureBlobFileSystemCLI extends AbstractAbfsIntegrationTest {
    */
   @Test
   public void testMkdirRootNonExistentContainer() throws Exception {
-    final Configuration rawConf = getRawConfiguration();
+    final Configuration rawConf = new Configuration(getRawConfiguration());
+    rawConf.setBoolean(AZURE_CREATE_REMOTE_FILESYSTEM_DURING_INITIALIZATION,
+        false);
     FsShell fsShell = new FsShell(rawConf);
     final String account =
         rawConf.get(FS_AZURE_ABFS_ACCOUNT_NAME, null);
