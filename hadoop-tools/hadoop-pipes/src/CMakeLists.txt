@@ -22,29 +22,43 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../../hadoop-common-project
 include(HadoopCommon)
 
 find_package(OpenSSL REQUIRED)
+find_package(PkgConfig QUIET)
+pkg_check_modules(LIBTIRPC libtirpc)
+
+find_path(TIRPC_INCLUDE_DIRS
+    NAMES netconfig.h
+    PATH_SUFFIXES tirpc
+    HINTS ${LIBTIRPC_INCLUDE_DIRS}
+)
+
+find_library(TIRPC_LIBRARIES
+    NAMES tirpc
+    HINTS ${LIBTIRPC_LIBRARY_DIRS}
+)
 
 include_directories(
     main/native/utils/api
     main/native/pipes/api
     ${CMAKE_CURRENT_SOURCE_DIR}
     ${OPENSSL_INCLUDE_DIR}
+    ${TIRPC_INCLUDE_DIRS}
 )
 
 # Example programs
 add_executable(wordcount-simple main/native/examples/impl/wordcount-simple.cc)
-target_link_libraries(wordcount-simple hadooppipes hadooputils)
+target_link_libraries(wordcount-simple hadooppipes hadooputils tirpc)
 hadoop_output_directory(wordcount-simple examples)
 
 add_executable(wordcount-part main/native/examples/impl/wordcount-part.cc)
-target_link_libraries(wordcount-part hadooppipes hadooputils)
+target_link_libraries(wordcount-part hadooppipes hadooputils tirpc)
 hadoop_output_directory(wordcount-part examples)
 
 add_executable(wordcount-nopipe main/native/examples/impl/wordcount-nopipe.cc)
-target_link_libraries(wordcount-nopipe hadooppipes hadooputils)
+target_link_libraries(wordcount-nopipe hadooppipes hadooputils tirpc)
 hadoop_output_directory(wordcount-nopipe examples)
 
 add_executable(pipes-sort main/native/examples/impl/sort.cc)
-target_link_libraries(pipes-sort hadooppipes hadooputils)
+target_link_libraries(pipes-sort hadooppipes hadooputils tirpc)
 hadoop_output_directory(pipes-sort examples)
 
 add_library(hadooputils STATIC
