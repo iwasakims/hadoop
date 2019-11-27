@@ -40,8 +40,6 @@ if (NOT RPC_INCLUDE_DIRS)
     )
 
     include_directories(${TIRPC_INCLUDE_DIRS})
-
-    add_library(tirpc)
 endif()
 
 include_directories(
@@ -72,6 +70,9 @@ add_library(hadooputils STATIC
     main/native/utils/impl/StringUtils.cc
     main/native/utils/impl/SerialUtils.cc
 )
+if (NOT RPC_INCLUDE_DIRS AND LIBTIRPC_FOUND)
+    target_link_libraries(hadooputils tirpc)
+endif()
 
 add_library(hadooppipes STATIC
     main/native/pipes/impl/HadoopPipes.cc
