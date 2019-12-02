@@ -22,6 +22,27 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/../../../hadoop-common-project
 include(HadoopCommon)
 
 find_package(OpenSSL REQUIRED)
+find_package(PkgConfig QUIET)
+pkg_check_modules(LIBTIRPC libtirpc)
+
+find_path(RPC_INCLUDE_DIRS NAMES rpc/rpc.h)
+
+if (NOT RPC_INCLUDE_DIRS)
+    find_path(TIRPC_INCLUDE_DIRS
+        NAMES netconfig.h
+        PATH_SUFFIXES tirpc
+        HINTS ${LIBTIRPC_INCLUDE_DIRS}
+    )
+
+    find_library(TIRPC_LIBRARIES
+        NAMES tirpc
+        HINTS ${LIBTIRPC_LIBRARY_DIRS}
+    )
+
+    include_directories(${TIRPC_INCLUDE_DIRS})
+
+    add_library(tirpc)
+endif()
 
 include_directories(
     main/native/utils/api
