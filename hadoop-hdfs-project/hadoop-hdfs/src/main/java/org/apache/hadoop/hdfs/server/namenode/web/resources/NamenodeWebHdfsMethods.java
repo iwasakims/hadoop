@@ -65,7 +65,6 @@ import org.apache.hadoop.fs.BlockLocation;
 import org.apache.hadoop.fs.ContentSummary;
 import org.apache.hadoop.fs.FileEncryptionInfo;
 import org.apache.hadoop.fs.FileStatus;
-import org.apache.hadoop.fs.FileSystem;
 import org.apache.hadoop.fs.FsServerDefaults;
 import org.apache.hadoop.fs.Options;
 import org.apache.hadoop.fs.XAttr;
@@ -81,6 +80,7 @@ import org.apache.hadoop.hdfs.protocol.BlockStoragePolicy;
 import org.apache.hadoop.hdfs.protocol.ClientProtocol;
 import org.apache.hadoop.hdfs.protocol.DatanodeInfo;
 import org.apache.hadoop.hdfs.protocol.DirectoryListing;
+import org.apache.hadoop.hdfs.protocol.EncryptionZone;
 import org.apache.hadoop.hdfs.protocol.ErasureCodingPolicy;
 import org.apache.hadoop.hdfs.protocol.HdfsFileStatus;
 import org.apache.hadoop.hdfs.protocol.LocatedBlocks;
@@ -117,6 +117,9 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import com.sun.jersey.spi.container.ResourceFilters;
+
+import static org.apache.hadoop.fs.FileSystem.USER_HOME_PREFIX;
+import static org.apache.hadoop.fs.FileSystem.TRASH_PREFIX;
 
 /** Web-hdfs NameNode implementation. */
 @Path("")
@@ -1285,7 +1288,7 @@ public class NamenodeWebHdfsMethods {
       return Response.ok().build();
     }
     case GETTRASHROOT: {
-      final String trashPath = getTrashRoot(fullpath, conf);
+      final String trashPath = getTrashRoot(fullpath);
       final String jsonStr = JsonUtil.toJsonString("Path", trashPath);
       return Response.ok(jsonStr).type(MediaType.APPLICATION_JSON).build();
     }
@@ -1345,11 +1348,15 @@ public class NamenodeWebHdfsMethods {
     }
   }
 
-  private static String getTrashRoot(String fullPath,
-      Configuration conf) throws IOException {
-    FileSystem fs = FileSystem.get(conf != null ? conf : new Configuration());
-    return fs.getTrashRoot(
-        new org.apache.hadoop.fs.Path(fullPath)).toUri().getPath();
+  private String getTrashRoot(String fullPath) throws IOException {
+    String username = UserGroupInformation.getCurrentUser().getShortUserName();
+    EncryptionZone ez =getRpcClientProtocol().getEZForPath(fullPath);
+    org.apache.hadoop.fs.Path trashRoot;
+    if (ez != null) {
+      return ez.getPath() + "/" +  TRASH_PREFIX + "/" + username;
+    } else {
+      return USER_HOME_PREFIX + "/" + username + "/" + TRASH_PREFIX;
+    }
   }
 
   private static DirectoryListing getDirectoryListing(final ClientProtocol cp,
