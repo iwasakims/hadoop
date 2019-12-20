@@ -65,3 +65,7 @@ CGroups itself has no requirements related to security. However, the LinuxContai
 | yarn | false | (User submitting the job) |
 
 
+CGroups Memory Control
+----------------------
+
+Please refer to [Using Memory Control in YARN](./NodeManagerCGroupsMemory.html).
