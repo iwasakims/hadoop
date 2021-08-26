@@ -30,7 +30,7 @@ public class OldSnapshotNameParam extends StringParam {
   private static final Domain DOMAIN = new Domain(NAME, null);
 
   public OldSnapshotNameParam(final String str) {
-    super(DOMAIN, str != null && !str.equals(DEFAULT) ? str : null);
+    super(DOMAIN, str != null && !str.equals(DEFAULT) ? str : "");
   }
 
   @Override

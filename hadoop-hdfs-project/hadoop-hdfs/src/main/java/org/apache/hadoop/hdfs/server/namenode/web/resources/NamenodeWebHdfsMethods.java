@@ -1330,8 +1330,8 @@ public class NamenodeWebHdfsMethods {
     }
     case GETSNAPSHOTDIFF: {
       SnapshotDiffReport diffReport =
-          cp.getSnapshotDiffReport(fullpath, oldSnapshotName.getValue(),
-              snapshotName.getValue());
+          DFSUtilClient.getSnapshotDiffReportMaybeListing(
+              fullpath, oldSnapshotName.getValue(), snapshotName.getValue(), cp);
       final String js = JsonUtil.toJsonString(diffReport);
       return Response.ok(js).type(MediaType.APPLICATION_JSON).build();
     }

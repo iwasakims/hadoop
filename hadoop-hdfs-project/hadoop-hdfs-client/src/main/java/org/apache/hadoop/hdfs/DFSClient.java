@@ -2270,14 +2270,8 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
       String fromSnapshot, String toSnapshot) throws IOException {
     checkOpen();
     try (TraceScope ignored = tracer.newScope("getSnapshotDiffReport")) {
-      Preconditions.checkArgument(fromSnapshot != null,
-          "null fromSnapshot");
-      Preconditions.checkArgument(toSnapshot != null,
-          "null toSnapshot");
-      return namenode
-          .getSnapshotDiffReport(snapshotDir, fromSnapshot, toSnapshot);
-    } catch (RemoteException re) {
-      throw re.unwrapRemoteException();
+      return DFSUtilClient.getSnapshotDiffReport(
+          snapshotDir, fromSnapshot, toSnapshot, namenode);
     }
   }
 
@@ -2290,11 +2284,8 @@ public class DFSClient implements java.io.Closeable, RemotePeerFactory,
       byte[] startPath, int index) throws IOException {
     checkOpen();
     try (TraceScope ignored = tracer.newScope("getSnapshotDiffReport")) {
-      return namenode
-          .getSnapshotDiffReportListing(snapshotDir, fromSnapshot, toSnapshot,
-              startPath, index);
-    } catch (RemoteException re) {
-      throw re.unwrapRemoteException();
+      return DFSUtilClient.getSnapshotDiffReportListing(
+          snapshotDir, fromSnapshot, toSnapshot, startPath, index, namenode);
     }
   }
 
