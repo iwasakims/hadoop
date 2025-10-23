@@ -870,26 +870,6 @@ function hadoop_basic_init
     export HADOOP_MAPRED_HOME="${HADOOP_HOME}"
   fi
 
-  if [[ ! -d "${HADOOP_COMMON_HOME}" ]]; then
-    hadoop_error "ERROR: Invalid HADOOP_COMMON_HOME"
-    exit 1
-  fi
-
-  if [[ ! -d "${HADOOP_HDFS_HOME}" ]]; then
-    hadoop_error "ERROR: Invalid HADOOP_HDFS_HOME"
-    exit 1
-  fi
-
-  if [[ ! -d "${HADOOP_YARN_HOME}" ]]; then
-    hadoop_error "ERROR: Invalid HADOOP_YARN_HOME"
-    exit 1
-  fi
-
-  if [[ ! -d "${HADOOP_MAPRED_HOME}" ]]; then
-    hadoop_error "ERROR: Invalid HADOOP_MAPRED_HOME"
-    exit 1
-  fi
-
   # if for some reason the shell doesn't have $USER defined
   # (e.g., ssh'd in to execute a command)
   # let's get the effective username and use that
