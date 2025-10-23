@@ -51,9 +51,4 @@ function hadoop_subcommand_kms
     "-Dkms.log.dir=${HADOOP_LOG_DIR}"
   hadoop_add_param HADOOP_OPTS "-Dlog4j.configuration=" \
     "-Dlog4j.configuration=file:${HADOOP_CONF_DIR}/kms-log4j.properties"
-
-  if [[ "${HADOOP_DAEMON_MODE}" == "default" ]] ||
-     [[ "${HADOOP_DAEMON_MODE}" == "start" ]]; then
-    hadoop_mkdir "${KMS_TEMP:-${HADOOP_HOME}/temp}"
-  fi
 }
